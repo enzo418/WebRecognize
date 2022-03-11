@@ -1,0 +1,117 @@
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
+
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+
+
+import {
+  Link as RouterLink,
+  LinkProps as RouterLinkProps,
+  Route,
+  Routes,
+  MemoryRouter,
+  useLocation,
+} from 'react-router-dom';
+
+import { StaticRouter } from 'react-router-dom/server';
+
+import './NavBar.scss';
+
+function Router(props: { children?: React.ReactNode }) {
+  const { children } = props;
+  if (typeof window === 'undefined') {
+    return <StaticRouter location="/drafts">{children}</StaticRouter>;
+  }
+
+  return (
+    <MemoryRouter initialEntries={['/drafts']} initialIndex={0}>
+      {children}
+    </MemoryRouter>
+  );
+}
+
+interface ListItemLinkProps {
+  icon?: React.ReactElement;
+  primary: string;
+  to: string;
+}
+
+const ListItemTheme = createTheme({
+  components: {
+    MuiListItem: {
+      styleOverrides: {
+        root: {
+          margin: '0px 0px 1rem',
+          transition: 'background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+          justifyContent: 'center',
+        }
+      }
+    },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          minWidth: '0'
+        },
+      },
+    },
+  },
+});
+
+
+function ListItemLink(props: ListItemLinkProps) {
+  const { icon, primary, to } = props;
+
+  const renderLink = React.useMemo(
+    () =>
+      React.forwardRef<HTMLAnchorElement, Omit<RouterLinkProps, 'to'>>(function Link(
+        itemProps,
+        ref,
+      ) {
+        return <RouterLink to={to} ref={ref} {...itemProps} role={undefined} />;
+      }),
+    [to],
+  );
+
+  return (
+    <li>
+      <ThemeProvider theme={ListItemTheme}>
+        <ListItem button component={renderLink}>
+          {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+          {/* <ListItemText primary={primary} sx={{ minWidth: '0' }} /> */}
+        </ListItem>
+      </ThemeProvider>
+    </li>
+  );
+}
+
+function Content() {
+  const location = useLocation();
+  return (
+    <Typography variant="body2" sx={{ pb: 2 }} color="text.secondary">
+      Current route: {location.pathname}
+    </Typography>
+  );
+}
+
+const NavBar: React.FC = () => {
+  const [value, setValue] = React.useState(0);
+
+  return (
+    <Box className='simple-bar' sx={{ bgcolor: 'background.paper', overflowX: 'hidden' }}>
+
+      <List sx={{ height: '100%' }}>
+        <ListItemLink to="/notifications" primary="" icon={<NotificationsNoneIcon />} />
+      </List>
+    </Box>
+  );
+}
+
+export default NavBar;
