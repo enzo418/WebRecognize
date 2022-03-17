@@ -257,16 +257,16 @@ function NotificationsRightBar() {
 
 function Notifications() {
     useEffect(() => {
-        function handleStatusChange(status) {
-            setIsOnline(status.isOnline);
-        }
+        // function handleStatusChange(status) {
+        //     setIsOnline(status.isOnline);
+        // }
 
-        ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+        // ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
 
         // Specify how to clean up after this effect:
-        return function cleanup() {
-            ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
-        };
+        // return function cleanup() {
+        //     ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+        // };
     });
 
     return (<>

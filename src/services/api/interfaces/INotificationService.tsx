@@ -1,4 +1,4 @@
-import INotification from '../../../domain/INotification';
+import INotification from '../../../domain/Notification';
 
 
 /**
