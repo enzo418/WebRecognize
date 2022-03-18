@@ -6,6 +6,7 @@
  */
 
 export default interface DTONotification {
+    id: string,
     date: Date;
     group: number;
     cameraID: string;

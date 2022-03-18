@@ -24,14 +24,17 @@ class MockCameraService implements ICameraService {
         this.cameras = pCameras;
     }
 
-    get(id: string): Camera {
-        return ensure(this.cameras.find((c) => c.id == id));
+    get(id: string): Promise<Camera> {
+        return new Promise((resolve, reject) => {
+            resolve(ensure(this.cameras.find((c) => c.id == id)));
+        });
     }
 }
 
 describe('Notification Service', () => {
     it('should do request a notifications, request a camera and be correct', async () => {
         const not: DTONotification = {
+            id: '1',
             date: new Date(1000, 1, 10, 0, 0, 0, 0),
             cameraID: '123456',
             group: 99,
@@ -54,6 +57,7 @@ describe('Notification Service', () => {
         expect(spyGetCam).toHaveBeenCalledTimes(1);
         expect(spyGetCam).toHaveBeenCalledWith(not.cameraID);
 
+        expect(response.id).toBe(not.id);
         expect(response.group).toBe(not.group);
         expect(response.date).toStrictEqual(not.date);
         expect(response.camera).toMatchObject(cameras[0]);
@@ -61,14 +65,17 @@ describe('Notification Service', () => {
 
     it('should request all the notifications and all the cameras', () => {
         const notResponse: DTONotification[] = [{
+            id: '1',
             date: new Date(1000, 1, 10, 0, 0, 0, 0),
             cameraID: '1',
             group: 99,
         }, {
+            id: '2',
             date: new Date(1000, 1, 10, 2, 0, 0, 3),
             cameraID: '2',
             group: 99,
         }, {
+            id: '3',
             date: new Date(423, 1, 10, 4, 0, 0, 3),
             cameraID: '2',
             group: 1,
@@ -105,6 +112,7 @@ describe('Notification Service', () => {
             const actual: Notification = pInput as Notification;
             const expected: DTONotification = pExpected as DTONotification;
 
+            expect(actual.id).toBe(expected.id);
             expect(actual.group).toBe(expected.group);
             expect(actual.date).toStrictEqual(expected.date);
             expect(actual.camera).toMatchObject(camAt(expected.cameraID));
