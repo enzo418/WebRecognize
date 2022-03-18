@@ -1,13 +1,11 @@
-import NotificationService, {DTONotification} from '../../services/api/NotificationService';
 import ICameraService from '../../services/api/interfaces/ICameraService';
 import Camera from '../../domain/Camera';
-import HttpClient from '../../Http/HttpClient';
 import Notification from '../../domain/Notification';
-
-import fetchMock from 'jest-fetch-mock';
-
-
-fetchMock.enableMocks();
+import DTONotification from '../../services/api/interfaces/DTONotification';
+import {
+    parseNotification,
+    parseNotifications,
+} from '../../services/api/convert/ConvertDTOtoNotification';
 
 function ensure<T>(
     argument: T | undefined | null,
@@ -31,10 +29,6 @@ class MockCameraService implements ICameraService {
     }
 }
 
-beforeEach(() => {
-    fetchMock.resetMocks();
-});
-
 describe('Notification Service', () => {
     it('should do request a notifications, request a camera and be correct', async () => {
         const not: DTONotification = {
@@ -44,20 +38,16 @@ describe('Notification Service', () => {
         };
 
         const cameras: Array<Camera> = [
-            {id: '123456', name: 'a'},
+            { id: '123456', name: 'a' },
         ];
 
-        fetchMock.mockResponseOnce(JSON.stringify(not));
-
         const camService: MockCameraService = new MockCameraService(cameras);
-        const httpClient: HttpClient = new HttpClient();
-        const notService: NotificationService = new NotificationService(httpClient, camService);
 
         const spyGetCam = jest.spyOn(camService, 'get');
 
         //
 
-        const response: Notification = await notService.get('1');
+        const response: Notification = parseNotification(not, camService);
 
         //
 
@@ -69,7 +59,7 @@ describe('Notification Service', () => {
         expect(response.camera).toMatchObject(cameras[0]);
     });
 
-    it('should request all the notifications and all the cameras', async () => {
+    it('should request all the notifications and all the cameras', () => {
         const notResponse: DTONotification[] = [{
             date: new Date(1000, 1, 10, 0, 0, 0, 0),
             cameraID: '1',
@@ -85,32 +75,28 @@ describe('Notification Service', () => {
         }];
 
         const cameras: Array<Camera> = [
-            {id: '1', name: 'a'},
-            {id: '2', name: 'b'},
+            { id: '1', name: 'a' },
+            { id: '2', name: 'b' },
         ];
 
-        const camAt = (id:string) => ensure(cameras.find((c) => c.id == id));
-
-        fetchMock.mockResponseOnce(JSON.stringify(notResponse));
+        const camAt = (id: string) => ensure(cameras.find((c) => c.id == id));
 
         const camService: MockCameraService = new MockCameraService(cameras);
-        const httpClient: HttpClient = new HttpClient();
-        const notService: NotificationService = new NotificationService(httpClient, camService);
 
         const spyGetCam = jest.spyOn(camService, 'get');
 
         //
 
-        const response: Notification[] = await notService.getAll();
+        const response: Notification[] = parseNotifications(notResponse, camService);
 
         //
 
         expect(spyGetCam).toHaveBeenCalledTimes(notResponse.length);
-        notResponse.forEach(({cameraID}, index) => {
+        notResponse.forEach(({ cameraID }, index) => {
             // call number starts at 1
-            expect(spyGetCam).toHaveBeenNthCalledWith(index+1, cameraID);
-            expect(spyGetCam).toHaveBeenNthCalledWith(index+1, cameraID);
-            expect(spyGetCam).toHaveBeenNthCalledWith(index+1, cameraID);
+            expect(spyGetCam).toHaveBeenNthCalledWith(index + 1, cameraID);
+            expect(spyGetCam).toHaveBeenNthCalledWith(index + 1, cameraID);
+            expect(spyGetCam).toHaveBeenNthCalledWith(index + 1, cameraID);
         });
 
         const inputVsExpected = response.map((n, i) => [n, notResponse[i]]);

@@ -2,23 +2,11 @@ import {INotificationService} from './interfaces/INotificationService';
 import IHttpClient from '../../Http/IHttpClient';
 import Notification from '../../domain/Notification';
 import ICameraService from './interfaces/ICameraService';
-import Camera from '../../domain/Camera';
 import config from '../../config';
+import { parseNotification, parseNotifications } from './convert/ConvertDTOtoNotification';
 
 function serialize(date: Date | string | any): string {
     return (typeof date == 'string') ? date : date.toISOString();
-}
-
-/**
- * JSON-like transfer object that the server sends to us.
- *
- * @interface DTONotification
- * @typedef {DTONotification}
- */
-export interface DTONotification {
-    date: Date;
-    group: number;
-    cameraID: string;
 }
 
 /**
@@ -41,16 +29,13 @@ export default class NotificationService implements INotificationService {
     constructor(pHttpClient: IHttpClient, pCameraService: ICameraService) {
         this.http = pHttpClient;
         this.cameraService = pCameraService;
-
-        this.parseNotification = this.parseNotification.bind(this);
-        this.parseNotifications = this.parseNotifications.bind(this);
     }
 
     get(id: string): Promise<Notification> {
         return new Promise((resolve, reject) => {
             this.http.get('/', {id})
                 .then((res) => res.json())
-                .then(this.parseNotification)
+                .then((res) => parseNotification(res, this.cameraService))
                 .then(resolve)
                 .catch(reject);
         });
@@ -60,7 +45,7 @@ export default class NotificationService implements INotificationService {
         return new Promise((resolve, reject) => {
             this.http.get('/', {limit})
                 .then((res) => res.json())
-                .then(this.parseNotifications)
+                .then((res) => parseNotifications(res, this.cameraService))
                 .then(resolve)
                 .catch(reject);
         });
@@ -73,7 +58,7 @@ export default class NotificationService implements INotificationService {
                 limit,
             })
                 .then((res) => res.json())
-                .then(this.parseNotifications)
+                .then((res) => parseNotifications(res, this.cameraService))
                 .then(resolve)
                 .catch(reject);
         });
@@ -86,7 +71,7 @@ export default class NotificationService implements INotificationService {
                 limit,
             })
                 .then((res) => res.json())
-                .then(this.parseNotifications)
+                .then((res) => parseNotifications(res, this.cameraService))
                 .then(resolve)
                 .catch(reject);
         });
@@ -103,7 +88,7 @@ export default class NotificationService implements INotificationService {
                 limit,
             })
                 .then((res) => res.json())
-                .then(this.parseNotifications)
+                .then((res) => parseNotifications(res, this.cameraService))
                 .then(resolve)
                 .catch(reject);
         });
@@ -111,33 +96,7 @@ export default class NotificationService implements INotificationService {
 
     subscribe(callback: (not: Notification) => any): void {
         notificationWS.addEventListener('message', (ev) => {
-            callback(this.parseNotification(ev.data));
+            callback(parseNotification(ev.data, this.cameraService));
         });
-    }
-
-    protected parseNotification(pNot: DTONotification): Notification {
-        const camera: Camera = this.cameraService.get(pNot.cameraID);
-
-        if (camera) {
-            const notification: Notification = {
-                date: new Date(pNot.date),
-                group: pNot.group,
-                camera: camera,
-            };
-
-            return notification;
-        } else {
-            throw new Error(`Couldn't get the camera with id: '${pNot.cameraID}'`);
-        }
-    }
-
-    protected parseNotifications(pNots: Array<DTONotification>) : Array<Notification> {
-        const result: Array<Notification> = [];
-
-        pNots.forEach((not) => {
-            result.push(this.parseNotification(not));
-        });
-
-        return result;
     }
 }
