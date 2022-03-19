@@ -1,3 +1,13 @@
 {
-    "jest.autoRun": "off"
+	"jest.autoRun": "off",
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
+	},
+	"typescript.format.insertSpaceBeforeAndAfterBinaryOperators": false,
+	"typescript.format.insertSpaceAfterSemicolonInForStatements": false,
+	"typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
+	"editor.insertSpaces": false,
+	"editor.comments.insertSpace": false,
+	"javascript.format.enable": false,
+	"typescript.format.enable": false
 }
