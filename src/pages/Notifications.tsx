@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import Typography from '@mui/material/Typography';
 
@@ -10,8 +10,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Stack from '@mui/material/Stack';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-
-import {pink} from '@mui/material/colors';
 
 import DatePicker from '@mui/lab/DatePicker';
 import TextField from '@mui/material/TextField';
@@ -45,9 +43,53 @@ import {useEffect} from 'react';
 
 import '../styles/Notifications.scss';
 
-function FilterNotificationAccordion() {
+import CameraServiceMock from '../services/api/mock/CameraServiceMock';
+import NotificationServiceMock from '../services/api/mock/NotificationServiceMock';
+import Notification from '../domain/Notification';
+import Camera from '../domain/Camera';
+
+import Button from '@mui/material/Button';
+
+type CameraID = Camera['id'];
+
+interface NotificationFilters {
+    before: Date | null;
+    after: Date | null;
+    fromCameras: CameraID[];
+};
+
+interface FilterComponentProps {
+    onFilter: (filter:NotificationFilters) => any;
+    cameras: Camera[];
+};
+
+function FilterNotificationAccordion(props:FilterComponentProps) {
     const [dateFrom, setValueDateFrom] = React.useState<Date | null>(null);
     const [dateTo, setValueDateTo] = React.useState<Date | null>(null);
+
+    const [cameraSelected, setCameraSelected] = React.useState<boolean[]>(
+        props.cameras.map(() => false),
+    );
+
+    const filter:NotificationFilters = {
+        before: null,
+        after: null,
+        fromCameras: [],
+    };
+
+    const handleFilterButton = () => {
+        filter.before = dateTo;
+        filter.after = dateFrom;
+        filter.fromCameras = cameraSelected.map((v, i) => props.cameras[i].id);
+        props.onFilter(filter);
+    };
+
+    const toggleCameraSelected = (index:number) => {
+        setCameraSelected((currentValues) => {
+            currentValues[index] = !currentValues[index];
+            return currentValues;
+        });
+    };
 
     return (
         <div>
@@ -65,15 +107,20 @@ function FilterNotificationAccordion() {
                         gutterBottom>Cameras</Typography>
 
                     <Stack direction="row" spacing={2} sx={{flexWrap: 'wrap'}}>
-                        <FormControlLabel control={<Checkbox defaultChecked />} label="cam1" />
-                        <FormControlLabel control={<Checkbox sx={{
-                            'color': pink[800],
-                            '&.Mui-checked': {
-                                color: pink[600],
-                            },
-                        }} />} label="cam2" />
-                        <FormControlLabel control={<Checkbox color="success" />} label="cam3" />
-                        <FormControlLabel control={<Checkbox />} label="cam4" />
+                        {
+                            props.cameras.map((camera, i) => {
+                                return <FormControlLabel
+                                    key={camera.id}
+                                    control={<Checkbox defaultChecked />}
+                                    label={camera.name}
+                                    checked={
+                                        cameraSelected[i]
+                                    }
+                                    // onChange={(ev) => handleCameraCheckboxChange(ev, camera.id)}
+                                    onClick={() => toggleCameraSelected(i)}
+                                />;
+                            })
+                        }
                     </Stack>
 
                     <Typography
@@ -100,6 +147,9 @@ function FilterNotificationAccordion() {
                         />
                     </Stack>
                 </AccordionDetails>
+                <Button onClick={handleFilterButton}>
+                Filter
+                </Button>
             </Accordion>
         </div>
     );
@@ -256,7 +306,46 @@ function NotificationsRightBar() {
 }
 
 function Notifications() {
+    const cameraService = new CameraServiceMock();
+    const notificationService = new NotificationServiceMock(cameraService);
+
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [currentNotificationIndex, setCurrentNotificationIndex] = useState<number>(0);
+    const [cameras, setCameras] = useState<Camera[]>([]);
+
+    const getCamerasFromNotifications = (nots:Notification[]) => {
+        const cams:Camera[] = [];
+        nots.forEach((not) => {
+            if (!cams.find((cam) => cam.id === not.camera.id)) {
+                cams.push(not.camera);
+            }
+        });
+        setCameras(cams);
+    };
+
+    const filterNotifications = (filter:NotificationFilters) => {
+
+    };
+
+    const processNotificationRequest = (response:Promise<Notification | Notification[]>) => {
+        response.then((responseNots:Notification | Notification[]) => {
+            let nots:Array<Notification>;
+
+            if (!Array.isArray(responseNots)) {
+                nots = [responseNots];
+            } else {
+                nots = responseNots;
+            }
+
+            setNotifications(nots);
+            setCurrentNotificationIndex(nots.length-1);
+            getCamerasFromNotifications(nots);
+        });
+    };
+
     useEffect(() => {
+        processNotificationRequest(notificationService.getAll());
+
         // function handleStatusChange(status) {
         //     setIsOnline(status.isOnline);
         // }
@@ -267,10 +356,12 @@ function Notifications() {
         // return function cleanup() {
         //     ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
         // };
-    });
+    }, []);
 
     return (<>
-        <FilterNotificationAccordion></FilterNotificationAccordion>
+        <FilterNotificationAccordion
+            onFilter={filterNotifications}
+            cameras={cameras}></FilterNotificationAccordion>
         <Box sx={{flexGrow: 1}}>
             <Grid container spacing={2}>
                 <Grid item xs={2}>
