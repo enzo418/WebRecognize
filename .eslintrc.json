@@ -31,6 +31,7 @@
             "error",
             4
         ],
-        "object-curly-spacing": "off"
+        "object-curly-spacing": "off",
+        "no-unused-vars": "warn"
     }
 }
