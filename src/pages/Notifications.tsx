@@ -67,9 +67,7 @@ function FilterNotificationAccordion(props:FilterComponentProps) {
     const [dateFrom, setValueDateFrom] = React.useState<Date | null>(null);
     const [dateTo, setValueDateTo] = React.useState<Date | null>(null);
 
-    const [cameraSelected, setCameraSelected] = React.useState<boolean[]>(
-        props.cameras.map(() => false),
-    );
+    const [camerasSelected, setCamerasSelected] = React.useState<CameraID[]>([]);
 
     const filter:NotificationFilters = {
         before: null,
@@ -80,15 +78,34 @@ function FilterNotificationAccordion(props:FilterComponentProps) {
     const handleFilterButton = () => {
         filter.before = dateTo;
         filter.after = dateFrom;
-        filter.fromCameras = cameraSelected.map((v, i) => props.cameras[i].id);
+        filter.fromCameras = camerasSelected;
         props.onFilter(filter);
     };
 
-    const toggleCameraSelected = (index:number) => {
-        setCameraSelected((currentValues) => {
-            currentValues[index] = !currentValues[index];
-            return currentValues;
+    const toggleCamerasSelected = (id:string) => {
+        setCamerasSelected((currentValues) => {
+            if (currentValues.indexOf(id) >= 0) {
+                return currentValues.filter((cid) => cid != id);
+            } else {
+                return currentValues.concat([id]);
+            }
         });
+    };
+
+    const handleDateFromChange = (value:Date| null) => {
+        if (!dateTo || value && dateTo >= value) {
+            setValueDateFrom(value);
+        } else {
+            // display error
+        }
+    };
+
+    const handleDateToChange = (value:Date | null) => {
+        if (!dateFrom || value && dateFrom <= value) {
+            setValueDateTo(value);
+        } else {
+            // display error
+        }
     };
 
     return (
@@ -111,13 +128,12 @@ function FilterNotificationAccordion(props:FilterComponentProps) {
                             props.cameras.map((camera, i) => {
                                 return <FormControlLabel
                                     key={camera.id}
-                                    control={<Checkbox defaultChecked />}
+                                    control={<Checkbox />}
                                     label={camera.name}
                                     checked={
-                                        cameraSelected[i]
+                                        camerasSelected.indexOf(camera.id) >= 0
                                     }
-                                    // onChange={(ev) => handleCameraCheckboxChange(ev, camera.id)}
-                                    onClick={() => toggleCameraSelected(i)}
+                                    onClick={() => toggleCamerasSelected(camera.id)}
                                 />;
                             })
                         }
@@ -132,7 +148,7 @@ function FilterNotificationAccordion(props:FilterComponentProps) {
                             label="From"
                             value={dateFrom}
                             onChange={(newValue) => {
-                                setValueDateFrom(newValue);
+                                handleDateFromChange(newValue);
                             }}
                             renderInput={(params) => <TextField {...params} />}
                         />
@@ -141,7 +157,7 @@ function FilterNotificationAccordion(props:FilterComponentProps) {
                             label="To"
                             value={dateTo}
                             onChange={(newValue) => {
-                                setValueDateTo(newValue);
+                                handleDateToChange(newValue);
                             }}
                             renderInput={(params) => <TextField {...params} />}
                         />
@@ -324,7 +340,7 @@ function Notifications() {
     };
 
     const filterNotifications = (filter:NotificationFilters) => {
-
+        console.log(filter);
     };
 
     const processNotificationRequest = (response:Promise<Notification | Notification[]>) => {
