@@ -2,17 +2,7 @@ import React, {useState} from 'react';
 
 import Typography from '@mui/material/Typography';
 
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
 import Stack from '@mui/material/Stack';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-
-import DatePicker from '@mui/lab/DatePicker';
-import TextField from '@mui/material/TextField';
 
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
@@ -48,128 +38,7 @@ import NotificationServiceMock from '../services/api/mock/NotificationServiceMoc
 import Notification from '../domain/Notification';
 import Camera from '../domain/Camera';
 
-import Button from '@mui/material/Button';
-
-type CameraID = Camera['id'];
-
-interface NotificationFilters {
-    before: Date | null;
-    after: Date | null;
-    fromCameras: CameraID[];
-};
-
-interface FilterComponentProps {
-    onFilter: (filter:NotificationFilters) => any;
-    cameras: Camera[];
-};
-
-function FilterNotificationAccordion(props:FilterComponentProps) {
-    const [dateFrom, setValueDateFrom] = React.useState<Date | null>(null);
-    const [dateTo, setValueDateTo] = React.useState<Date | null>(null);
-
-    const [camerasSelected, setCamerasSelected] = React.useState<CameraID[]>([]);
-
-    const filter:NotificationFilters = {
-        before: null,
-        after: null,
-        fromCameras: [],
-    };
-
-    const handleFilterButton = () => {
-        filter.before = dateTo;
-        filter.after = dateFrom;
-        filter.fromCameras = camerasSelected;
-        props.onFilter(filter);
-    };
-
-    const toggleCamerasSelected = (id:string) => {
-        setCamerasSelected((currentValues) => {
-            if (currentValues.indexOf(id) >= 0) {
-                return currentValues.filter((cid) => cid != id);
-            } else {
-                return currentValues.concat([id]);
-            }
-        });
-    };
-
-    const handleDateFromChange = (value:Date| null) => {
-        if (!dateTo || value && dateTo >= value) {
-            setValueDateFrom(value);
-        } else {
-            // display error
-        }
-    };
-
-    const handleDateToChange = (value:Date | null) => {
-        if (!dateFrom || value && dateFrom <= value) {
-            setValueDateTo(value);
-        } else {
-            // display error
-        }
-    };
-
-    return (
-        <div>
-            <Accordion TransitionProps={{unmountOnExit: true}} >
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id="panel1a-header">
-                    <Typography>Filters</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <Typography
-                        className="grey-title"
-                        variant="body1"
-                        gutterBottom>Cameras</Typography>
-
-                    <Stack direction="row" spacing={2} sx={{flexWrap: 'wrap'}}>
-                        {
-                            props.cameras.map((camera, i) => {
-                                return <FormControlLabel
-                                    key={camera.id}
-                                    control={<Checkbox />}
-                                    label={camera.name}
-                                    checked={
-                                        camerasSelected.indexOf(camera.id) >= 0
-                                    }
-                                    onClick={() => toggleCamerasSelected(camera.id)}
-                                />;
-                            })
-                        }
-                    </Stack>
-
-                    <Typography
-                        className="grey-title"
-                        variant="body1"
-                        gutterBottom>Between this dates</Typography>
-                    <Stack direction="row" spacing={2}>
-                        <DatePicker
-                            label="From"
-                            value={dateFrom}
-                            onChange={(newValue) => {
-                                handleDateFromChange(newValue);
-                            }}
-                            renderInput={(params) => <TextField {...params} />}
-                        />
-
-                        <DatePicker
-                            label="To"
-                            value={dateTo}
-                            onChange={(newValue) => {
-                                handleDateToChange(newValue);
-                            }}
-                            renderInput={(params) => <TextField {...params} />}
-                        />
-                    </Stack>
-                </AccordionDetails>
-                <Button onClick={handleFilterButton}>
-                Filter
-                </Button>
-            </Accordion>
-        </div>
-    );
-}
+import FilterNotification, {INotificationFilters} from '../components/FilterNotifications';
 
 function NotificationsTimeline() {
     return (
@@ -339,7 +208,7 @@ function Notifications() {
         setCameras(cams);
     };
 
-    const filterNotifications = (filter:NotificationFilters) => {
+    const filterNotifications = (filter:INotificationFilters) => {
         console.log(filter);
     };
 
@@ -375,9 +244,9 @@ function Notifications() {
     }, []);
 
     return (<>
-        <FilterNotificationAccordion
+        <FilterNotification
             onFilter={filterNotifications}
-            cameras={cameras}></FilterNotificationAccordion>
+            cameras={cameras}></FilterNotification>
         <Box sx={{flexGrow: 1}}>
             <Grid container spacing={2}>
                 <Grid item xs={2}>
