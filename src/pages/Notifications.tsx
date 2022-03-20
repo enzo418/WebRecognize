@@ -4,14 +4,6 @@ import Typography from '@mui/material/Typography';
 
 import Stack from '@mui/material/Stack';
 
-import Timeline from '@mui/lab/Timeline';
-import TimelineItem from '@mui/lab/TimelineItem';
-import TimelineSeparator from '@mui/lab/TimelineSeparator';
-import TimelineConnector from '@mui/lab/TimelineConnector';
-import TimelineContent from '@mui/lab/TimelineContent';
-import TimelineDot from '@mui/lab/TimelineDot';
-import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
-
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 
@@ -20,11 +12,6 @@ import Skeleton from '@mui/material/Skeleton';
 // import Container from '@mui/material/Container';
 
 // import Divider from '@mui/material/Divider';
-
-import KeyboardDoubleArrowUpRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowUpRounded';
-import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
-import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded';
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -39,55 +26,7 @@ import Notification from '../domain/Notification';
 import Camera from '../domain/Camera';
 
 import FilterNotification, {INotificationFilters} from '../components/FilterNotifications';
-
-function NotificationsTimeline() {
-    return (
-        <React.Fragment>
-            <Timeline position="alternate">
-                <TimelineItem>
-                    <TimelineOppositeContent color="text.secondary">
-                        09:30 am
-                    </TimelineOppositeContent>
-                    <TimelineSeparator>
-                        <TimelineDot />
-                        <TimelineConnector />
-                    </TimelineSeparator>
-                    <TimelineContent>Eat</TimelineContent>
-                </TimelineItem>
-                <TimelineItem>
-                    <TimelineOppositeContent color="text.secondary">
-                        10:00 am
-                    </TimelineOppositeContent>
-                    <TimelineSeparator>
-                        <TimelineDot />
-                        <TimelineConnector />
-                    </TimelineSeparator>
-                    <TimelineContent>Code</TimelineContent>
-                </TimelineItem>
-                <TimelineItem>
-                    <TimelineOppositeContent color="text.secondary">
-                        12:00 am
-                    </TimelineOppositeContent>
-                    <TimelineSeparator>
-                        <TimelineDot />
-                        <TimelineConnector />
-                    </TimelineSeparator>
-                    <TimelineContent>Sleep</TimelineContent>
-                </TimelineItem>
-                <TimelineItem>
-                    <TimelineOppositeContent color="text.secondary">
-                        9:00 am
-                    </TimelineOppositeContent>
-                    <TimelineSeparator>
-                        <TimelineDot />
-                        <TimelineConnector />
-                    </TimelineSeparator>
-                    <TimelineContent>Repeat</TimelineContent>
-                </TimelineItem>
-            </Timeline>
-        </React.Fragment>
-    );
-}
+import {NavNotificationsTimeline} from '../components/NavNotificationsTimeline';
 
 function NotificationsBody() {
     return (
@@ -123,29 +62,10 @@ function NotificationsBodyInfo() {
     );
 }
 
-function NotificationsRightBarMoveTo() {
-    return (<>
-        <Typography className="grey-title">Move to</Typography>
-        <Stack direction="row" spacing={2}>
-            <Typography>25/02/15 15:33</Typography>
-            <KeyboardDoubleArrowUpRoundedIcon />
-        </Stack>
-
-        <Stack direction="row" spacing={2}>
-            <Typography>23/02/15 15:33</Typography>
-            <KeyboardArrowUpRoundedIcon />
-        </Stack>
-
-        <Stack direction="row" spacing={2}>
-            <Typography>22/02/15 15:33</Typography>
-            <KeyboardArrowDownRoundedIcon />
-        </Stack>
-
-        <Stack direction="row" spacing={2}>
-            <Typography>20/02/15 15:33</Typography>
-            <KeyboardDoubleArrowDownRoundedIcon />
-        </Stack></>);
-}
+interface IRightBarNotifProps {
+    notifications: Notification[];
+    currentIndex: number;
+};
 
 function NotificationsRightBarShowType() {
     const [view, setView] = React.useState('list');
@@ -176,12 +96,13 @@ function NotificationsRightBarShowType() {
     </>);
 }
 
-function NotificationsRightBar() {
+
+function NotificationsRightBar(props:IRightBarNotifProps) {
     return (
         <Stack spacing={12}>
-            <div>
-                <NotificationsRightBarMoveTo></NotificationsRightBarMoveTo>
-            </div>
+            {/* <div>
+                <NotificationsRightBarMoveTo {...props}></NotificationsRightBarMoveTo>
+            </div>*/}
 
             <div>
                 <NotificationsRightBarShowType></NotificationsRightBarShowType>
@@ -194,22 +115,48 @@ function Notifications() {
     const cameraService = new CameraServiceMock();
     const notificationService = new NotificationServiceMock(cameraService);
 
+    // yes, to show a progress indicator
+    const [loading, setLoading] = useState<boolean>(true);
+
+    // yes
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [currentNotificationIndex, setCurrentNotificationIndex] = useState<number>(0);
+
+    // state needed since all the content displayed will change if this changes
+    const [currentNotificationIndex, setCurrentNotificationIndex] = useState<number | null>(null);
+
+    // state needed? Yes, filter depends on it to update its elements
     const [cameras, setCameras] = useState<Camera[]>([]);
 
-    const getCamerasFromNotifications = (nots:Notification[]) => {
+    const setCamerasFromNotifications = (nots:Notification[]) => {
         const cams:Camera[] = [];
         nots.forEach((not) => {
             if (!cams.find((cam) => cam.id === not.camera.id)) {
                 cams.push(not.camera);
             }
         });
+
         setCameras(cams);
     };
 
     const filterNotifications = (filter:INotificationFilters) => {
         console.log(filter);
+    };
+
+    const processNotifications = (nots:Notification[]) => {
+        setNotifications(nots);
+
+        if (!currentNotificationIndex) {
+            setCurrentNotificationIndex(nots.length-1);
+        }
+
+        setCamerasFromNotifications(nots);
+
+        // setTimeout(() => {
+        //    console.log('now');
+        //    processNotifications(nots.slice(1, 3));
+        // }, 7000);
+
+        setLoading(false);
     };
 
     const processNotificationRequest = (response:Promise<Notification | Notification[]>) => {
@@ -222,9 +169,7 @@ function Notifications() {
                 nots = responseNots;
             }
 
-            setNotifications(nots);
-            setCurrentNotificationIndex(nots.length-1);
-            getCamerasFromNotifications(nots);
+            processNotifications(nots);
         });
     };
 
@@ -247,20 +192,36 @@ function Notifications() {
         <FilterNotification
             onFilter={filterNotifications}
             cameras={cameras}></FilterNotification>
-        <Box sx={{flexGrow: 1}}>
-            <Grid container spacing={2}>
-                <Grid item xs={2}>
-                    <NotificationsTimeline></NotificationsTimeline>
+
+        {!loading && currentNotificationIndex != null &&
+            <Box sx={{flexGrow: 1}}>
+                <Grid container spacing={2}>
+                    <Grid item xs={2}>
+                        <NavNotificationsTimeline
+                            notifications={notifications}
+                            currentIndex={currentNotificationIndex}
+                            cameras={cameras}
+                        ></NavNotificationsTimeline>
+                    </Grid>
+                    <Grid item xs={8}>
+                        <NotificationsBody></NotificationsBody>
+                        <NotificationsBodyInfo></NotificationsBodyInfo>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <NotificationsRightBar
+                            notifications={notifications}
+                            currentIndex={currentNotificationIndex}
+                        ></NotificationsRightBar>
+                    </Grid>
                 </Grid>
-                <Grid item xs={8}>
-                    <NotificationsBody></NotificationsBody>
-                    <NotificationsBodyInfo></NotificationsBodyInfo>
-                </Grid>
-                <Grid item xs={2}>
-                    <NotificationsRightBar></NotificationsRightBar>
-                </Grid>
-            </Grid>
-        </Box>
+            </Box>
+        }
+
+        {loading && <Typography>Loading</Typography>}
+
+
+        {!loading && currentNotificationIndex == null &&
+        <Typography>There are no notifications</Typography>}
 
     </>
     );

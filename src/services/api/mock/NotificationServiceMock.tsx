@@ -4,28 +4,56 @@ import ICameraService from '../interfaces/ICameraService';
 import { parseNotification, parseNotifications } from '../convert/ConvertDTOtoNotification';
 import DTONotification from '../interfaces/DTONotification';
 import {ensure} from '../../../utils/error';
+import { subDays, addMinutes } from 'date-fns';
+import {random} from '../../../utils/random';
 
-const notificationsMock: DTONotification[] = [{
-    id: '1',
-    group: 1,
-    cameraID: '1',
-    date: new Date(),
-}, {
-    id: '2',
-    group: 2,
-    cameraID: '1',
-    date: new Date(),
-}, {
-    id: '3',
-    group: 1,
-    cameraID: '1',
-    date: new Date(),
-}, {
-    id: '4',
-    group: 3,
-    cameraID: '3',
-    date: new Date(),
-}];
+const generateNotifications = (n:number, numberCams:number) => {
+    const generated:DTONotification[] = [];
+    let lastID:number = 0;
+    let lastDate:Date = new Date();
+
+    for (let i=0; i < n; i++) {
+        const g = {
+            id: '' + lastID+1,
+            group: random(0, n),
+            cameraID: '' + random(0, numberCams),
+            date: addMinutes(subDays(lastDate, 1), random(20, 60)),
+        };
+        generated.push(g);
+
+        lastID++;
+        lastDate = g.date;
+    }
+
+    return generated;
+};
+
+
+const notificationsMock: DTONotification[] = generateNotifications(1000, 450);
+
+
+// const baseDate = new Date();
+// const notificationsMock: DTONotification[] = [{
+//    id: '1',
+//    group: 1,
+//    cameraID: '1',
+//    date: addMinutes(subDays(baseDate, 9), 5),
+// }, {
+//    id: '2',
+//    group: 2,
+//    cameraID: '1',
+//    date: addMinutes(subDays(baseDate, 8), 10),
+// }, {
+//    id: '3',
+//    group: 1,
+//    cameraID: '1',
+//    date: addMinutes(subDays(baseDate, 7), 15),
+// }, {
+//    id: '4',
+//    group: 3,
+//    cameraID: '3',
+//    date: addMinutes(subDays(baseDate, 6), 20),
+// }];
 
 export default class NotificationServiceMock implements INotificationService {
     private cameraService: ICameraService;

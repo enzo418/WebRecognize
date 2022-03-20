@@ -1,0 +1,39 @@
+.discrete-scroll {
+    overflow-y: scroll;
+    max-height: "calc(100% - 50px)";
+
+    &:hover {
+        &::-webkit-scrollbar {
+            background-color: transparent;
+        }
+
+        &::-webkit-scrollbar-track {
+            // box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            background-color: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: darkgrey;
+            outline: 1px solid slategrey;
+        }
+
+        // &::-webkit-scrollbar-track-piece:end {
+        //     background: transparent;
+        //     margin-bottom: 10px;
+        // }
+
+        // &::-webkit-scrollbar-track-piece:start {
+        //     background: transparent;
+        //     margin-top: 10px;
+        // }
+    }
+}
+
+.discrete-scroll {
+    background-color: transparent;
+}
+
+.discrete-scroll::-webkit-scrollbar {
+    background-color: transparent;
+    width: 0.2em;
+}
