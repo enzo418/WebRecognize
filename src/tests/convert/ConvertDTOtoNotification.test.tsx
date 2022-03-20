@@ -50,7 +50,7 @@ describe('Notification Service', () => {
 
         //
 
-        const response: Notification = parseNotification(not, camService);
+        const response: Notification = await parseNotification(not, camService);
 
         //
 
@@ -63,7 +63,7 @@ describe('Notification Service', () => {
         expect(response.camera).toMatchObject(cameras[0]);
     });
 
-    it('should request all the notifications and all the cameras', () => {
+    it('should request all the notifications and all the cameras', async () => {
         const notResponse: DTONotification[] = [{
             id: '1',
             date: new Date(1000, 1, 10, 0, 0, 0, 0),
@@ -94,7 +94,7 @@ describe('Notification Service', () => {
 
         //
 
-        const response: Notification[] = parseNotifications(notResponse, camService);
+        const response: Notification[] = await parseNotifications(notResponse, camService);
 
         //
 

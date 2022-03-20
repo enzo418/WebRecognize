@@ -9,6 +9,9 @@ const camerasMock = [{
 }, {
     id: '2',
     name: 'cam2',
+}, {
+    id: '3',
+    name: 'cam3',
 }];
 
 export default class CameraServiceMock implements ICameraService {

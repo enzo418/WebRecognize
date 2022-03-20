@@ -22,13 +22,21 @@ notificationWS.addEventListener('close', (ev) => {
     console.debug('Notification ws disconnected');
 });
 
+type NotificationCallback = (notification:Notification) => any;
+
 export default class NotificationService implements INotificationService {
     private http: IHttpClient;
     private cameraService: ICameraService;
+    private wsCallbacks: NotificationCallback[];
 
     constructor(pHttpClient: IHttpClient, pCameraService: ICameraService) {
         this.http = pHttpClient;
         this.cameraService = pCameraService;
+        this.wsCallbacks = [];
+
+        notificationWS.addEventListener('message', async (ev) => {
+            this.callWsCallbacks(await parseNotification(ev.data, this.cameraService));
+        });
     }
 
     get(id: string): Promise<Notification> {
@@ -94,9 +102,13 @@ export default class NotificationService implements INotificationService {
         });
     }
 
-    subscribe(callback: (not: Notification) => any): void {
-        notificationWS.addEventListener('message', (ev) => {
-            callback(parseNotification(ev.data, this.cameraService));
+    subscribe(callback: NotificationCallback): void {
+        this.wsCallbacks.push(callback);
+    }
+
+    private callWsCallbacks(notification:Notification) {
+        this.wsCallbacks.forEach((callback) => {
+            callback(notification);
         });
     }
 }
