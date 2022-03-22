@@ -285,6 +285,21 @@ function Notifications() {
 
     const filterNotifications = (filter:INotificationFilters) => {
         console.log(filter);
+        if (filter.before && filter.after) {
+            processNotificationRequest(
+                notificationService.getBetween(filter.before, filter.after, 100),
+            );
+        } else if (filter.before && !filter.after) {
+            processNotificationRequest(
+                notificationService.getBefore(filter.before, 100),
+            );
+        } else if (!filter.before && filter.after) {
+            processNotificationRequest(
+                notificationService.getAfter(filter.after, 100),
+            );
+        }
+
+        // TODO: Add camera filters
     };
 
     const groupNotifications = (nots:Notification[]) => {
