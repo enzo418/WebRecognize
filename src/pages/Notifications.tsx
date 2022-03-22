@@ -36,26 +36,19 @@ import {getEnumAt, getEnumKeysNames} from '../utils/enum';
 import {NotificationGroup} from '../domain/NotificationGroup';
 import {ensure} from '../utils/error';
 import {intersect} from '../utils/array';
+import SkeletonImage from '../components/SkeletonImage';
+import SkeletonVideo from '../components/SkeletonVideo';
 
 interface INotificationBodyDisplayMediaProps {
     mediaURI: string;
 };
 
 function NotificationBodyDisplayImage(props:INotificationBodyDisplayMediaProps) {
-    // return <img src={props.mediaURI}></img>;
-    return <Box
-        component="img"
-        sx={{
-            height: 'auto',
-            width: 'auto',
-        }}
-        alt="The house from the offer."
-        src={props.mediaURI}
-    />;
+    return <SkeletonImage src={props.mediaURI}></SkeletonImage>;
 }
 
 function NotificationBodyDisplayVideo(props:INotificationBodyDisplayMediaProps) {
-    return <video controls src={props.mediaURI}></video>;
+    return <SkeletonVideo src={props.mediaURI}></SkeletonVideo>;
 }
 
 interface INotificationBodyDisplayTextProps {
