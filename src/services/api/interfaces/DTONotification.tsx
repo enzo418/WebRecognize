@@ -11,5 +11,6 @@ export default interface DTONotification {
     group: number;
     cameraID: string;
     type: string;
+    content: string;
 // eslint-disable-next-line semi
 };

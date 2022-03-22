@@ -22,7 +22,12 @@ import '../styles/Notifications.scss';
 
 import CameraServiceMock from '../services/api/mock/CameraServiceMock';
 import NotificationServiceMock from '../services/api/mock/NotificationServiceMock';
-import Notification, {ENotificationType} from '../domain/Notification';
+import Notification,
+{
+    ENotificationType,
+    MediaNotification,
+    TextNotification,
+} from '../domain/Notification';
 import Camera from '../domain/Camera';
 
 import FilterNotification, {INotificationFilters} from '../components/FilterNotifications';
@@ -32,11 +37,70 @@ import {NotificationGroup} from '../domain/NotificationGroup';
 import {ensure} from '../utils/error';
 import {intersect} from '../utils/array';
 
-function NotificationsBody() {
+interface INotificationBodyDisplayMediaProps {
+    mediaURI: string;
+};
+
+function NotificationBodyDisplayImage(props:INotificationBodyDisplayMediaProps) {
+    // return <img src={props.mediaURI}></img>;
+    return <Box
+        component="img"
+        sx={{
+            height: 'auto',
+            width: 'auto',
+        }}
+        alt="The house from the offer."
+        src={props.mediaURI}
+    />;
+}
+
+function NotificationBodyDisplayVideo(props:INotificationBodyDisplayMediaProps) {
+    return <video controls src={props.mediaURI}></video>;
+}
+
+interface INotificationBodyDisplayTextProps {
+    text: string;
+};
+
+function NotificationBodyDisplayText(props:INotificationBodyDisplayTextProps) {
+    return <Typography>{props.text}</Typography>;
+}
+
+interface INotificationBodyDisplayProps {
+    notification: Notification;
+};
+
+function NotificationBodyDisplay(props:INotificationBodyDisplayProps) {
+    const {notification} = props;
+
+    let element = null;
+
+    switch (notification.type) {
+    case ENotificationType.IMAGE:
+        element = <NotificationBodyDisplayImage
+            mediaURI={(notification as MediaNotification).mediaURI}
+        />;
+        break;
+    case ENotificationType.VIDEO:
+        element = <NotificationBodyDisplayVideo
+            mediaURI={(notification as MediaNotification).mediaURI}
+        />;
+        break;
+    case ENotificationType.TEXT:
+        element = <NotificationBodyDisplayText
+            text={(notification as TextNotification).text}
+        />;
+        break;
+    }
+
+    console.log(element);
+
     return (
         <Stack spacing={1}>
-            <Skeleton variant="text" />
-            <Skeleton variant="rectangular" width={600} height={360} />
+            {/* <Skeleton variant="text" />*/}
+            {/* <Skeleton variant="rectangular" width={600} height={360} />*/}
+
+            {element}
         </Stack>
     );
 }
@@ -125,30 +189,33 @@ function NotificationItem(props:INotificationItemProps) {
     const defaulttype = selectableTypes[0];
 
     const [type, setType] = useState<string>(defaulttype);
+
     const [typedNotification, setTypedNotification] = useState<Notification>(
         Object(notification)[type],
     );
 
     const handleChangeType = (t:string) => {
         if (notification.hasOwnProperty(t)) {
+            console.log('Changed notification to:', Object(notification)[t]);
+
             setType(t);
             setTypedNotification(ensure(Object(notification)[t]));
         }
     };
 
-    console.log({type, types, selectableTypes});
-
-
-    // if the notification group changed, check if the old type is
+    // condition 1: if the notification group changed, check if the old type is
     // available on the new one
-    if (!notification.hasOwnProperty(type)) {
+    // condition 2: if it changed the notification group then change the typed notf.
+    if (!notification.hasOwnProperty(type) || typedNotification.group != notification.groupID) {
         handleChangeType(defaulttype);
     }
 
-
     return (<>
         <Grid item xs={8}>
-            <NotificationsBody></NotificationsBody>
+            <NotificationBodyDisplay
+                notification={typedNotification}
+            />
+
             <NotificationItemBody
                 notification={typedNotification}/>
         </Grid>

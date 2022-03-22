@@ -14,3 +14,11 @@ export default interface Notification {
     type: ENotificationType;
 // eslint-disable-next-line semi
 };
+
+export interface MediaNotification extends Notification {
+    mediaURI:string;
+};
+
+export interface TextNotification extends Notification {
+    text: string;
+};

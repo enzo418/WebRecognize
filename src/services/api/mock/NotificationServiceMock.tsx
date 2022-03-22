@@ -6,7 +6,15 @@ import DTONotification from '../interfaces/DTONotification';
 import {ensure} from '../../../utils/error';
 import { subSeconds, subHours } from 'date-fns';
 import {random} from '../../../utils/random';
-import {getEnumKeys, getEnumKeysNames} from '../../../utils/enum';
+import {getEnumAt, getEnumKeysNames} from '../../../utils/enum';
+
+
+const videos:string[] = [
+    'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
+    'https://samplelib.com/lib/preview/mp4/sample-10s.mp4',
+    'https://samplelib.com/lib/preview/mp4/sample-15s.mp4',
+    'https://samplelib.com/lib/preview/mp4/sample-20s.mp4',
+    'https://samplelib.com/lib/preview/mp4/sample-30s.mp4'];
 
 const generateNotifications = (n:number, numberCams:number) => {
     const generated:DTONotification[] = [];
@@ -18,12 +26,27 @@ const generateNotifications = (n:number, numberCams:number) => {
     let lastNID = -1;
     for (let i = 0; i < n; i++) {
         types.forEach((t, ti) => {
+            let content:string = '';
+
+            switch (getEnumAt(ENotificationType, t)) {
+            case ENotificationType.IMAGE:
+                content = `https://picsum.photos/640/360?random=1&cache=${random(i, 100000)}`;
+                break;
+            case ENotificationType.VIDEO:
+                content = videos[random(0, videos.length-1)];
+                break;
+            case ENotificationType.TEXT:
+                content = 'random text with lucky number: ' + random(0, 999);
+                break;
+            }
+
             const g:DTONotification = {
                 id: '' + (lastNID + ti + 1),
                 group: i,
                 cameraID: '' + random(0, numberCams),
                 date: subSeconds(lastDate, random(0, 15 * 60)),
                 type: t,
+                content,
             };
 
             if (random(0, 10) > 3) {

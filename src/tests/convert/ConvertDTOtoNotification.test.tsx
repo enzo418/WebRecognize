@@ -1,6 +1,10 @@
 import ICameraService from '../../services/api/interfaces/ICameraService';
 import Camera from '../../domain/Camera';
-import Notification, {ENotificationType} from '../../domain/Notification';
+import Notification, {
+    ENotificationType,
+    MediaNotification,
+    TextNotification,
+} from '../../domain/Notification';
 import DTONotification from '../../services/api/interfaces/DTONotification';
 import {
     parseNotification,
@@ -32,6 +36,22 @@ class MockCameraService implements ICameraService {
     }
 }
 
+const getNotificationContent = (n:Notification) => {
+    let content = '';
+    switch (n.type) {
+    case ENotificationType.IMAGE:
+        content = (n as MediaNotification).mediaURI;
+        break;
+    case ENotificationType.VIDEO:
+        content = (n as MediaNotification).mediaURI;
+        break;
+    case ENotificationType.TEXT:
+        content = (n as TextNotification).text;
+        break;
+    }
+    return content;
+};
+
 describe('Notification Service', () => {
     it('should do request a notifications, request a camera and be correct', async () => {
         const not: DTONotification = {
@@ -40,6 +60,7 @@ describe('Notification Service', () => {
             cameraID: '123456',
             group: 99,
             type: 'image',
+            content: 'aaa',
         };
 
         const cameras: Array<Camera> = [
@@ -64,6 +85,7 @@ describe('Notification Service', () => {
         expect(response.date).toStrictEqual(not.date);
         expect(response.camera).toMatchObject(cameras[0]);
         expect(response.type).toBe(ENotificationType.IMAGE);
+        expect(getNotificationContent(response)).toBe(not.content);
     });
 
     it('should request all the notifications and all the cameras', async () => {
@@ -73,18 +95,21 @@ describe('Notification Service', () => {
             cameraID: '1',
             group: 99,
             type: 'text',
+            content: 'hi',
         }, {
             id: '2',
             date: new Date(1000, 1, 10, 2, 0, 0, 3),
             cameraID: '2',
             group: 99,
             type: 'image',
+            content: 'this_is_a_uri',
         }, {
             id: '3',
             date: new Date(423, 1, 10, 4, 0, 0, 3),
             cameraID: '2',
             group: 1,
             type: 'video',
+            content: 'this_is_a_uri2',
         }];
 
         const cameras: Array<Camera> = [
@@ -124,6 +149,8 @@ describe('Notification Service', () => {
             expect(actual.camera).toMatchObject(camAt(expected.cameraID));
             expect(actual.type)
                 .toBe(tryGetEnumValueFromDirtyString(ENotificationType, expected.type));
+
+            expect(getNotificationContent(actual)).toBe(expected.content);
         });
     });
 });

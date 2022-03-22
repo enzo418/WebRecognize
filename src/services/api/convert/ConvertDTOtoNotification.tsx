@@ -1,7 +1,12 @@
 import ICameraService from '../interfaces/ICameraService';
 import DTONotification from '../interfaces/DTONotification';
 import Camera from '../../../domain/Camera';
-import Notification, {ENotificationType} from '../../../domain/Notification';
+import Notification,
+{
+    ENotificationType,
+    MediaNotification,
+    TextNotification,
+} from '../../../domain/Notification';
 import {getEnumKeysNames, tryGetEnumValueFromDirtyString} from '../../../utils/enum';
 
 // function notificationStringTypeToEnum(type:string) : ENotificationType {
@@ -25,13 +30,34 @@ export async function parseNotification(
         const camera: Camera = await cameraService.get(pNot.cameraID);
 
         if (camera) {
-            const notification: Notification = {
+            let notification: Notification = {
                 id: pNot.id,
                 date: new Date(pNot.date),
                 group: pNot.group,
                 camera: camera,
                 type: tryGetEnumValueFromDirtyString(ENotificationType, pNot.type),
             };
+
+            switch (notification.type) {
+            case ENotificationType.IMAGE:
+                notification = {
+                    ...notification,
+                    mediaURI: pNot.content,
+                } as MediaNotification;
+                break;
+            case ENotificationType.VIDEO:
+                notification = {
+                    ...notification,
+                    mediaURI: pNot.content,
+                } as MediaNotification;
+                break;
+            case ENotificationType.TEXT:
+                notification = {
+                    ...notification,
+                    text: pNot.content,
+                } as TextNotification;
+                break;
+            }
 
             resolve(notification);
         } else {
