@@ -107,10 +107,11 @@ function NotificationBodyDisplay(props:INotificationBodyDisplayProps) {
 
 interface INotificationItemBodyProps {
     notification: Notification;
+    text: string | null;
 };
 
 function NotificationItemBody(props:INotificationItemBodyProps) {
-    const {notification} = props;
+    const {notification, text} = props;
 
     return (
         <Stack spacing={1}>
@@ -120,12 +121,22 @@ function NotificationItemBody(props:INotificationItemBodyProps) {
                 <Stack spacing={2}>
                     <Stack direction="row" spacing={2}>
                         <Typography variant="overline">
-                            Date: {notification.date.toLocaleString()}</Typography>
+                            Date:</Typography>
+                        <Typography color="text.secondary" variant="overline">
+                            {notification.date.toLocaleString()}
+                        </Typography>
                     </Stack>
-                    <Stack direction="row" spacing={2}>
-                        <Typography variant="overline">Message: </Typography>
-                        <Skeleton variant="text" />
-                    </Stack>
+                    {
+                        text != null &&
+                        (<Stack direction="row" spacing={2}>
+                            <Typography variant="overline">
+                                Message:
+                            </Typography>
+                            <Typography color="text.secondary" variant="overline">
+                                {text}
+                            </Typography>
+                        </Stack>)
+                    }
                     <Stack direction="row" spacing={2}>
                         <Typography variant="overline">Detected: </Typography>
                         <Skeleton variant="text" />
@@ -217,6 +228,12 @@ function NotificationItem(props:INotificationItemProps) {
         setTypedNotification(ensure(Object(notification)[t]));
     }
 
+    let text:string|null = null;
+
+    if (notification.text) {
+        text = notification.text.text;
+    }
+
     return (<>
         <Grid item xs={8}>
             <NotificationBodyDisplay
@@ -224,7 +241,8 @@ function NotificationItem(props:INotificationItemProps) {
             />
 
             <NotificationItemBody
-                notification={typedNotification}/>
+                notification={typedNotification}
+                text={text}/>
         </Grid>
         <Grid item xs={2}>
             <NotificationTypeSelector
@@ -233,7 +251,6 @@ function NotificationItem(props:INotificationItemProps) {
                 allTypes={types}
                 selectableTypes={selectableTypes}
             />
-            {/* <NotificationsRightBar ></NotificationsRightBar>*/}
         </Grid>
     </>);
 }
