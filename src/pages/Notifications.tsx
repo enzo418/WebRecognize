@@ -181,6 +181,7 @@ interface INotificationItemProps {
 function NotificationItem(props:INotificationItemProps) {
     const {notifications, currentNotificationIndex} = props;
 
+    // notification is the group notification
     const notification = notifications[currentNotificationIndex];
 
     const types:string[] = ensure(getEnumKeysNames(ENotificationType, true));
@@ -190,6 +191,7 @@ function NotificationItem(props:INotificationItemProps) {
 
     const [type, setType] = useState<string>(defaulttype);
 
+    // typed notification is a notification with an image/video or text
     const [typedNotification, setTypedNotification] = useState<Notification>(
         Object(notification)[type],
     );
