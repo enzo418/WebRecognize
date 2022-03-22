@@ -107,13 +107,14 @@ function NotificationBodyDisplay(props:INotificationBodyDisplayProps) {
 interface INotificationItemBodyProps {
     notification: Notification;
     text: string | null;
+    sx?: any;
 };
 
 function NotificationItemBody(props:INotificationItemBodyProps) {
     const {notification, text} = props;
 
     return (
-        <Stack spacing={1}>
+        <Stack spacing={1} sx={props.sx}>
             <Typography className="grey-title">Info</Typography>
 
             <Box sx={{flexGrow: 1}}>
@@ -241,7 +242,8 @@ function NotificationItem(props:INotificationItemProps) {
 
             <NotificationItemBody
                 notification={typedNotification}
-                text={text}/>
+                text={text}
+                sx={{paddingTop: '15px'}}/>
         </Grid>
         <Grid item xs={2}>
             <NotificationTypeSelector

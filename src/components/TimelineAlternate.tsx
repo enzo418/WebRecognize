@@ -44,47 +44,44 @@ interface ITimeLineAlternateProps {
     onclick: ClickCallback;
 };
 
-export default function TimeLineAlternate(props: ITimeLineAlternateProps) {
-    const parentRef = React.useRef<any>();
+interface TimeLineItemGeneratorProps {
+    index:number;
+    size: number;
+    start: number;
+    element: ITimelineItemBase;
+    onclick: ClickCallback;
+};
 
-    const rowVirtualizer = useVirtual({
-        size: props.elements.length,
-        parentRef,
-        estimateSize: React.useCallback((i) => 80, []),
-        overscan: 5,
-    });
+function TimeLineItemGenerator(props:TimeLineItemGeneratorProps) {
+    const {index, size, start, element, onclick} = props;
 
-    function TimeLineGenerateElementSeparator(props:any) {
-        const {index, size, start, element} = props;
+    let htmlElem :any;
 
-        return (
-            <TimelineItem
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: `${size}px`,
-                    transform: `translateY(${start}px)`,
-                    padding: 0,
-                }}
-                className="only-separator">
-                <TimelineSeparator>
-                    <TimelineConnector sx={{backgroundColor: element.separatorColor}}/>
-                </TimelineSeparator>
-
-                <TimelineContent color={
-                    ['both', 'right'].includes(element.grayOut) ?
-                        'text.secondary' :
-                        'text.primary'
-                }>{element.text}</TimelineContent>
-            </TimelineItem>);
+    if (element.isSeparator) {
+        htmlElem = (<TimeLineGenerateElementSeparator
+            index={index}
+            size={size}
+            start={start}
+            element={element}/>
+        );
+    } else {
+        htmlElem = (<TimeLineGenerateElement
+            index={index}
+            size={size}
+            start={start}
+            element={element}
+            onclick={onclick}/>
+        );
     }
 
-    function TimeLineGenerateElement(props:any) {
-        const {index, size, start, element, onclick} = props;
+    return htmlElem;
+}
 
-        return (<TimelineItem
+function TimeLineGenerateElementSeparator(props:any) {
+    const {size, start, element} = props;
+
+    return (
+        <TimelineItem
             style={{
                 position: 'absolute',
                 top: 0,
@@ -94,63 +91,77 @@ export default function TimeLineAlternate(props: ITimeLineAlternateProps) {
                 transform: `translateY(${start}px)`,
                 padding: 0,
             }}
-            onClick={() => onclick(element.id)}>
-            <Grid container spacing={2}>
-                <Grid item xs={5}>
-                    <TimelineContent
-                        color={
-                            ['both', 'left'].includes(element.grayOut) ?
-                                'text.secondary' :
-                                'text.primary'
-                        }
-                        sx={{ m: '0', px: 0, pr: '10px' }}
-                        align="right">
-                        {element.left}
-                    </TimelineContent>
-                </Grid>
+            className="only-separator">
+            <TimelineSeparator>
+                <TimelineConnector sx={{backgroundColor: element.separatorColor}}/>
+            </TimelineSeparator>
 
-                <Grid item xs={2}>
-                    <TimelineSeparator>
-                        <TimelineDot sx={{backgroundColor: element.knobColor}}/>
-                        <TimelineConnector />
-                    </TimelineSeparator>
-                </Grid>
+            <TimelineContent color={
+                ['both', 'right'].includes(element.grayOut) ?
+                    'text.secondary' :
+                    'text.primary'
+            }>{element.text}</TimelineContent>
+        </TimelineItem>);
+}
 
-                <Grid item xs={5}>
-                    <TimelineContent color={
-                        ['both', 'right'].includes(element.grayOut) ?
+function TimeLineGenerateElement(props:any) {
+    const {size, start, element, onclick} = props;
+
+    return (<TimelineItem
+        style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: `${size}px`,
+            transform: `translateY(${start}px)`,
+            padding: 0,
+        }}
+        onClick={() => onclick(element.id)}>
+        <Grid container spacing={2}>
+            <Grid item xs={5}>
+                <TimelineContent
+                    color={
+                        ['both', 'left'].includes(element.grayOut) ?
                             'text.secondary' :
                             'text.primary'
-                    }>{element.right}</TimelineContent></Grid>
+                    }
+                    sx={{ m: '0', px: 0, pr: '10px' }}
+                    align="right">
+                    {element.left}
+                </TimelineContent>
             </Grid>
 
-        </TimelineItem>);
-    }
+            <Grid item xs={2}>
+                <TimelineSeparator>
+                    <TimelineDot sx={
+                        {backgroundColor: element.knobColor,
+                            cursor: 'pointer'}
+                    }/>
+                    <TimelineConnector />
+                </TimelineSeparator>
+            </Grid>
 
-    function TimeLineItemGenerator(props:any) {
-        const {separators, index, size, start, element, onclick} = props;
+            <Grid item xs={5}>
+                <TimelineContent color={
+                    ['both', 'right'].includes(element.grayOut) ?
+                        'text.secondary' :
+                        'text.primary'
+                }>{element.right}</TimelineContent></Grid>
+        </Grid>
 
-        let htmlElem :any;
+    </TimelineItem>);
+}
 
-        if (element.isSeparator) {
-            htmlElem = (<TimeLineGenerateElementSeparator
-                index={index}
-                size={size}
-                start={start}
-                element={element}/>
-            );
-        } else {
-            htmlElem = (<TimeLineGenerateElement
-                index={index}
-                size={size}
-                start={start}
-                element={element}
-                onclick={onclick}/>
-            );
-        }
+export default function TimeLineAlternate(props: ITimeLineAlternateProps) {
+    const parentRef = React.useRef<any>();
 
-        return htmlElem;
-    }
+    const rowVirtualizer = useVirtual({
+        size: props.elements.length,
+        parentRef,
+        estimateSize: React.useCallback(() => 80, []),
+        overscan: 5,
+    });
 
     return (
         <React.Fragment>
