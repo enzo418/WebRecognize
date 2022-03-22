@@ -196,8 +196,6 @@ function NotificationItem(props:INotificationItemProps) {
 
     const handleChangeType = (t:string) => {
         if (notification.hasOwnProperty(t)) {
-            console.log('Changed notification to:', Object(notification)[t]);
-
             setType(t);
             setTypedNotification(ensure(Object(notification)[t]));
         }
@@ -207,7 +205,14 @@ function NotificationItem(props:INotificationItemProps) {
     // available on the new one
     // condition 2: if it changed the notification group then change the typed notf.
     if (!notification.hasOwnProperty(type) || typedNotification.group != notification.groupID) {
-        handleChangeType(defaulttype);
+        let t = type;
+
+        if (!notification.hasOwnProperty(type)) {
+            setType(defaulttype);
+            t = defaulttype;
+        }
+
+        setTypedNotification(ensure(Object(notification)[t]));
     }
 
     return (<>
