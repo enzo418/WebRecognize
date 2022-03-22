@@ -63,7 +63,13 @@ interface INotificationBodyDisplayTextProps {
 };
 
 function NotificationBodyDisplayText(props:INotificationBodyDisplayTextProps) {
-    return <Typography>{props.text}</Typography>;
+    return (
+        <Box
+            sx={{
+                'minWidth': '100vw',
+                'minHeight': '30vh',
+            }}
+        ><Typography>{props.text}</Typography></Box>);
 }
 
 interface INotificationBodyDisplayProps {

@@ -3,7 +3,8 @@ import React from 'react';
 import Notification from '../domain/Notification';
 import Camera from '../domain/Camera';
 
-import { format } from 'date-fns';
+// import { formatRelative, format } from 'date-fns';
+import format from '../lib/format';
 
 import TimeLineAlternate, {
     ITimelineItem,
