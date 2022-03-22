@@ -394,7 +394,7 @@ function Notifications() {
             cameras={cameras}></FilterNotification>
 
         {!loading && currentNotificationIndex != null &&
-            <Box sx={{flexGrow: 1}}>
+            <Box sx={{flexGrow: 1, paddingTop: '15px'}}>
                 <Grid container spacing={2}>
                     <Grid item xs={2}>
                         <NavNotificationsTimeline
