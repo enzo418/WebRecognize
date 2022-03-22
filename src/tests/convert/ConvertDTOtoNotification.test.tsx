@@ -1,11 +1,12 @@
 import ICameraService from '../../services/api/interfaces/ICameraService';
 import Camera from '../../domain/Camera';
-import Notification from '../../domain/Notification';
+import Notification, {ENotificationType} from '../../domain/Notification';
 import DTONotification from '../../services/api/interfaces/DTONotification';
 import {
     parseNotification,
     parseNotifications,
 } from '../../services/api/convert/ConvertDTOtoNotification';
+import {tryGetEnumValueFromDirtyString} from '../../utils/enum';
 
 function ensure<T>(
     argument: T | undefined | null,
@@ -38,6 +39,7 @@ describe('Notification Service', () => {
             date: new Date(1000, 1, 10, 0, 0, 0, 0),
             cameraID: '123456',
             group: 99,
+            type: 'image',
         };
 
         const cameras: Array<Camera> = [
@@ -61,6 +63,7 @@ describe('Notification Service', () => {
         expect(response.group).toBe(not.group);
         expect(response.date).toStrictEqual(not.date);
         expect(response.camera).toMatchObject(cameras[0]);
+        expect(response.type).toBe(ENotificationType.IMAGE);
     });
 
     it('should request all the notifications and all the cameras', async () => {
@@ -69,16 +72,19 @@ describe('Notification Service', () => {
             date: new Date(1000, 1, 10, 0, 0, 0, 0),
             cameraID: '1',
             group: 99,
+            type: 'text',
         }, {
             id: '2',
             date: new Date(1000, 1, 10, 2, 0, 0, 3),
             cameraID: '2',
             group: 99,
+            type: 'image',
         }, {
             id: '3',
             date: new Date(423, 1, 10, 4, 0, 0, 3),
             cameraID: '2',
             group: 1,
+            type: 'video',
         }];
 
         const cameras: Array<Camera> = [
@@ -116,6 +122,8 @@ describe('Notification Service', () => {
             expect(actual.group).toBe(expected.group);
             expect(actual.date).toStrictEqual(expected.date);
             expect(actual.camera).toMatchObject(camAt(expected.cameraID));
+            expect(actual.type)
+                .toBe(tryGetEnumValueFromDirtyString(ENotificationType, expected.type));
         });
     });
 });

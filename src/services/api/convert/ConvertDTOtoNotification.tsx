@@ -1,7 +1,22 @@
 import ICameraService from '../interfaces/ICameraService';
 import DTONotification from '../interfaces/DTONotification';
 import Camera from '../../../domain/Camera';
-import Notification from '../../../domain/Notification';
+import Notification, {ENotificationType} from '../../../domain/Notification';
+import {getEnumKeysNames, tryGetEnumValueFromDirtyString} from '../../../utils/enum';
+
+// function notificationStringTypeToEnum(type:string) : ENotificationType {
+//    const names = getEnumKeysNames(ENotificationType).map((t:string) => t.toLowerCase());
+//    const cleanType:string = type.toLowerCase().trim();
+//    const indx = names.indexOf(cleanType);
+//    if (indx != -1) {
+//        // why so many conversions? We cannot use cleanType since
+//        // it's on lower case but the type might be on upper case.
+//        const t = ENotificationType[indx] as keyof typeof ENotificationType;
+//        return ENotificationType[t];
+//    } else {
+//        throw new Error(`Wrong notification type '${type}'`);
+//    }
+// }
 
 export async function parseNotification(
     pNot: DTONotification,
@@ -15,6 +30,7 @@ export async function parseNotification(
                 date: new Date(pNot.date),
                 group: pNot.group,
                 camera: camera,
+                type: tryGetEnumValueFromDirtyString(ENotificationType, pNot.type),
             };
 
             resolve(notification);

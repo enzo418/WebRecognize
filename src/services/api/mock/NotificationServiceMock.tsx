@@ -1,35 +1,45 @@
 import { INotificationService } from '../interfaces/INotificationService';
-import Notification from '../../../domain/Notification';
+import Notification, {ENotificationType} from '../../../domain/Notification';
 import ICameraService from '../interfaces/ICameraService';
 import { parseNotification, parseNotifications } from '../convert/ConvertDTOtoNotification';
 import DTONotification from '../interfaces/DTONotification';
 import {ensure} from '../../../utils/error';
-import { subDays, addMinutes } from 'date-fns';
+import { subSeconds, subHours } from 'date-fns';
 import {random} from '../../../utils/random';
+import {getEnumKeys, getEnumKeysNames} from '../../../utils/enum';
 
 const generateNotifications = (n:number, numberCams:number) => {
     const generated:DTONotification[] = [];
-    let lastID:number = 0;
+    // let lastID:number = -1;
     let lastDate:Date = new Date();
 
-    for (let i=0; i < n; i++) {
-        const g = {
-            id: '' + lastID+1,
-            group: random(0, n),
-            cameraID: '' + random(0, numberCams),
-            date: addMinutes(subDays(lastDate, 1), random(20, 60)),
-        };
-        generated.push(g);
+    const types = getEnumKeysNames(ENotificationType);
 
-        lastID++;
-        lastDate = g.date;
+    let lastNID = -1;
+    for (let i = 0; i < n; i++) {
+        types.forEach((t, ti) => {
+            const g:DTONotification = {
+                id: '' + (lastNID + ti + 1),
+                group: i,
+                cameraID: '' + random(0, numberCams),
+                date: subSeconds(lastDate, random(0, 15 * 60)),
+                type: t,
+            };
+
+            if (random(0, 10) > 3) {
+                generated.push(g);
+                lastNID = parseInt(g.id);
+            }
+
+            lastDate = subHours(g.date, random(1, 1));
+        });
     }
 
     return generated;
 };
 
 
-const notificationsMock: DTONotification[] = generateNotifications(1000, 450);
+const notificationsMock: DTONotification[] = generateNotifications(100, 450);
 
 
 // const baseDate = new Date();

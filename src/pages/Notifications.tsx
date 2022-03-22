@@ -22,11 +22,15 @@ import '../styles/Notifications.scss';
 
 import CameraServiceMock from '../services/api/mock/CameraServiceMock';
 import NotificationServiceMock from '../services/api/mock/NotificationServiceMock';
-import Notification from '../domain/Notification';
+import Notification, {ENotificationType} from '../domain/Notification';
 import Camera from '../domain/Camera';
 
 import FilterNotification, {INotificationFilters} from '../components/FilterNotifications';
 import {NavNotificationsTimeline} from '../components/NavNotificationsTimeline';
+import {getEnumAt, getEnumKeysNames} from '../utils/enum';
+import {NotificationGroup} from '../domain/NotificationGroup';
+import {ensure} from '../utils/error';
+import {intersect} from '../utils/array';
 
 function NotificationsBody() {
     return (
@@ -37,7 +41,13 @@ function NotificationsBody() {
     );
 }
 
-function NotificationsBodyInfo() {
+interface INotificationItemBodyProps {
+    notification: Notification;
+};
+
+function NotificationItemBody(props:INotificationItemBodyProps) {
+    const {notification} = props;
+
     return (
         <Stack spacing={1}>
             <Typography className="grey-title">Info</Typography>
@@ -45,8 +55,8 @@ function NotificationsBodyInfo() {
             <Box sx={{flexGrow: 1}}>
                 <Stack spacing={2}>
                     <Stack direction="row" spacing={2}>
-                        <Typography variant="overline">Date: </Typography>
-                        <Skeleton variant="text" />
+                        <Typography variant="overline">
+                            Date: {notification.date.toLocaleString()}</Typography>
                     </Stack>
                     <Stack direction="row" spacing={2}>
                         <Typography variant="overline">Message: </Typography>
@@ -62,53 +72,96 @@ function NotificationsBodyInfo() {
     );
 }
 
-interface IRightBarNotifProps {
-    notifications: Notification[];
-    currentIndex: number;
+interface INotificationTypeSelectorProps {
+    type: string;
+    onChange: (t:string) => void;
+    allTypes: string[];
+    selectableTypes: string[];
 };
 
-function NotificationsRightBarShowType() {
-    const [view, setView] = React.useState('list');
+function NotificationTypeSelector(props:INotificationTypeSelectorProps) {
+    const {type, onChange, allTypes, selectableTypes} = props;
 
-    const handleChange = (event: React.MouseEvent<HTMLElement>, nextView: string) => {
-        setView(nextView);
+    const handleChange = (event: React.MouseEvent<HTMLElement>, newType: string) => {
+        onChange(newType);
     };
 
     return (<>
         <Typography className="grey-title">Show</Typography>
         <ToggleButtonGroup
             orientation="vertical"
-            value={view}
+            value={type}
             exclusive
             onChange={handleChange}
             sx={{width: '90%'}}
         >
-            <ToggleButton value="list" aria-label="list">
-                < Typography>Video</Typography>
-            </ToggleButton>
-            <ToggleButton value="module" aria-label="module">
-                <Typography>Image</Typography>
-            </ToggleButton>
-            <ToggleButton value="quilt" aria-label="quilt">
-                <Typography>Text</Typography>
-            </ToggleButton>
+            {allTypes.map((t) => (
+                <ToggleButton
+                    key={t}
+                    value={t}
+                    aria-label={t}
+                    disabled={selectableTypes.indexOf(t) == -1}
+                >
+                    <Typography>{t}</Typography>
+                </ToggleButton>),
+            )}
         </ToggleButtonGroup>
     </>);
 }
 
+interface INotificationItemProps {
+    notifications: NotificationGroup[];
+    currentNotificationIndex: number;
+};
 
-function NotificationsRightBar(props:IRightBarNotifProps) {
-    return (
-        <Stack spacing={12}>
-            {/* <div>
-                <NotificationsRightBarMoveTo {...props}></NotificationsRightBarMoveTo>
-            </div>*/}
+function NotificationItem(props:INotificationItemProps) {
+    const {notifications, currentNotificationIndex} = props;
 
-            <div>
-                <NotificationsRightBarShowType></NotificationsRightBarShowType>
-            </div>
-        </Stack>
+    const notification = notifications[currentNotificationIndex];
+
+    const types:string[] = ensure(getEnumKeysNames(ENotificationType, true));
+    const selectableTypes:string[] = intersect(Object.keys(notification), types);
+
+    const defaulttype = selectableTypes[0];
+
+    const [type, setType] = useState<string>(defaulttype);
+    const [typedNotification, setTypedNotification] = useState<Notification>(
+        Object(notification)[type],
     );
+
+    const handleChangeType = (t:string) => {
+        if (notification.hasOwnProperty(t)) {
+            setType(t);
+            setTypedNotification(ensure(Object(notification)[t]));
+        }
+    };
+
+    console.log({type, types, selectableTypes});
+
+
+    // if the notification group changed, check if the old type is
+    // available on the new one
+    if (!notification.hasOwnProperty(type)) {
+        handleChangeType(defaulttype);
+    }
+
+
+    return (<>
+        <Grid item xs={8}>
+            <NotificationsBody></NotificationsBody>
+            <NotificationItemBody
+                notification={typedNotification}/>
+        </Grid>
+        <Grid item xs={2}>
+            <NotificationTypeSelector
+                type={type}
+                onChange={handleChangeType}
+                allTypes={types}
+                selectableTypes={selectableTypes}
+            />
+            {/* <NotificationsRightBar ></NotificationsRightBar>*/}
+        </Grid>
+    </>);
 }
 
 function Notifications() {
@@ -119,7 +172,7 @@ function Notifications() {
     const [loading, setLoading] = useState<boolean>(true);
 
     // yes
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [notifications, setNotifications] = useState<NotificationGroup[]>([]);
 
     // state needed since all the content displayed will change if this changes
     const [currentNotificationIndex, setCurrentNotificationIndex] = useState<number | null>(null);
@@ -142,11 +195,63 @@ function Notifications() {
         console.log(filter);
     };
 
-    const processNotifications = (nots:Notification[]) => {
-        setNotifications(nots);
+    const groupNotifications = (nots:Notification[]) => {
+        // group notifications by group id
+        const grouped:Record<number, Notification[]> = nots
+            .reduce((groups:Record<number, Notification[]>, item) => {
+                const group = (groups[item.group] || []);
+                group.push(item);
+                groups[item.group] = group;
+                return groups;
+            }, {});
 
-        if (!currentNotificationIndex) {
-            setCurrentNotificationIndex(nots.length-1);
+        const entries = Object.entries(grouped);
+
+        // map [id, [textN, imageN, videoN]] to
+        // {id, text:textN, image: imageN, ...}
+        return entries.map(([groupID, groupNotifications]) => {
+            const notificationsPerType:Record<string, Notification> = {};
+
+            // get all the available notification types
+            const nTypes = getEnumKeysNames(ENotificationType);
+
+            let minDate = groupNotifications[0].date;
+            const camera = groupNotifications[0].camera;
+
+            // search each type on the group notifications
+            nTypes.forEach((t:string) => {
+                const found = groupNotifications
+                    .find((not) =>
+                        not.type == getEnumAt(ENotificationType, t));
+                if (found) {
+                    // to lower case since the propery is define as such
+                    notificationsPerType[t.toLowerCase()] = found;
+
+                    if (found.date < minDate) {
+                        minDate = found.date;
+                    }
+                }
+            });
+
+            // build the group with the notfs found
+            const group : NotificationGroup = {
+                groupID: parseInt(groupID),
+                date: minDate,
+                camera,
+                ...notificationsPerType,
+            };
+
+            return group;
+        });
+    };
+
+    const processNotifications = (nots:Notification[]) => {
+        const grouped = groupNotifications(nots);
+
+        setNotifications(grouped);
+
+        if (!currentNotificationIndex && nots.length > 0) {
+            setCurrentNotificationIndex(0);
         }
 
         setCamerasFromNotifications(nots);
@@ -188,6 +293,11 @@ function Notifications() {
         // };
     }, []);
 
+    const onChangeNotification = (n:NotificationGroup) => {
+        const index = notifications.indexOf(n);
+        setCurrentNotificationIndex(index);
+    };
+
     return (<>
         <FilterNotification
             onFilter={filterNotifications}
@@ -201,18 +311,12 @@ function Notifications() {
                             notifications={notifications}
                             currentIndex={currentNotificationIndex}
                             cameras={cameras}
+                            onChangeNotification={onChangeNotification}
                         ></NavNotificationsTimeline>
                     </Grid>
-                    <Grid item xs={8}>
-                        <NotificationsBody></NotificationsBody>
-                        <NotificationsBodyInfo></NotificationsBodyInfo>
-                    </Grid>
-                    <Grid item xs={2}>
-                        <NotificationsRightBar
-                            notifications={notifications}
-                            currentIndex={currentNotificationIndex}
-                        ></NotificationsRightBar>
-                    </Grid>
+                    <NotificationItem
+                        notifications={notifications}
+                        currentNotificationIndex={currentNotificationIndex}/>
                 </Grid>
             </Box>
         }
