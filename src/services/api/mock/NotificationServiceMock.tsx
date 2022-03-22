@@ -62,7 +62,7 @@ const generateNotifications = (n:number, numberCams:number) => {
 };
 
 
-const notificationsMock: DTONotification[] = generateNotifications(100, 450);
+const notificationsMock: DTONotification[] = generateNotifications(1000, 450);
 
 
 // const baseDate = new Date();

@@ -369,7 +369,7 @@ function Notifications() {
     };
 
     useEffect(() => {
-        processNotificationRequest(notificationService.getAll());
+        processNotificationRequest(notificationService.getAll(200));
 
         // function handleStatusChange(status) {
         //     setIsOnline(status.isOnline);
