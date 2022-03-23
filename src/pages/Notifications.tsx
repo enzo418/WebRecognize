@@ -32,12 +32,14 @@ import Camera from '../domain/Camera';
 
 import FilterNotification, {INotificationFilters} from '../components/FilterNotifications';
 import {NavNotificationsTimeline} from '../components/NavNotificationsTimeline';
-import {getEnumAt, getEnumKeysNames} from '../utils/enum';
-import {NotificationGroup} from '../domain/NotificationGroup';
+import {getEnumAt, getEnumKeysNames, getEnumNameAt} from '../utils/enum';
+import {NotificationGroup, NotificationGroupTypeMap} from '../domain/NotificationGroup';
 import {ensure} from '../utils/error';
 import {intersect} from '../utils/array';
 import SkeletonImage from '../components/SkeletonImage';
 import SkeletonVideo from '../components/SkeletonVideo';
+import {INotificationService} from '../services/api/interfaces/INotificationService';
+import ICameraService from '../services/api/interfaces/ICameraService';
 
 interface INotificationBodyDisplayMediaProps {
     mediaURI: string;
@@ -68,6 +70,9 @@ function NotificationBodyDisplayText(props:INotificationBodyDisplayTextProps) {
 interface INotificationBodyDisplayProps {
     notification: Notification;
 };
+
+type NewOmit<T, K extends PropertyKey> =
+  { [P in keyof T as Exclude<P, K>]: T[P] };
 
 function NotificationBodyDisplay(props:INotificationBodyDisplayProps) {
     const {notification} = props;
@@ -256,9 +261,38 @@ function NotificationItem(props:INotificationItemProps) {
     </>);
 }
 
+class SingletonCameraService {
+    private static instance: ICameraService;
+
+    private constructor() {};
+
+    public static getInstance() : ICameraService {
+        if (!SingletonCameraService.instance) {
+            SingletonCameraService.instance = new CameraServiceMock();
+        }
+
+        return SingletonCameraService.instance;
+    }
+};
+
+class SingletonNotificationService {
+    private static instance: INotificationService;
+
+    private constructor() {};
+
+    public static getInstance(cameraService:ICameraService) : INotificationService {
+        if (!SingletonNotificationService.instance) {
+            SingletonNotificationService.instance = new NotificationServiceMock(cameraService);
+        }
+
+        return SingletonNotificationService.instance;
+    }
+};
+
 function Notifications() {
-    const cameraService = new CameraServiceMock();
-    const notificationService = new NotificationServiceMock(cameraService);
+    const notificationService = SingletonNotificationService.getInstance(
+        SingletonCameraService.getInstance(),
+    );
 
     // yes, to show a progress indicator
     const [loading, setLoading] = useState<boolean>(true);
@@ -272,7 +306,7 @@ function Notifications() {
     // state needed? Yes, filter depends on it to update its elements
     const [cameras, setCameras] = useState<Camera[]>([]);
 
-    const setCamerasFromNotifications = (nots:Notification[]) => {
+    const setCamerasFromNotifications = (nots:NotificationGroup[]) => {
         const cams:Camera[] = [];
         nots.forEach((not) => {
             if (!cams.find((cam) => cam.id === not.camera.id)) {
@@ -352,16 +386,14 @@ function Notifications() {
         });
     };
 
-    const processNotifications = (nots:Notification[]) => {
-        const grouped = groupNotifications(nots);
-
+    const processNotifications = (grouped:NotificationGroup[]) => {
         setNotifications(grouped);
 
-        if (!currentNotificationIndex && nots.length > 0) {
+        if (!currentNotificationIndex && grouped.length > 0) {
             setCurrentNotificationIndex(0);
         }
 
-        setCamerasFromNotifications(nots);
+        setCamerasFromNotifications(grouped);
 
         // setTimeout(() => {
         //    console.log('now');
@@ -381,23 +413,53 @@ function Notifications() {
                 nots = responseNots;
             }
 
-            processNotifications(nots);
+
+            const grouped = groupNotifications(nots);
+            processNotifications(grouped);
         });
     };
 
+    function handleNewNotification(n:Notification) : Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            // find if the notification belongs to some group
+            // that already exists
+            const group = notifications.find((group) => group.groupID == n.group);
+
+            const type:string = getEnumNameAt(ENotificationType, n.type, true);
+            const typeMaped = type as keyof NotificationGroupTypeMap;
+            const typedNotification = n as NotificationGroupTypeMap[typeof typeMaped];
+
+            // if found, add it to the the group
+            if (group) {
+                // const gkey = type as keyof typeof group;
+                if (group.hasOwnProperty(type)) {
+                    reject(new Error(
+                        `There was already a notification of this type! ${group} ${n.type}`,
+                    ));
+                } else {
+                    Object(group)[typeMaped] = typedNotification;
+                }
+            } else {
+                const newGroup : NotificationGroup = {
+                    groupID: n.group,
+                    date: n.date,
+                    camera: n.camera,
+                };
+                Object(newGroup)[typeMaped] = typedNotification;
+
+                notifications.push(newGroup);
+            }
+
+            processNotifications(notifications);
+
+            resolve(true);
+        });
+    }
+
     useEffect(() => {
-        processNotificationRequest(notificationService.getAll(200));
+        // processNotificationRequest(notificationService.getAll(200));
 
-        // function handleStatusChange(status) {
-        //     setIsOnline(status.isOnline);
-        // }
-
-        // ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
-
-        // Specify how to clean up after this effect:
-        // return function cleanup() {
-        //     ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
-        // };
+        notificationService.subscribe(handleNewNotification);
     }, []);
 
     const onChangeNotification = (n:NotificationGroup) => {
@@ -439,3 +501,4 @@ function Notifications() {
 }
 
 export default Notifications;
+

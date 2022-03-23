@@ -1,6 +1,5 @@
 import React from 'react';
 
-import Notification from '../domain/Notification';
 import Camera from '../domain/Camera';
 
 // import { formatRelative, format } from 'date-fns';
@@ -64,6 +63,7 @@ export function NavNotificationsTimeline(props: INavNotificationsTimelineProps) 
             right: n.camera.name,
             grayOut: 'none',
             knobColor: (!(parseInt(n.camera.id) % 3) ? '#f02f08': 'secondary'),
+            mark: i == currentIndex,
         };
         items.push(item);
     });

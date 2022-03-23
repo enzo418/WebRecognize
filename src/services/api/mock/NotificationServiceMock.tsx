@@ -88,19 +88,25 @@ const notificationsMock: DTONotification[] = generateNotifications(1000, 450);
 //    date: addMinutes(subDays(baseDate, 6), 20),
 // }];
 
+type CallbackWS = (n:Notification) => Promise<boolean>;
+
 export default class NotificationServiceMock implements INotificationService {
     private cameraService: ICameraService;
     private notifications: DTONotification[];
-    // private pulseSender: number;
-    // private pulseCallers: any;
+    private pulseSender: NodeJS.Timer;
+    private pulseCallers: CallbackWS[];
+    private lastNotifSended: number;
+    private pulseInterval:number;
 
     constructor(pCameraService: ICameraService, pNots: DTONotification[]=notificationsMock) {
         this.notifications=pNots;
         this.cameraService=pCameraService;
+        this.lastNotifSended = 0;
+        this.pulseCallers = [];
 
-        // this.pulseSender = setInterval(() => {
-        //     this.pulseCallers.forEach(call => call()})
-        // });
+        this.pulseInterval = 7 * 1000;
+
+        this.pulseSender = setInterval(this.pulseHandler.bind(this), 7000);
     }
 
     get(id: string): Promise<Notification> {
@@ -172,9 +178,39 @@ export default class NotificationServiceMock implements INotificationService {
         });
     }
 
-    subscribe(callback: (not: Notification) => any): void {
+    subscribe(callback: CallbackWS): void {
+        this.pulseCallers.push(callback);
+
         // notificationWS.addEventListener('message', (ev) => {
         //     callback(parseNotification(ev.data, this.cameraService));
         // });
     }
+
+    private async pulseHandler() : Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            clearInterval(this.pulseSender);
+
+            const not = await parseNotification(
+                this.notifications[this.lastNotifSended],
+                this.cameraService,
+            );
+
+            const promises = this.pulseCallers.map((call) => call(not));
+
+            Promise.allSettled(promises).then((results) => {
+                const rejected = results.filter((r) => r.status == 'rejected');
+                if (rejected.length > 0) {
+                    console.error('Error! a callback was rejected', rejected);
+                }
+
+                if (this.notifications.length > this.lastNotifSended -1) {
+                    this.lastNotifSended++;
+                    this.pulseSender = setInterval(this.pulseHandler.bind(this), 7000);
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    };
 }

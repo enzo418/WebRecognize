@@ -42,6 +42,16 @@ export function getEnumAt<T extends EnumType>(pEnum:T, type:string) : number {
     return pEnum[type as keyof typeof pEnum] as number;
 }
 
+export function getEnumNameAt<T extends EnumType>(pEnum:T, type:number, lower:boolean) : string {
+    let res = pEnum[type as unknown as keyof typeof pEnum] as string;
+
+    if (lower) {
+        res = res.toLowerCase();
+    }
+
+    return res;
+}
+
 export function getEnumKeys<T>(pEnum:T) : Array<number> {
     return Object.keys(pEnum)
         .filter((v) => !isNaN(Number(v)))

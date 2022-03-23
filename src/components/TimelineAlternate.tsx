@@ -24,6 +24,9 @@ export interface ITimelineItem extends ITimelineItemBase {
     right: string;
     knobColor: any;
     grayOut: 'left' | 'right' | 'both' | 'none';
+
+    // if mark is true the knob will be different
+    mark: boolean;
 };
 
 export interface ITimelineItemSectionSeparator extends ITimelineItemBase {
@@ -136,7 +139,8 @@ function TimeLineGenerateElement(props:any) {
                 <TimelineSeparator>
                     <TimelineDot sx={
                         {backgroundColor: element.knobColor,
-                            cursor: 'pointer'}
+                            cursor: 'pointer',
+                            border: element.mark ? '2px solid black' : ''}
                     }/>
                     <TimelineConnector />
                 </TimelineSeparator>
