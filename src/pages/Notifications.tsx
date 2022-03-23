@@ -403,11 +403,17 @@ export default class Notifications extends React.Component<NotificationsProps, N
         });
     };
 
-    processNotifications = (grouped:NotificationGroup[]) => {
+    processNotifications = (
+        grouped:NotificationGroup[],
+        addedANewGroup: boolean = true) => {
         let index:number = this.state.currentNotificationIndex;
         if (this.state.currentNotificationIndex == -1 && grouped.length > 0 ||
             grouped.length > 0 && this.state.jumpToNewNotification) {
             index = 0;
+        } else if (addedANewGroup) {
+            // since it will be added at front, we need to keep the UI in the
+            // current notification (currentIndex + 1)
+            index++;
         }
 
         const cams:Camera[] = this.getCamerasFromNotifications(grouped);
@@ -464,10 +470,11 @@ export default class Notifications extends React.Component<NotificationsProps, N
                 };
                 Object(newGroup)[typeMaped] = typedNotification;
 
-                this.state.notifications.push(newGroup);
+                // add it to the front since its the newer
+                this.state.notifications.unshift(newGroup);
             }
 
-            this.processNotifications(this.state.notifications);
+            this.processNotifications(this.state.notifications, group === undefined);
 
             resolve(true);
         });

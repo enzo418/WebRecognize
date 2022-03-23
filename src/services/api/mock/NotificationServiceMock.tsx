@@ -4,7 +4,7 @@ import ICameraService from '../interfaces/ICameraService';
 import { parseNotification, parseNotifications } from '../convert/ConvertDTOtoNotification';
 import DTONotification from '../interfaces/DTONotification';
 import {ensure} from '../../../utils/error';
-import { subSeconds, subHours } from 'date-fns';
+import { subSeconds, subHours, addSeconds, addHours } from 'date-fns';
 import {random} from '../../../utils/random';
 import {getEnumAt, getEnumKeysNames} from '../../../utils/enum';
 
@@ -44,7 +44,7 @@ const generateNotifications = (n:number, numberCams:number) => {
                 id: '' + (lastNID + ti + 1),
                 group: i,
                 cameraID: '' + random(0, numberCams),
-                date: subSeconds(lastDate, random(0, 15 * 60)),
+                date: addSeconds(lastDate, random(0, 15 * 60)),
                 type: t,
                 content,
             };
@@ -54,7 +54,7 @@ const generateNotifications = (n:number, numberCams:number) => {
                 lastNID = parseInt(g.id);
             }
 
-            lastDate = subHours(g.date, random(1, 1));
+            lastDate = addHours(g.date, random(1, 1));
         });
     }
 
