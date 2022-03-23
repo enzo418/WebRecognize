@@ -104,9 +104,9 @@ export default class NotificationServiceMock implements INotificationService {
         this.lastNotifSended = 0;
         this.pulseCallers = [];
 
-        this.pulseInterval = 7 * 1000;
+        this.pulseInterval = 2 * 1000;
 
-        this.pulseSender = setInterval(this.pulseHandler.bind(this), 7000);
+        this.pulseSender = setInterval(this.pulseHandler.bind(this), this.pulseInterval);
     }
 
     get(id: string): Promise<Notification> {
@@ -205,7 +205,10 @@ export default class NotificationServiceMock implements INotificationService {
 
                 if (this.notifications.length > this.lastNotifSended -1) {
                     this.lastNotifSended++;
-                    this.pulseSender = setInterval(this.pulseHandler.bind(this), 7000);
+                    this.pulseSender = setInterval(
+                        this.pulseHandler.bind(this),
+                        this.pulseInterval,
+                    );
                     resolve(true);
                 } else {
                     resolve(false);

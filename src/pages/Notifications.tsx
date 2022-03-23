@@ -40,6 +40,7 @@ import SkeletonImage from '../components/SkeletonImage';
 import SkeletonVideo from '../components/SkeletonVideo';
 import {INotificationService} from '../services/api/interfaces/INotificationService';
 import ICameraService from '../services/api/interfaces/ICameraService';
+import {FormControlLabel, Switch} from '@mui/material';
 
 interface INotificationBodyDisplayMediaProps {
     mediaURI: string;
@@ -289,24 +290,40 @@ class SingletonNotificationService {
     }
 };
 
-function Notifications() {
-    const notificationService = SingletonNotificationService.getInstance(
-        SingletonCameraService.getInstance(),
-    );
+type NotificationsProps = { };
 
-    // yes, to show a progress indicator
-    const [loading, setLoading] = useState<boolean>(true);
+type NotificationsState = {
+    loading: boolean;
+    notifications: NotificationGroup[];
+    currentNotificationIndex: number;
+    cameras: Camera[];
+    jumpToNewNotification: boolean;
+};
 
-    // yes
-    const [notifications, setNotifications] = useState<NotificationGroup[]>([]);
+export default class Notifications extends React.Component<NotificationsProps, NotificationsState> {
+    state:NotificationsState = {
+        loading: false,
+        notifications: [],
+        cameras: [],
+        currentNotificationIndex: -1,
+        jumpToNewNotification: false,
+    };
 
-    // state needed since all the content displayed will change if this changes
-    const [currentNotificationIndex, setCurrentNotificationIndex] = useState<number | null>(null);
+    notificationService:INotificationService;
 
-    // state needed? Yes, filter depends on it to update its elements
-    const [cameras, setCameras] = useState<Camera[]>([]);
+    constructor(props:NotificationsProps) {
+        super(props);
 
-    const setCamerasFromNotifications = (nots:NotificationGroup[]) => {
+        this.notificationService = SingletonNotificationService.getInstance(
+            SingletonCameraService.getInstance(),
+        );
+
+        // processNotificationRequest(notificationService.getAll(200));
+
+        this.notificationService.subscribe(this.handleNewNotification.bind(this));
+    }
+
+    getCamerasFromNotifications = (nots:NotificationGroup[]) => {
         const cams:Camera[] = [];
         nots.forEach((not) => {
             if (!cams.find((cam) => cam.id === not.camera.id)) {
@@ -314,29 +331,29 @@ function Notifications() {
             }
         });
 
-        setCameras(cams);
+        return cams;
     };
 
-    const filterNotifications = (filter:INotificationFilters) => {
+    filterNotifications = (filter:INotificationFilters) => {
         console.log(filter);
         if (filter.before && filter.after) {
-            processNotificationRequest(
-                notificationService.getBetween(filter.before, filter.after, 100),
+            this.processNotificationRequest(
+                this.notificationService.getBetween(filter.before, filter.after, 100),
             );
         } else if (filter.before && !filter.after) {
-            processNotificationRequest(
-                notificationService.getBefore(filter.before, 100),
+            this.processNotificationRequest(
+                this.notificationService.getBefore(filter.before, 100),
             );
         } else if (!filter.before && filter.after) {
-            processNotificationRequest(
-                notificationService.getAfter(filter.after, 100),
+            this.processNotificationRequest(
+                this.notificationService.getAfter(filter.after, 100),
             );
         }
 
         // TODO: Add camera filters
     };
 
-    const groupNotifications = (nots:Notification[]) => {
+    groupNotifications = (nots:Notification[]) => {
         // group notifications by group id
         const grouped:Record<number, Notification[]> = nots
             .reduce((groups:Record<number, Notification[]>, item) => {
@@ -386,24 +403,24 @@ function Notifications() {
         });
     };
 
-    const processNotifications = (grouped:NotificationGroup[]) => {
-        setNotifications(grouped);
-
-        if (!currentNotificationIndex && grouped.length > 0) {
-            setCurrentNotificationIndex(0);
+    processNotifications = (grouped:NotificationGroup[]) => {
+        let index:number = this.state.currentNotificationIndex;
+        if (this.state.currentNotificationIndex == -1 && grouped.length > 0 ||
+            grouped.length > 0 && this.state.jumpToNewNotification) {
+            index = 0;
         }
 
-        setCamerasFromNotifications(grouped);
+        const cams:Camera[] = this.getCamerasFromNotifications(grouped);
 
-        // setTimeout(() => {
-        //    console.log('now');
-        //    processNotifications(nots.slice(1, 3));
-        // }, 7000);
-
-        setLoading(false);
+        this.setState(() => ({
+            notifications: grouped,
+            cameras: cams,
+            loading: false,
+            currentNotificationIndex: index,
+        }));
     };
 
-    const processNotificationRequest = (response:Promise<Notification | Notification[]>) => {
+    processNotificationRequest = (response:Promise<Notification | Notification[]>) => {
         response.then((responseNots:Notification | Notification[]) => {
             let nots:Array<Notification>;
 
@@ -414,16 +431,16 @@ function Notifications() {
             }
 
 
-            const grouped = groupNotifications(nots);
-            processNotifications(grouped);
+            const grouped = this.groupNotifications(nots);
+            this.processNotifications(grouped);
         });
     };
 
-    function handleNewNotification(n:Notification) : Promise<boolean> {
+    handleNewNotification(n:Notification) : Promise<boolean> {
         return new Promise((resolve, reject) => {
             // find if the notification belongs to some group
             // that already exists
-            const group = notifications.find((group) => group.groupID == n.group);
+            const group = this.state.notifications.find((group) => group.groupID == n.group);
 
             const type:string = getEnumNameAt(ENotificationType, n.type, true);
             const typeMaped = type as keyof NotificationGroupTypeMap;
@@ -447,58 +464,68 @@ function Notifications() {
                 };
                 Object(newGroup)[typeMaped] = typedNotification;
 
-                notifications.push(newGroup);
+                this.state.notifications.push(newGroup);
             }
 
-            processNotifications(notifications);
+            this.processNotifications(this.state.notifications);
 
             resolve(true);
         });
     }
 
-    useEffect(() => {
-        // processNotificationRequest(notificationService.getAll(200));
-
-        notificationService.subscribe(handleNewNotification);
-    }, []);
-
-    const onChangeNotification = (n:NotificationGroup) => {
-        const index = notifications.indexOf(n);
-        setCurrentNotificationIndex(index);
+    onChangeJumpToNewNotification = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState(() => ({
+            jumpToNewNotification: event.target.checked,
+        }));
     };
 
-    return (<>
-        <FilterNotification
-            onFilter={filterNotifications}
-            cameras={cameras}></FilterNotification>
+    onChangeNotification = (n:NotificationGroup) => {
+        const index = this.state.notifications.indexOf(n);
 
-        {!loading && currentNotificationIndex != null &&
+        this.setState(() => ({
+            currentNotificationIndex: index,
+        }));
+    };
+
+    render() {
+        return (<>
+            <FilterNotification
+                onFilter={this.filterNotifications}
+                cameras={this.state.cameras}></FilterNotification>
+
+            {!this.state.loading && this.state.currentNotificationIndex != -1 &&
             <Box sx={{flexGrow: 1, paddingTop: '15px'}}>
                 <Grid container spacing={2}>
                     <Grid item xs={2}>
+                        <FormControlLabel
+                            control={<Switch
+                                checked={this.state.jumpToNewNotification}
+                                onChange={this.onChangeJumpToNewNotification}
+                            />}
+
+                            label="Automatically Jump to new notification" />
+
                         <NavNotificationsTimeline
-                            notifications={notifications}
-                            currentIndex={currentNotificationIndex}
-                            cameras={cameras}
-                            onChangeNotification={onChangeNotification}
+                            notifications={this.state.notifications}
+                            currentIndex={this.state.currentNotificationIndex}
+                            cameras={this.state.cameras}
+                            onChangeNotification={this.onChangeNotification}
                         ></NavNotificationsTimeline>
                     </Grid>
                     <NotificationItem
-                        notifications={notifications}
-                        currentNotificationIndex={currentNotificationIndex}/>
+                        notifications={this.state.notifications}
+                        currentNotificationIndex={this.state.currentNotificationIndex}/>
                 </Grid>
             </Box>
-        }
+            }
 
-        {loading && <Typography>Loading</Typography>}
+            {this.state.loading && <Typography>Loading</Typography>}
 
 
-        {!loading && currentNotificationIndex == null &&
+            {!this.state.loading && this.state.currentNotificationIndex == -1 &&
         <Typography>There are no notifications</Typography>}
 
-    </>
-    );
+        </>
+        );
+    }
 }
-
-export default Notifications;
-
