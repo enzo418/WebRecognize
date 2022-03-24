@@ -491,6 +491,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
         this.setState(() => ({
             currentNotificationIndex: index,
+            jumpToNewNotification: false,
         }));
     };
 
