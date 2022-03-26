@@ -198,6 +198,8 @@ interface INotificationItemProps {
 function NotificationItem(props:INotificationItemProps) {
     const {notifications, currentNotificationIndex} = props;
 
+    console.log('item: ', {notifications, currentNotificationIndex});
+
     // notification is the group notification
     const notification = notifications[currentNotificationIndex];
 
@@ -294,10 +296,20 @@ type NotificationsProps = { };
 
 type NotificationsState = {
     loading: boolean;
+
+    // notifications that are beign shown
     notifications: NotificationGroup[];
+
+    // current notification shown index
     currentNotificationIndex: number;
+
+    // cameras from all the notification
     cameras: Camera[];
+
+    // should jump to the new notification once it arrives
     jumpToNewNotification: boolean;
+
+    currentFilter: INotificationFilters;
 };
 
 export default class Notifications extends React.Component<NotificationsProps, NotificationsState> {
@@ -307,6 +319,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
         cameras: [],
         currentNotificationIndex: -1,
         jumpToNewNotification: false,
+        currentFilter: {active: false, after: null, before: null, fromCameras: []},
     };
 
     notificationService:INotificationService;
@@ -318,7 +331,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
             SingletonCameraService.getInstance(),
         );
 
-        // processNotificationRequest(notificationService.getAll(200));
+        this.processNotificationRequest(this.notificationService.getAll(10));
 
         this.notificationService.subscribe(this.handleNewNotification.bind(this));
     }
@@ -335,22 +348,30 @@ export default class Notifications extends React.Component<NotificationsProps, N
     };
 
     filterNotifications = (filter:INotificationFilters) => {
-        console.log(filter);
-        if (filter.before && filter.after) {
-            this.processNotificationRequest(
-                this.notificationService.getBetween(filter.before, filter.after, 100),
-            );
-        } else if (filter.before && !filter.after) {
-            this.processNotificationRequest(
-                this.notificationService.getBefore(filter.before, 100),
-            );
-        } else if (!filter.before && filter.after) {
-            this.processNotificationRequest(
-                this.notificationService.getAfter(filter.after, 100),
-            );
+        console.log('filtering: ', filter);
+        if (filter.active) {
+            if (filter.before && filter.after) {
+                this.processNotificationRequest(
+                    this.notificationService.getBetween(filter.before, filter.after, 100),
+                );
+            } else if (filter.before && !filter.after) {
+                this.processNotificationRequest(
+                    this.notificationService.getBefore(filter.before, 100),
+                );
+            } else if (!filter.before && filter.after) {
+                this.processNotificationRequest(
+                    this.notificationService.getAfter(filter.after, 100),
+                );
+            }
+        } else {
+            this.processNotificationRequest(this.notificationService.getAll(100));
         }
 
         // TODO: Add camera filters
+
+        this.setState(() => ({
+            currentFilter: filter,
+        }));
     };
 
     groupNotifications = (nots:Notification[]) => {
@@ -406,14 +427,21 @@ export default class Notifications extends React.Component<NotificationsProps, N
     processNotifications = (
         grouped:NotificationGroup[],
         addedANewGroup: boolean = true) => {
-        let index:number = this.state.currentNotificationIndex;
-        if (this.state.currentNotificationIndex == -1 && grouped.length > 0 ||
-            grouped.length > 0 && this.state.jumpToNewNotification) {
-            index = 0;
-        } else if (addedANewGroup) {
-            // since it will be added at front, we need to keep the UI in the
-            // current notification (currentIndex + 1)
-            index++;
+        console.log('Processing new here');
+
+        let index:number = -1;
+
+        if (grouped.length != 0) {
+            index = this.state.currentNotificationIndex;
+            if (this.state.currentNotificationIndex == -1 && grouped.length > 0 ||
+                grouped.length > 0 && this.state.jumpToNewNotification ||
+                grouped.length < this.state.currentNotificationIndex) {
+                index = 0;
+            } else if (addedANewGroup) {
+                // since it will be added at front, we need to keep the UI in the
+                // current notification (currentIndex + 1)
+                index++;
+            }
         }
 
         const cams:Camera[] = this.getCamerasFromNotifications(grouped);
@@ -436,14 +464,36 @@ export default class Notifications extends React.Component<NotificationsProps, N
                 nots = responseNots;
             }
 
-
             const grouped = this.groupNotifications(nots);
             this.processNotifications(grouped);
         });
     };
 
+    noitificationVerifiesFilter = (n:Notification, filter:INotificationFilters) => {
+        let isValid = true;
+
+        if (filter.before != null && n.date > filter.before) {
+            isValid = false;
+        }
+
+        if (filter.after != null && n.date < filter.after) {
+            isValid = false;
+        }
+
+        if (filter.fromCameras.length > 0 && filter.fromCameras.includes(n.camera.id)) {
+            isValid = false;
+        }
+
+        return isValid;
+    };
+
     handleNewNotification(n:Notification) : Promise<boolean> {
         return new Promise((resolve, reject) => {
+            if (this.state.currentFilter.active &&
+                !this.noitificationVerifiesFilter(n, this.state.currentFilter)) {
+                return resolve(false);
+            }
+
             // find if the notification belongs to some group
             // that already exists
             const group = this.state.notifications.find((group) => group.groupID == n.group);
@@ -473,6 +523,8 @@ export default class Notifications extends React.Component<NotificationsProps, N
                 // add it to the front since its the newer
                 this.state.notifications.unshift(newGroup);
             }
+
+            console.log('Processing new');
 
             this.processNotifications(this.state.notifications, group === undefined);
 
@@ -531,7 +583,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
 
             {!this.state.loading && this.state.currentNotificationIndex == -1 &&
-        <Typography>There are no notifications</Typography>}
+            <Typography>There are no notifications</Typography>}
 
         </>
         );

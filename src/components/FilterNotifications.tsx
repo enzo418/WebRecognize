@@ -20,6 +20,8 @@ import CamerasSelector from './CamerasSelector';
 type CameraID = Camera['id'];
 
 export interface INotificationFilters {
+    active: boolean;
+
     before: Date | null;
     after: Date | null;
     fromCameras: CameraID[];
@@ -40,12 +42,19 @@ function FilterNotification(props:IFilterComponentProps) {
         before: null,
         after: null,
         fromCameras: [],
+        active: false,
     };
 
     const handleFilterButton = () => {
+        filter.active = true;
         filter.before = dateTo;
         filter.after = dateFrom;
         filter.fromCameras = camerasSelected;
+        props.onFilter(filter);
+    };
+
+    const handleClearFilterButton = () => {
+        filter.active = false;
         props.onFilter(filter);
     };
 
@@ -112,6 +121,9 @@ function FilterNotification(props:IFilterComponentProps) {
                 </AccordionDetails>
                 <Button onClick={handleFilterButton}>
                 Filter
+                </Button>
+                <Button onClick={handleClearFilterButton}>
+                Clear Filters
                 </Button>
             </Accordion>
         </div>
