@@ -1,12 +1,13 @@
-const location = `${window.location.hostname}:${window.location.port}`;
+const location = `http://localhost:3001`;
+
 const config = {
-    server: '',
+    server: location,
     endpoints: {
         api: {
             notification: '/api/notifications',
         },
         websocket: {
-            notification: `ws://${location}/notification`,
+            notification: `ws://localhost:3001/notifications`,
         },
     },
 };

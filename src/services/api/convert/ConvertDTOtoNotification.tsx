@@ -9,6 +9,10 @@ import Notification,
 } from '../../../domain/Notification';
 import {getEnumKeysNames, tryGetEnumValueFromDirtyString} from '../../../utils/enum';
 
+import {parseDate} from '../../../utils/date';
+
+import config from '../../../config';
+
 // function notificationStringTypeToEnum(type:string) : ENotificationType {
 //    const names = getEnumKeysNames(ENotificationType).map((t:string) => t.toLowerCase());
 //    const cleanType:string = type.toLowerCase().trim();
@@ -32,23 +36,25 @@ export async function parseNotification(
         if (camera) {
             let notification: Notification = {
                 id: pNot.id,
-                date: new Date(pNot.date),
+                date: parseDate(pNot.date),
                 group: pNot.group,
                 camera: camera,
                 type: tryGetEnumValueFromDirtyString(ENotificationType, pNot.type),
             };
 
+            const absoluteURL = new URL(pNot.content, config.server).href;
+
             switch (notification.type) {
             case ENotificationType.IMAGE:
                 notification = {
                     ...notification,
-                    mediaURI: pNot.content,
+                    mediaURI: absoluteURL,
                 } as MediaNotification;
                 break;
             case ENotificationType.VIDEO:
                 notification = {
                     ...notification,
-                    mediaURI: pNot.content,
+                    mediaURI: absoluteURL,
                 } as MediaNotification;
                 break;
             case ENotificationType.TEXT:
