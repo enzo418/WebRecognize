@@ -334,6 +334,8 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
     notificationService:INotificationService;
 
+    notificationAudioPlayer: React.RefObject<any>;
+
     constructor(props:NotificationsProps) {
         super(props);
 
@@ -344,6 +346,8 @@ export default class Notifications extends React.Component<NotificationsProps, N
         this.processNotificationRequest(this.notificationService.getAll(10));
 
         this.notificationService.subscribe(this.handleNewNotification.bind(this));
+
+        this.notificationAudioPlayer = React.createRef();
     }
 
     getCamerasFromNotifications = (nots:NotificationGroup[]) => {
@@ -543,6 +547,8 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
             this.processNotifications(this.state.notifications, addedANewGroup);
 
+            this.notificationAudioPlayer.current.play();
+
             resolve(true);
         });
     }
@@ -561,6 +567,10 @@ export default class Notifications extends React.Component<NotificationsProps, N
             jumpToNewNotification: false,
         }));
     };
+
+    componentDidMount() {
+        this.notificationAudioPlayer.current.volume = 0.3;
+    }
 
     render() {
         return (<>
@@ -600,6 +610,9 @@ export default class Notifications extends React.Component<NotificationsProps, N
             {!this.state.loading && this.state.currentNotificationIndex == -1 &&
             <Typography>There are no notifications</Typography>}
 
+            <audio ref={this.notificationAudioPlayer}>
+                <source src="/tone1.wav" type="audio/x-wav" />
+            </audio>
         </>
         );
     }
