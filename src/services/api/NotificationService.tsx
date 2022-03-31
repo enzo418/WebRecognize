@@ -23,7 +23,7 @@ notificationWS.addEventListener('close', (ev) => {
     console.debug('Notification ws disconnected');
 });
 
-type NotificationCallback = (notification:Notification) => any;
+type NotificationCallback = (notification:Notification[]) => any;
 
 export default class NotificationService implements INotificationService {
     private http: IHttpClient;
@@ -35,18 +35,7 @@ export default class NotificationService implements INotificationService {
         this.cameraService = pCameraService;
         this.wsCallbacks = [];
 
-        notificationWS.addEventListener('message', async (ev) => {
-            let data:string;
-            if (ev.data instanceof Blob) {
-                data = await ev.data.text();
-            } else {
-                data = ev.data;
-            }
-
-            const not:DTONotification = JSON.parse(data);
-
-            this.callWsCallbacks(await parseNotification(not, this.cameraService));
-        });
+        notificationWS.addEventListener('message', async (ev) => this.handleNewWsNotification(ev));
     }
 
     get(id: string): Promise<Notification> {
@@ -116,9 +105,23 @@ export default class NotificationService implements INotificationService {
         this.wsCallbacks.push(callback);
     }
 
-    private callWsCallbacks(notification:Notification) {
+    private async handleNewWsNotification(ev: MessageEvent<any>) {
+        let data:string;
+        if (ev.data instanceof Blob) {
+            data = await ev.data.text();
+        } else {
+            data = ev.data;
+        }
+
+        const parsed:DTONotification | DTONotification[] = JSON.parse(data);
+        const nots:DTONotification[] = parsed instanceof Array ? parsed : [parsed];
+
+        this.callWsCallbacks(await parseNotifications(nots, this.cameraService));
+    }
+
+    private callWsCallbacks(notifications:Notification[]) {
         this.wsCallbacks.forEach((callback) => {
-            callback(notification);
+            callback(notifications);
         });
     }
 }

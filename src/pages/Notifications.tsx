@@ -497,46 +497,51 @@ export default class Notifications extends React.Component<NotificationsProps, N
         return isValid;
     };
 
-    handleNewNotification(n:Notification) : Promise<boolean> {
+    handleNewNotification(notifications:Notification[]) : Promise<boolean> {
         return new Promise((resolve, reject) => {
-            if (this.state.currentFilter.active &&
-                !this.noitificationVerifiesFilter(n, this.state.currentFilter)) {
-                return resolve(false);
-            }
-
-            // find if the notification belongs to some group
-            // that already exists
-            const group = this.state.notifications.find((group) => group.groupID == n.group);
-
-            const type:string = getEnumNameAt(ENotificationType, n.type, true);
-            const typeMaped = type as keyof NotificationGroupTypeMap;
-            const typedNotification = n as NotificationGroupTypeMap[typeof typeMaped];
-
-            // if found, add it to the the group
-            if (group) {
-                // const gkey = type as keyof typeof group;
-                if (group.hasOwnProperty(type)) {
-                    reject(new Error(
-                        `There was already a notification of this type! ${group} ${n.type}`,
-                    ));
-                } else {
-                    Object(group)[typeMaped] = typedNotification;
+            let addedANewGroup: boolean = false;
+            notifications.forEach((n) => {
+                if (this.state.currentFilter.active &&
+                    !this.noitificationVerifiesFilter(n, this.state.currentFilter)) {
+                    return resolve(false);
                 }
-            } else {
-                const newGroup : NotificationGroup = {
-                    groupID: n.group,
-                    date: n.date,
-                    camera: n.camera,
-                };
-                Object(newGroup)[typeMaped] = typedNotification;
 
-                // add it to the front since its the newer
-                this.state.notifications.unshift(newGroup);
-            }
+                // find if the notification belongs to some group
+                // that already exists
+                const group = this.state.notifications.find((group) => group.groupID == n.group);
 
-            console.log('Processing new');
+                const type:string = getEnumNameAt(ENotificationType, n.type, true);
+                const typeMaped = type as keyof NotificationGroupTypeMap;
+                const typedNotification = n as NotificationGroupTypeMap[typeof typeMaped];
 
-            this.processNotifications(this.state.notifications, group === undefined);
+                // if found, add it to the the group
+                if (group) {
+                    // const gkey = type as keyof typeof group;
+                    if (group.hasOwnProperty(type)) {
+                        reject(new Error(
+                            `There was already a notification of this type! ${group} ${n.type}`,
+                        ));
+                    } else {
+                        Object(group)[typeMaped] = typedNotification;
+                    }
+                } else {
+                    const newGroup : NotificationGroup = {
+                        groupID: n.group,
+                        date: n.date,
+                        camera: n.camera,
+                    };
+                    Object(newGroup)[typeMaped] = typedNotification;
+
+                    // add it to the front since its the newer
+                    this.state.notifications.unshift(newGroup);
+                }
+
+                addedANewGroup = addedANewGroup || group === undefined;
+
+                console.log('Processing new');
+            });
+
+            this.processNotifications(this.state.notifications, addedANewGroup);
 
             resolve(true);
         });

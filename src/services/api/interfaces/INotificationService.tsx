@@ -73,5 +73,5 @@ export abstract class INotificationService {
      * @abstract
      * @param {*} callback Function to call when a new notification is available.
      */
-    abstract subscribe(callback: (not: INotification) => any): void;
+    abstract subscribe(callback: (not: INotification[]) => any): void;
 }
