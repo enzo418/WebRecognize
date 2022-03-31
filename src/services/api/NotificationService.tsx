@@ -4,6 +4,7 @@ import Notification from '../../domain/Notification';
 import ICameraService from './interfaces/ICameraService';
 import config from '../../config';
 import { parseNotification, parseNotifications } from './convert/ConvertDTOtoNotification';
+import DTONotification from './interfaces/DTONotification';
 
 function serialize(date: Date | string | any): string {
     return (typeof date == 'string') ? date : date.toISOString();
@@ -35,7 +36,16 @@ export default class NotificationService implements INotificationService {
         this.wsCallbacks = [];
 
         notificationWS.addEventListener('message', async (ev) => {
-            this.callWsCallbacks(await parseNotification(ev.data, this.cameraService));
+            let data:string;
+            if (ev.data instanceof Blob) {
+                data = await ev.data.text();
+            } else {
+                data = ev.data;
+            }
+
+            const not:DTONotification = JSON.parse(data);
+
+            this.callWsCallbacks(await parseNotification(not, this.cameraService));
         });
     }
 

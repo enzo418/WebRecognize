@@ -54,9 +54,11 @@ const getNotificationContent = (n:Notification) => {
 
 describe('Notification Service', () => {
     it('should do request a notifications, request a camera and be correct', async () => {
+        const date = new Date(1000, 0, 24, 0, 0, 0, 0);
+
         const not: DTONotification = {
             id: '1',
-            date: new Date(1000, 1, 10, 0, 0, 0, 0),
+            date: '24/01/1000 00:00:00',
             cameraID: '123456',
             group: 99,
             type: 'image',
@@ -82,30 +84,32 @@ describe('Notification Service', () => {
 
         expect(response.id).toBe(not.id);
         expect(response.group).toBe(not.group);
-        expect(response.date).toStrictEqual(not.date);
+        expect(response.date).toStrictEqual(date);
         expect(response.camera).toMatchObject(cameras[0]);
         expect(response.type).toBe(ENotificationType.IMAGE);
         expect(getNotificationContent(response)).toBe(not.content);
     });
 
     it('should request all the notifications and all the cameras', async () => {
+        const date = new Date(2010, 4, 28, 23, 33, 15);
+
         const notResponse: DTONotification[] = [{
             id: '1',
-            date: new Date(1000, 1, 10, 0, 0, 0, 0),
+            date: '28/05/2010 23:33:15',
             cameraID: '1',
             group: 99,
             type: 'text',
             content: 'hi',
         }, {
             id: '2',
-            date: new Date(1000, 1, 10, 2, 0, 0, 3),
+            date: '28/05/2010 23:33:15',
             cameraID: '2',
             group: 99,
             type: 'image',
             content: 'this_is_a_uri',
         }, {
             id: '3',
-            date: new Date(423, 1, 10, 4, 0, 0, 3),
+            date: '28/05/2010 23:33:15',
             cameraID: '2',
             group: 1,
             type: 'video',
@@ -145,7 +149,7 @@ describe('Notification Service', () => {
 
             expect(actual.id).toBe(expected.id);
             expect(actual.group).toBe(expected.group);
-            expect(actual.date).toStrictEqual(expected.date);
+            expect(actual.date).toStrictEqual(date);
             expect(actual.camera).toMatchObject(camAt(expected.cameraID));
             expect(actual.type)
                 .toBe(tryGetEnumValueFromDirtyString(ENotificationType, expected.type));

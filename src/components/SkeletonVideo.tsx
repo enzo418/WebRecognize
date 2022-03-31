@@ -14,6 +14,7 @@ export default function SkeletonVideo(props:SkeletonVideoProps) {
             (<Skeleton variant="rectangular" width="auto" height={360} />) : <></>}
         <video
             controls
+            crossOrigin="anonymous"
             style={{
                 'display': loaded ? 'block' : 'none',
             }}

@@ -22,6 +22,13 @@ import '../styles/Notifications.scss';
 
 import CameraServiceMock from '../services/api/mock/CameraServiceMock';
 import NotificationServiceMock from '../services/api/mock/NotificationServiceMock';
+
+import NotificationService from '../services/api/NotificationService';
+
+import HttpClient from '../Http/HttpClient';
+
+import config from '../config';
+
 import Notification,
 {
     ENotificationType,
@@ -285,7 +292,10 @@ class SingletonNotificationService {
 
     public static getInstance(cameraService:ICameraService) : INotificationService {
         if (!SingletonNotificationService.instance) {
-            SingletonNotificationService.instance = new NotificationServiceMock(cameraService);
+            SingletonNotificationService.instance = new NotificationService(
+                new HttpClient(config.server),
+                cameraService,
+            );
         }
 
         return SingletonNotificationService.instance;
