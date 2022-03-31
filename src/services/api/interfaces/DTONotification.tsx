@@ -7,7 +7,7 @@
 
 export default interface DTONotification {
     id: string,
-    date: Date;
+    date: number; // unix date
     group: number;
     cameraID: string;
     type: string;

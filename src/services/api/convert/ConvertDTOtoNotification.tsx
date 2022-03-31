@@ -36,7 +36,7 @@ export async function parseNotification(
         if (camera) {
             let notification: Notification = {
                 id: pNot.id,
-                date: parseDate(pNot.date),
+                date: new Date(pNot.date * 1000),
                 group: pNot.group,
                 camera: camera,
                 type: tryGetEnumValueFromDirtyString(ENotificationType, pNot.type),

@@ -4,9 +4,10 @@ import ICameraService from '../interfaces/ICameraService';
 import { parseNotification, parseNotifications } from '../convert/ConvertDTOtoNotification';
 import DTONotification from '../interfaces/DTONotification';
 import {ensure} from '../../../utils/error';
-import { subSeconds, subHours, addSeconds, addHours } from 'date-fns';
+import { subSeconds, subHours, addSeconds, addHours, format } from 'date-fns';
 import {random} from '../../../utils/random';
 import {getEnumAt, getEnumKeysNames} from '../../../utils/enum';
+import {parseDate} from '../../../utils/date';
 
 
 const videos:string[] = [
@@ -40,11 +41,13 @@ const generateNotifications = (n:number, numberCams:number) => {
                 break;
             }
 
+            const newDate = addSeconds(lastDate, random(0, 15 * 60));
+
             const g:DTONotification = {
                 id: '' + (lastNID + ti + 1),
                 group: i,
                 cameraID: '' + random(0, numberCams),
-                date: addSeconds(lastDate, random(0, 15 * 60)),
+                date: format(newDate, 'dd/MM/yyyy HH:mm:ss'),
                 type: t,
                 content,
             };
@@ -54,7 +57,7 @@ const generateNotifications = (n:number, numberCams:number) => {
                 lastNID = parseInt(g.id);
             }
 
-            lastDate = addHours(g.date, random(1, 1));
+            lastDate = addHours(newDate, random(1, 1));
         });
     }
 
@@ -132,7 +135,7 @@ export default class NotificationServiceMock implements INotificationService {
         return new Promise((resolve, reject) => {
             const found: DTONotification[]=[];
             this.notifications.forEach((not) => {
-                if (before instanceof Date&&not.date<before) {
+                if (before instanceof Date && parseDate(not.date) < before) {
                     found.push(not);
                 } else if (typeof before==='string'&&not.id<before) {
                     found.push(not);
@@ -147,7 +150,7 @@ export default class NotificationServiceMock implements INotificationService {
         return new Promise((resolve, reject) => {
             const found: DTONotification[]=[];
             this.notifications.forEach((not) => {
-                if (after instanceof Date&&not.date>after) {
+                if (after instanceof Date && parseDate(not.date) > after) {
                     found.push(not);
                 } else if (typeof after==='string'&&not.id>after) {
                     found.push(not);
@@ -167,7 +170,7 @@ export default class NotificationServiceMock implements INotificationService {
             this.notifications.forEach((not) => {
                 if (after instanceof Date&&
                     before instanceof Date &&
-                    not.date >= after && not.date <= before) {
+                    parseDate(not.date) >= after && parseDate(not.date) <= before) {
                     found.push(not);
                 } else if (typeof after==='string'&&not.id>after) {
                     found.push(not);
