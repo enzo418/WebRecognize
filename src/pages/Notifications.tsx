@@ -343,7 +343,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
             SingletonCameraService.getInstance(),
         );
 
-        this.processNotificationRequest(this.notificationService.getAll(10));
+        this.processNotificationRequest(this.notificationService.getAll(100));
 
         this.notificationService.subscribe(this.handleNewNotification.bind(this));
 
@@ -402,7 +402,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
         // map [id, [textN, imageN, videoN]] to
         // {id, text:textN, image: imageN, ...}
-        return entries.map(([groupID, groupNotifications]) => {
+        const mapped = entries.map(([groupID, groupNotifications]) => {
             const notificationsPerType:Record<string, Notification> = {};
 
             // get all the available notification types
@@ -436,6 +436,11 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
             return group;
         });
+
+        // Group orders by key so smallest group id goes first
+        // but that means olders notification will appear at the
+        // top in the timeline. To solve that we reverse the order.
+        return mapped.reverse();
     };
 
     processNotifications = (

@@ -50,7 +50,7 @@ export default class NotificationService implements INotificationService {
 
     getAll(limit = 100): Promise<Array<Notification>> {
         return new Promise((resolve, reject) => {
-            this.http.get('/', {limit})
+            this.http.get('/api/notifications/', {limit})
                 .then((res) => res.json())
                 .then((res) => parseNotifications(res, this.cameraService))
                 .then(resolve)
