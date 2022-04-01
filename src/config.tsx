@@ -1,4 +1,6 @@
-const location = `http://localhost:3001`;
+const port = 3001;
+const host = window.location.hostname;
+const location = `http://${host}:${port}`;
 
 const config = {
     server: location,
@@ -7,7 +9,7 @@ const config = {
             notification: '/api/notifications',
         },
         websocket: {
-            notification: `ws://localhost:3001/notifications`,
+            notification: `ws://${host}:${port}/notifications`,
         },
     },
 };
