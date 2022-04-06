@@ -1,0 +1,115 @@
+diff --git a/node_modules/cra-build-watch/README.md b/node_modules/cra-build-watch/README.md
+index 3ad0c86..3b69fdd 100644
+--- a/node_modules/cra-build-watch/README.md
++++ b/node_modules/cra-build-watch/README.md
+@@ -97,6 +97,7 @@ If those defaults do not work for you, the script accepts some arguments:
+ - `--react-scripts-version`: expects the `react-scripts` version you are using in your project i.e `2.0.3`. If not given it will be implied from your `node_modules` and if it cannot be implied the version `2.1.2` will be the default. Consider setting it if you **ejected** and are not using the latest `react-scripts` version.
+ - `-p|--public-path`: expects a relative URL where `/` is the root. If you serve your files using an external webserver this argument is to match with your web server configuration. More information can be found in [webpack configuration guide](https://webpack.js.org/configuration/output/#output-publicpath).
+   - default: "".
++- `-c|--only-compile`: Doesn't watch if a file has changed.
+ - `-v|--verbose`: display webpack build output.
+ 
+ # Contributions
+diff --git a/node_modules/cra-build-watch/scripts/index.js b/node_modules/cra-build-watch/scripts/index.js
+index 2231fc7..0fbbe68 100644
+--- a/node_modules/cra-build-watch/scripts/index.js
++++ b/node_modules/cra-build-watch/scripts/index.js
+@@ -21,6 +21,7 @@ const {
+     chunkFilename,
+     afterInitialBuildHook,
+     afterRebuildHook,
++    onlyCompile
+   },
+ } = require('../utils/cliHandler');
+ const { getReactScriptsVersion, isEjected } = require('../utils');
+@@ -92,25 +93,9 @@ if (disableChunks) {
+   };
+ }
+ 
+-// update media path destination
+-if (major >= 4) {
+-  const oneOfIndex = 1;
+-  config.module.rules[oneOfIndex].oneOf[0].options.name = `media/[name].[hash:8].[ext]`;
+-  config.module.rules[oneOfIndex].oneOf[1].options.name = `media/[name].[hash:8].[ext]`;
+-  config.module.rules[oneOfIndex].oneOf[8].options.name = `media/[name].[hash:8].[ext]`;
+-} else if (major >= 2) {
+-  // 2.0.0 => 2
+-  // 2.0.1 => 3
+-  // 2.0.2 => 3
+-  // 2.0.3 => 3
+-  // 2.0.4 to 3.0.0 => 2
+-  const oneOfIndex = concatenatedVersion === 200 || concatenatedVersion >= 204 ? 2 : 3;
+-  config.module.rules[oneOfIndex].oneOf[0].options.name = `media/[name].[hash:8].[ext]`;
+-  config.module.rules[oneOfIndex].oneOf[7].options.name = `media/[name].[hash:8].[ext]`;
+-} else {
+-  config.module.rules[1].oneOf[0].options.name = `media/[name].[hash:8].[ext]`;
+-  config.module.rules[1].oneOf[3].options.name = `media/[name].[hash:8].[ext]`;
+-}
++// update media path destination -- CODE REMOVED! --
++// Note: This part of the code was to move all the static files from
++// /static/media/ to /media, but that doesn't really affect at all.
+ 
+ let htmlPluginIndex = 1;
+ let interpolateHtmlPluginIndex = 0;
+@@ -128,6 +113,11 @@ config.plugins[htmlPluginIndex] = new HtmlWebpackPlugin({
+   filename: 'index.html',
+ });
+ 
++config.devServer = {
++  hot: false,
++  inline: false
++}
++
+ spinner.succeed();
+ spinner.start('Clear destination folder');
+ 
+@@ -146,7 +136,9 @@ fs.emptyDir(paths.appBuild)
+         }
+       }).apply(webpackCompiler);
+ 
+-      webpackCompiler.watch({}, (err, stats) => {
++      // console.log(Object.entries(webpackCompiler).filter(([key, value]) => typeof value === 'function'));
++
++      const webpackCallback = (err, stats) => {
+         if (err) {
+           return reject(err);
+         }
+@@ -169,7 +161,13 @@ fs.emptyDir(paths.appBuild)
+         }
+ 
+         return resolve();
+-      });
++      };
++
++      if (onlyCompile) {
++        webpackCompiler.run(webpackCallback);
++      } else {
++        webpackCompiler.watch({}, webpackCallback);
++      }
+     });
+   })
+   .then(() => copyPublicFolder())
+diff --git a/node_modules/cra-build-watch/utils/cliHandler.js b/node_modules/cra-build-watch/utils/cliHandler.js
+index 18b2fff..3920c36 100644
+--- a/node_modules/cra-build-watch/utils/cliHandler.js
++++ b/node_modules/cra-build-watch/utils/cliHandler.js
+@@ -24,6 +24,8 @@ module.exports = meow(
+ 
+       --react-scripts-version Version of the react-scripts package used in your project i.e 2.0.3. If not given it will be implied from your package.json and if it cannot be implied the major version 2 will be the default.
+ 
++      -c, --only-compile Doesn't use watch feature, only compiles the code
++
+       -v, --verbose
+ 
+     Examples
+@@ -63,6 +65,10 @@ module.exports = meow(
+       },
+       'after-rebuild-hook': {
+         type: 'string',
++      },
++      'only-compile': {
++        type: 'string',
++        alias: 'c'
+       }
+     },
+   }
