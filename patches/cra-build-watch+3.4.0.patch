@@ -11,18 +11,32 @@ index 3ad0c86..3b69fdd 100644
  
  # Contributions
 diff --git a/node_modules/cra-build-watch/scripts/index.js b/node_modules/cra-build-watch/scripts/index.js
-index 2231fc7..0fbbe68 100644
+index 2231fc7..fceb24e 100644
 --- a/node_modules/cra-build-watch/scripts/index.js
 +++ b/node_modules/cra-build-watch/scripts/index.js
-@@ -21,6 +21,7 @@ const {
+@@ -21,8 +21,10 @@ const {
      chunkFilename,
      afterInitialBuildHook,
      afterRebuildHook,
 +    onlyCompile
    },
  } = require('../utils/cliHandler');
++
  const { getReactScriptsVersion, isEjected } = require('../utils');
-@@ -92,25 +93,9 @@ if (disableChunks) {
+ 
+ const { major, concatenatedVersion } = getReactScriptsVersion(reactScriptsVersion);
+@@ -53,6 +55,10 @@ const spinner = ora('Update webpack configuration').start();
+ // the in-memory development server to serve the content
+ const env = getClientEnvironment(process.env.PUBLIC_URL || ''); // eslint-disable-line no-process-env
+ 
++if (!verbose) {
++  config.stats = 'none';
++}
++
+ /**
+  * We need to update the webpack dev config in order to remove the use of webpack devserver
+  */
+@@ -92,25 +98,9 @@ if (disableChunks) {
    };
  }
  
@@ -51,7 +65,7 @@ index 2231fc7..0fbbe68 100644
  
  let htmlPluginIndex = 1;
  let interpolateHtmlPluginIndex = 0;
-@@ -128,6 +113,11 @@ config.plugins[htmlPluginIndex] = new HtmlWebpackPlugin({
+@@ -128,6 +118,11 @@ config.plugins[htmlPluginIndex] = new HtmlWebpackPlugin({
    filename: 'index.html',
  });
  
@@ -63,18 +77,22 @@ index 2231fc7..0fbbe68 100644
  spinner.succeed();
  spinner.start('Clear destination folder');
  
-@@ -146,7 +136,9 @@ fs.emptyDir(paths.appBuild)
+@@ -141,12 +136,12 @@ fs.emptyDir(paths.appBuild)
+       const webpackCompiler = webpack(config);
+       new webpack.ProgressPlugin(() => {
+         if (!inProgress) {
+-          spinner.start('Start webpack watch');
++          spinner.start(onlyCompile ? 'Compiling' : 'Start webpack watch');
+           inProgress = true;
          }
        }).apply(webpackCompiler);
  
 -      webpackCompiler.watch({}, (err, stats) => {
-+      // console.log(Object.entries(webpackCompiler).filter(([key, value]) => typeof value === 'function'));
-+
 +      const webpackCallback = (err, stats) => {
          if (err) {
            return reject(err);
          }
-@@ -169,7 +161,13 @@ fs.emptyDir(paths.appBuild)
+@@ -169,7 +164,13 @@ fs.emptyDir(paths.appBuild)
          }
  
          return resolve();
@@ -90,7 +108,7 @@ index 2231fc7..0fbbe68 100644
    })
    .then(() => copyPublicFolder())
 diff --git a/node_modules/cra-build-watch/utils/cliHandler.js b/node_modules/cra-build-watch/utils/cliHandler.js
-index 18b2fff..3920c36 100644
+index 18b2fff..0e2701c 100644
 --- a/node_modules/cra-build-watch/utils/cliHandler.js
 +++ b/node_modules/cra-build-watch/utils/cliHandler.js
 @@ -24,6 +24,8 @@ module.exports = meow(
@@ -102,14 +120,15 @@ index 18b2fff..3920c36 100644
        -v, --verbose
  
      Examples
-@@ -63,6 +65,10 @@ module.exports = meow(
+@@ -63,6 +65,11 @@ module.exports = meow(
        },
        'after-rebuild-hook': {
          type: 'string',
 +      },
 +      'only-compile': {
-+        type: 'string',
-+        alias: 'c'
++        type: 'boolean',
++        alias: 'c',
++        default: false
        }
      },
    }
