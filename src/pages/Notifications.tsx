@@ -345,8 +345,6 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
         this.processNotificationRequest(this.notificationService.getAll(100));
 
-        this.notificationService.subscribe(this.handleNewNotification.bind(this));
-
         this.notificationAudioPlayer = React.createRef();
     }
 
@@ -360,6 +358,10 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
         return cams;
     };
+
+    componentWillUnmount() {
+        this.notificationService.unsubscribe(this.handleNewNotification);
+    }
 
     filterNotifications = (filter:INotificationFilters) => {
         console.log('filtering: ', filter);
@@ -506,7 +508,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
         return isValid;
     };
 
-    handleNewNotification(notifications:Notification[]) : Promise<boolean> {
+    handleNewNotification = (notifications:Notification[]) => {
         return new Promise((resolve, reject) => {
             let addedANewGroup: boolean = false;
             notifications.forEach((n) => {
@@ -556,7 +558,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
             resolve(true);
         });
-    }
+    };
 
     onChangeJumpToNewNotification = (event: React.ChangeEvent<HTMLInputElement>) => {
         this.setState(() => ({
@@ -575,6 +577,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
 
     componentDidMount() {
         this.notificationAudioPlayer.current.volume = 0.3;
+        this.notificationService.subscribe(this.handleNewNotification);
     }
 
     render() {

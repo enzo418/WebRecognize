@@ -9,6 +9,9 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 
 import {ThemeProvider, createTheme} from '@mui/material/styles';
 
+import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
+import PodcastsIcon from '@mui/icons-material/Podcasts';
+
 import {
     Link as RouterLink,
     LinkProps as RouterLinkProps,
@@ -102,6 +105,7 @@ const NavBar: React.FC = () => {
 
             <List sx={{height: '100%'}}>
                 <ListItemLink to="/notifications" primary="" icon={<NotificationsNoneIcon />} />
+                <ListItemLink to="/liveView" primary="" icon={<SettingsInputAntennaIcon />} />
             </List>
         </Box>
     );

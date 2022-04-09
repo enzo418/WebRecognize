@@ -27,6 +27,7 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import './App.scss';
 import './styles/Typography.scss';
 import {Paper} from '@mui/material';
+import LiveViewPage from './pages/LiveViewPage';
 
 function App() {
     return (
@@ -41,6 +42,8 @@ function App() {
                         <Grid item xs={10} md={11} >
                             <Routes>
                                 <Route path="/notifications" element={<Notifications />}>
+                                </Route>
+                                <Route path="/liveView" element={<LiveViewPage />}>
                                 </Route>
                             </Routes>
                         </Grid>

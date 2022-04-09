@@ -7,9 +7,12 @@ const config = {
     endpoints: {
         api: {
             notification: '/api/notifications',
+            liveViewObserver: '/api/requestObserverStream',
+            liveViewCamera: '/api/requestCameraStream',
         },
         websocket: {
             notification: `ws://${host}:${port}/notifications`,
+            liveView: `ws://${host}:${port}/live/`, // ws:/live/liveID
         },
     },
 };

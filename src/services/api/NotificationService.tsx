@@ -105,6 +105,10 @@ export default class NotificationService implements INotificationService {
         this.wsCallbacks.push(callback);
     }
 
+    unsubscribe(callback: NotificationCallback): void {
+        this.wsCallbacks = this.wsCallbacks.filter((c) => c != callback);
+    }
+
     private async handleNewWsNotification(ev: MessageEvent<any>) {
         let data:string;
         if (ev.data instanceof Blob) {
