@@ -11,7 +11,8 @@
             "args": [
                 "test",
                 "--runInBand",
-                "--watchAll=false"
+                "--watchAll=false",
+                "--testNamePattern=\"Configuration service tree call Should register a field and callback on failed update\""
             ],
             // "preLaunchTask": "build",
             "cwd": "${workspaceFolder}",

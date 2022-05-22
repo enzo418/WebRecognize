@@ -60,4 +60,15 @@ export default abstract class IHttpClient {
      * @returns {Promise<Response>}
      */
     abstract get(path: string, parameters: object): Promise<Response>;
+
+    /**
+     * PUT verb
+     *
+     * @abstract
+     * @param {string} path
+     * @param {object} body request body
+     * @param {object} query request parameters/query
+     * @returns {Promise<Response>}
+     */
+     abstract put(path: string, body: object, query?:object): Promise<Response>;
 }

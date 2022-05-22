@@ -69,6 +69,29 @@ export default class HttpClient implements IHttpClient {
         return fetch(url, init);
     }
 
+    public put(
+        path: string,
+        body: object = {},
+        query: object = {},
+        init: RequestInit = {},
+    ): Promise<Response> {
+        let url: string = this.baseUrl + path;
+
+        if (Object.keys(query).length > 0) {
+            url += '?' + this.encodeObjectToQueryParams(query);
+        }
+
+        const reqParams = Object.assign({
+            body: JSON.stringify(body),
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }, init);
+
+        return fetch(url, reqParams);
+    }
+
     /**
      * Converts an object (key-value) to a string
      * in the format
