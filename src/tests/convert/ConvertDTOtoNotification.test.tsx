@@ -11,6 +11,7 @@ import {
     parseNotifications,
 } from '../../services/api/convert/ConvertDTOtoNotification';
 import {tryGetEnumValueFromDirtyString} from '../../utils/enum';
+import {dateToUnix, parseDate} from '../../utils/date';
 
 function ensure<T>(
     argument: T | undefined | null,
@@ -58,7 +59,7 @@ describe('Notification Service', () => {
 
         const not: DTONotification = {
             id: '1',
-            date: '24/01/1000 00:00:00',
+            date: dateToUnix(parseDate('24/01/1000 00:00:00')),
             cameraID: '123456',
             group: 99,
             type: 'image',
@@ -95,21 +96,21 @@ describe('Notification Service', () => {
 
         const notResponse: DTONotification[] = [{
             id: '1',
-            date: '28/05/2010 23:33:15',
+            date: dateToUnix(parseDate('28/05/2010 23:33:15')),
             cameraID: '1',
             group: 99,
             type: 'text',
             content: 'hi',
         }, {
             id: '2',
-            date: '28/05/2010 23:33:15',
+            date: dateToUnix(parseDate('28/05/2010 23:33:15')),
             cameraID: '2',
             group: 99,
             type: 'image',
             content: 'this_is_a_uri',
         }, {
             id: '3',
-            date: '28/05/2010 23:33:15',
+            date: dateToUnix(parseDate('28/05/2010 23:33:15')),
             cameraID: '2',
             group: 1,
             type: 'video',

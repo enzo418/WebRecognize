@@ -7,7 +7,7 @@ import {ensure} from '../../../utils/error';
 import { subSeconds, subHours, addSeconds, addHours, format } from 'date-fns';
 import {random} from '../../../utils/random';
 import {getEnumAt, getEnumKeysNames} from '../../../utils/enum';
-import {parseDate} from '../../../utils/date';
+import {dateToUnix, parseDate} from '../../../utils/date';
 
 
 const videos:string[] = [
@@ -47,7 +47,7 @@ const generateNotifications = (n:number, numberCams:number) => {
                 id: '' + (lastNID + ti + 1),
                 group: i,
                 cameraID: '' + random(0, numberCams),
-                date: format(newDate, 'dd/MM/yyyy HH:mm:ss'),
+                date: Math.floor(newDate.getTime() / 1000),
                 type: t,
                 content,
             };
@@ -134,8 +134,9 @@ export default class NotificationServiceMock implements INotificationService {
     getBefore(before: string|Date, limit: number): Promise<Array<Notification>> {
         return new Promise((resolve, reject) => {
             const found: DTONotification[]=[];
+            const unixTimeBefore = dateToUnix(before);
             this.notifications.forEach((not) => {
-                if (before instanceof Date && parseDate(not.date) < before) {
+                if (before instanceof Date && not.date < unixTimeBefore) {
                     found.push(not);
                 } else if (typeof before==='string'&&not.id<before) {
                     found.push(not);
@@ -149,8 +150,9 @@ export default class NotificationServiceMock implements INotificationService {
     getAfter(after: string|Date, limit: number): Promise<Array<Notification>> {
         return new Promise((resolve, reject) => {
             const found: DTONotification[]=[];
+            const unixTimeAfter = dateToUnix(after);
             this.notifications.forEach((not) => {
-                if (after instanceof Date && parseDate(not.date) > after) {
+                if (after instanceof Date && not.date > unixTimeAfter) {
                     found.push(not);
                 } else if (typeof after==='string'&&not.id>after) {
                     found.push(not);
@@ -167,10 +169,12 @@ export default class NotificationServiceMock implements INotificationService {
         limit: number): Promise<Array<Notification>> {
         return new Promise((resolve, reject) => {
             const found: DTONotification[]=[];
+            const unixTimeAfter = dateToUnix(after);
+            const unixTimeBefore = dateToUnix(before);
             this.notifications.forEach((not) => {
                 if (after instanceof Date&&
                     before instanceof Date &&
-                    parseDate(not.date) >= after && parseDate(not.date) <= before) {
+                    not.date >= unixTimeAfter && not.date <= unixTimeBefore) {
                     found.push(not);
                 } else if (typeof after==='string'&&not.id>after) {
                     found.push(not);
