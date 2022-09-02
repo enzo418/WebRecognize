@@ -20,10 +20,6 @@ import {
 
 import Notifications from './pages/Notifications';
 
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-
-
 import './App.scss';
 import './styles/Typography.scss';
 import {Paper} from '@mui/material';
@@ -31,26 +27,22 @@ import LiveViewPage from './pages/LiveViewPage';
 
 function App() {
     return (
-
         <Router>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Paper elevation={0} >
-                    <Grid container spacing={2}>
-                        <Grid item xs={2} md={1}>
-                            <Item><NavBar></NavBar></Item>
-                        </Grid>
-                        <Grid item xs={10} md={11} >
-                            <Routes>
-                                <Route path="/notifications" element={<Notifications />}>
-                                </Route>
-                                <Route path="/liveView" element={<LiveViewPage />}>
-                                </Route>
-                            </Routes>
-                        </Grid>
+            <Paper elevation={0} >
+                <Grid container spacing={2}>
+                    <Grid item xs={2} md={1}>
+                        <Item><NavBar></NavBar></Item>
                     </Grid>
-                </Paper>
-            </LocalizationProvider>
-
+                    <Grid item xs={10} md={11} >
+                        <Routes>
+                            <Route path="/notifications" element={<Notifications />}>
+                            </Route>
+                            <Route path="/liveView" element={<LiveViewPage />}>
+                            </Route>
+                        </Routes>
+                    </Grid>
+                </Grid>
+            </Paper>
         </Router>
     );
 }
