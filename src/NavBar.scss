@@ -1,10 +1,9 @@
 .simple-bar {
-    position: fixed;
-    width: 80px;
     overflow-y: scroll;
     top: 0;
     bottom: 0;
-    max-height: "calc(100% - 50px)";
+    max-height: calc(100% - 50px);
+    height: 100vh;
 
     &:hover {
         &::-webkit-scrollbar {

@@ -29,11 +29,9 @@ function App() {
     return (
         <Router>
             <Paper elevation={0} >
-                <Grid container spacing={2}>
-                    <Grid item xs={2} md={1}>
-                        <Item><NavBar></NavBar></Item>
-                    </Grid>
-                    <Grid item xs={10} md={11} >
+                <Stack direction="row">
+                    <NavBar sx={{maxWidth: '60px'}} />
+                    <Box sx={{width: 'calc(100% - 60px)', padding: '0px'}}>
                         <Routes>
                             <Route path="/notifications" element={<Notifications />}>
                             </Route>
