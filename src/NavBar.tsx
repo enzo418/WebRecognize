@@ -10,7 +10,7 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import {ThemeProvider, createTheme} from '@mui/material/styles';
 
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
-import PodcastsIcon from '@mui/icons-material/Podcasts';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 import {
     Link as RouterLink,
@@ -65,7 +65,7 @@ const ListItemTheme = createTheme({
 
 
 function ListItemLink(props: ListItemLinkProps) {
-    const {icon, to} = props;
+    const {icon, to, ...rest} = props;
 
     const renderLink = React.useMemo(
         () =>
@@ -99,11 +99,21 @@ function ListItemLink(props: ListItemLinkProps) {
 //     );
 // }
 
-const NavBar: React.FC = () => {
+const NavBar: React.FC = (props:any) => {
+    const sx = {
+        ...{
+            bgcolor: 'background.paper',
+            overflowX: 'hidden',
+            borderRight: '1px solid #e5e6eb'}, /* TODO: add e5e6eb to vars*/
+        ...(props.sx || {}),
+    };
+
     return (
-        <Box className='simple-bar' sx={{bgcolor: 'background.paper', overflowX: 'hidden'}}>
+        <Box className='simple-bar'
+            sx={sx} {...props}>
 
             <List sx={{height: '100%'}}>
+                <ListItemLink to="/configuration" primary="" icon={<SettingsIcon />} />
                 <ListItemLink to="/notifications" primary="" icon={<NotificationsNoneIcon />} />
                 <ListItemLink to="/liveView" primary="" icon={<SettingsInputAntennaIcon />} />
             </List>
