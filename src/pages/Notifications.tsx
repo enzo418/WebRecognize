@@ -307,7 +307,7 @@ type NotificationsProps = { };
 type NotificationsState = {
     loading: boolean;
 
-    // notifications that are beign shown
+    // notifications that are being shown
     notifications: NotificationGroup[];
 
     // current notification shown index
@@ -490,7 +490,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
         });
     };
 
-    noitificationVerifiesFilter = (n:Notification, filter:INotificationFilters) => {
+    notificationVerifiesFilter = (n:Notification, filter:INotificationFilters) => {
         let isValid = true;
 
         if (filter.before != null && n.date > filter.before) {
@@ -513,7 +513,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
             let addedANewGroup: boolean = false;
             notifications.forEach((n) => {
                 if (this.state.currentFilter.active &&
-                    !this.noitificationVerifiesFilter(n, this.state.currentFilter)) {
+                    !this.notificationVerifiesFilter(n, this.state.currentFilter)) {
                     return resolve(false);
                 }
 
@@ -522,8 +522,8 @@ export default class Notifications extends React.Component<NotificationsProps, N
                 const group = this.state.notifications.find((group) => group.groupID == n.group);
 
                 const type:string = getEnumNameAt(ENotificationType, n.type, true);
-                const typeMaped = type as keyof NotificationGroupTypeMap;
-                const typedNotification = n as NotificationGroupTypeMap[typeof typeMaped];
+                const typeMapped = type as keyof NotificationGroupTypeMap;
+                const typedNotification = n as NotificationGroupTypeMap[typeof typeMapped];
 
                 // if found, add it to the the group
                 if (group) {
@@ -533,7 +533,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
                             `There was already a notification of this type! ${group} ${n.type}`,
                         ));
                     } else {
-                        Object(group)[typeMaped] = typedNotification;
+                        Object(group)[typeMapped] = typedNotification;
                     }
                 } else {
                     const newGroup : NotificationGroup = {
@@ -541,7 +541,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
                         date: n.date,
                         camera: n.camera,
                     };
-                    Object(newGroup)[typeMaped] = typedNotification;
+                    Object(newGroup)[typeMapped] = typedNotification;
 
                     // add it to the front since its the newer
                     this.state.notifications.unshift(newGroup);
@@ -587,7 +587,7 @@ export default class Notifications extends React.Component<NotificationsProps, N
                 cameras={this.state.cameras}></FilterNotification>
 
             {!this.state.loading && this.state.currentNotificationIndex != -1 &&
-            <Box sx={{flexGrow: 1, paddingTop: '15px'}}>
+            <Box sx={{flexGrow: 1, pt: '15px', pl: '15px'}}>
                 <Grid container spacing={2}>
                     <Grid item xs={2}>
                         <FormControlLabel

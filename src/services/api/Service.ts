@@ -15,7 +15,7 @@ export default class Service {
      * Handles the first interaction with a promise from the backend response.
      *
      * It tries to be a failsafe middleware to get the status and body of the
-     * response, in wich if the status is not in the range of 200 - 299 it
+     * response, in which if the status is not in the range of 200 - 299 it
      * returns a Promise.reject with the response body.
      *
      * As defined in the backend, this body might contain a title, status

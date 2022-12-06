@@ -100,20 +100,22 @@ function ListItemLink(props: ListItemLinkProps) {
 // }
 
 const NavBar: React.FC = (props:any) => {
-    const sx = {
+    const {sx, ...rest} = props;
+
+    const finalSx = {
         ...{
             bgcolor: 'background.paper',
             overflowX: 'hidden',
             borderRight: '1px solid #e5e6eb'}, /* TODO: add e5e6eb to vars*/
-        ...(props.sx || {}),
+        ...(sx || {}),
     };
 
     return (
         <Box className='simple-bar'
-            sx={sx} {...props}>
+            sx={finalSx} {...rest}>
 
             <List sx={{height: '100%'}}>
-                <ListItemLink to="/configuration" primary="" icon={<SettingsIcon />} />
+                <ListItemLink to="/configuration/" primary="" icon={<SettingsIcon />} />
                 <ListItemLink to="/notifications" primary="" icon={<NotificationsNoneIcon />} />
                 <ListItemLink to="/liveView" primary="" icon={<SettingsInputAntennaIcon />} />
             </List>

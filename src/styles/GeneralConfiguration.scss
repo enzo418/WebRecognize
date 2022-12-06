@@ -1,0 +1,29 @@
+// https://mui.com/material-ui/customization/breakpoints/#default-breakpoints
+$xs: 0px; // and higher
+$sm: 600px; 
+$md: 900px;
+$lg: 1200px;
+
+.grid-padding-0 {
+    .MuiGrid-root.MuiGrid-item {
+        padding: 0;
+    }
+
+    .MuiListItemIcon-root {
+        min-width: fit-content;
+        padding-right: 15px;
+    }
+}
+
+.MuiListItem-root.configuration-option {
+    @media screen and (max-width: $md) {
+        padding-right: 0;
+        margin: auto;
+        width: fit-content;
+
+        .MuiListItemIcon-root {
+            min-width: fit-content;            
+        }
+    }
+}
+    

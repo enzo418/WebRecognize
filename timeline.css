@@ -1,0 +1,78 @@
+/* e.g
+
+<div class="timeline-wrapper"><div class="timeline-header"><div class="timeline-header-title">Thursday, Aug 4, 2022</div></div><div class="timeline-item timeline-item-selected timeline-latest"><div class="timeline-item-header">Now</div><div class="timeline-item-content">Current editor</div></div>
+
+*/
+ 
+.timeline-wrapper {
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+.timeline-header {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 16px 12px;
+    text-transform: uppercase;
+}
+
+.timeline-item-selected {
+    background-color: var(--green-50);
+}
+
+.timeline-item {
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    padding: 16px;
+    position: relative;
+}
+
+/* header = left = time */
+.timeline-item-header {
+    flex-basis: 64px;
+    flex-grow: 0;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* content = right = text */
+.timeline-item-selected .timeline-item-content {
+    font-weight: 700;
+}
+
+.timeline-item:before {
+    background-color: var(--gray-200);
+    content: "";
+    height: 100%;
+    left: 80px;
+    position: absolute;
+    top: 0;
+    width: 1px;
+}
+
+/* latest = selected */
+.timeline-latest:before {
+    height: 50%;
+    top: 50%;
+}
+
+.timeline-item:after {
+    background-color: #fff;
+    border: 1px solid var(--gray-600);
+    border-radius: 100%;
+    content: "";
+    height: 5px;
+    left: 78px;
+    position: absolute;
+    top: 22px;
+    width: 5px;
+}
+
+.timeline-item-selected:after, .timeline-item:hover:after {
+    border: 2px solid var(--gray-900);
+    height: 7px;
+    left: 77px;
+    width: 7px;
+}

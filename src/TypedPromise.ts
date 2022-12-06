@@ -73,6 +73,10 @@ class PromiseContext<OkType, FailType> {
      * @return {any}
      */
     public callCatchCallbackOrPropagate = (thenIndex:number, error:any): any => {
+        if (this.catchCallback.length === 0) {
+            throw error;
+        }
+
         const i = thenIndex;
         const found = this.catchCallback.reduce((a, b) => {
             if (a.upToIndex <= i && b.upToIndex > i) return a;

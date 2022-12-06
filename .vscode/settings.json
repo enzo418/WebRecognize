@@ -9,5 +9,6 @@
 	"editor.comments.insertSpace": false,
 	"javascript.format.enable": false,
 	"typescript.format.enable": false,
-	"typescript.workspaceSymbols.scope": "currentProject"
+	"typescript.workspaceSymbols.scope": "currentProject",
+	"editor.formatOnSave": false
 }
