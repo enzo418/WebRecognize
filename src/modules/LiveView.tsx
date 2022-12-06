@@ -3,7 +3,7 @@ import config from '../config';
 
 interface LiveViewProps {
     onLoad: any;
-    style: object;
+    style?: object;
     feedID: string;
 };
 
@@ -74,7 +74,7 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
         return <img
             ref={this.image}
             onLoad={this.onImageLoaded}
-            style={this.props.style}></img>;
+            style={this.props.style || {}}></img>;
     }
 }
 

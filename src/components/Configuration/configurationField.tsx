@@ -11,6 +11,10 @@ interface IConfigurationFieldProps {
         camera?: string | number;
         updateCB: UpdateFieldCallback;
         getFieldCB: GetFieldCallback;
+
+        // onValueChanged is used to update live views or 
+        // other component that depends on the current value of this configuration
+        onValueChanged?: (newValue: any) => any;
     };
 
     [x: string | number | symbol] : unknown; // indexer, allows extra properties
@@ -60,6 +64,10 @@ export default function configurationField(
             this.props.data.getFieldCB.apply(null, [this.completePath])
                 .ok((r) => {
                     this.setState(({value: r, state: 'initial', errorMessage: ''}));
+
+                    if (this.props.data.onValueChanged) {
+                        this.props.data.onValueChanged(r);
+                    }
                 })
                 .fail((e) => {
                     console.log('couldn\'t get the field value!', {error: e});
@@ -79,7 +87,12 @@ export default function configurationField(
 
         updateField(value:any) {
             this.props.data.updateCB.apply(null, [this.completePath, value])
-                .ok((_) => this.setState(({state: 'updated'})))
+                .ok((_) => {
+                    this.setState(({state: 'updated'}));
+                    if (this.props.data.onValueChanged) {
+                        this.props.data.onValueChanged(value);
+                    }
+                })
 
                 // Here i might use some basic mapping between status codes to text,
                 // translations based on codes given in e.code, etc.

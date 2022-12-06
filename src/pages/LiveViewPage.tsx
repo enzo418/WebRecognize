@@ -2,9 +2,10 @@ import {Box, Skeleton, Typography} from '@mui/material';
 import React from 'react';
 import config from '../config';
 import LiveView from '../modules/LiveView';
+import {liveViewService} from '../services/api/Services';
 
 interface LiveViewPageProps {
-
+    
 };
 
 interface LiveViewPageState {
@@ -25,28 +26,28 @@ export default class LiveViewPage extends React.Component<LiveViewPageProps, Liv
     }
 
     componentDidMount() {
-        const url = `${config.server}${config.endpoints.api.liveViewObserver}`;
-        fetch(url)
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.status !== 'error') {
-                    const feedId = data['data']['ws_feed_path'].replace('/live/', '');
-                    this.setState(
-                        (prev) => {
-                            if (prev.feedsID.indexOf(feedId) < 0) {
-                                prev.feedsID.push(feedId);
-                            }
+        liveViewService.getAllCamerasView()
+            .ok(data => {
+                this.setState(
+                    (prev) => {
+                        if (prev.feedsID.indexOf(data.ws_feed_id) < 0) {
+                            prev.feedsID.push(data.ws_feed_id);
+                        }
 
-                            return prev;
-                        },
-                    );
-                } else {
-                    this.setState({error: data.error});
-                }
-            }).catch((error) => {
-                this.setState({error: 'Couldn\'t get the live feed requested'});
-                console.warn('Couldn\'t get the live feed id!', {error});
-            }).finally(() => this.setState({loading: false}));
+                        return {
+                            loading: false,
+                            error: '',
+                            feedsID: prev.feedsID
+                        };
+                    },
+                );
+            }).fail(err => {
+                console.log("Live view page error: ", err);
+                this.setState({
+                    error: err.title || "unknown error",
+                    loading: false,
+                });
+            });
     }
 
     render() {

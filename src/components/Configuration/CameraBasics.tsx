@@ -12,6 +12,7 @@ import {
 
 import React from 'react';
 import {useConfiguration} from '../../context/configurationContext';
+import LiveViewBox from '../LiveViewBox';
 import {SelectConfigurationField, TextConfigurationField} from './configurationField';
 
 interface Props {
@@ -43,6 +44,8 @@ export default function CameraBasics() {
 
     const commonData = {getFieldCB, updateCB, camera: params?.camera_id};
 
+    const [url, setUrl] = React.useState<string>("");
+
     return (
         <Grid
             container
@@ -52,7 +55,10 @@ export default function CameraBasics() {
                     label="name"
                     variant="standard"
                     fullWidth
-                    data={{...commonData, path: 'name'}}
+                    data={{
+                        ...commonData, 
+                        path: 'name', 
+                    }}
                 />
             </Grid>
 
@@ -61,7 +67,11 @@ export default function CameraBasics() {
                     label="url"
                     variant="standard"
                     fullWidth
-                    data={{...commonData, path: 'url'}}
+                    data={{
+                        ...commonData, 
+                        path: 'url', 
+                        onValueChanged: (v) => setUrl(v)
+                    }}
                 />
             </Grid>
 
@@ -90,7 +100,7 @@ export default function CameraBasics() {
                 </Stack>
             </Grid>
             <Grid item xs={12} sm={12} md={8}>
-                <Skeleton variant="rectangular" width={640} height={360} />
+                <LiveViewBox style={{width: "640px"}} uri={url} keepSkeletonOnError={true} />
             </Grid>
         </Grid>
     );
