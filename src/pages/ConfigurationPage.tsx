@@ -205,7 +205,7 @@ export default function ConfigurationPage() {
 
         const hasChildren = element.elements !== undefined;
 
-        const configuration_general = computedConfiguration.general.getPath(id);
+        const configuration_general = computedConfiguration.general.getPath(params);
 
         // if has children add handler to display the children on click,
         // else set the link to the redirect location
