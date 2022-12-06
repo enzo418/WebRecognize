@@ -32,7 +32,7 @@ import {
 } from 'react-router-dom';
 import withParams from '../utils/missingHooks';
 import {ensure} from '../utils/error';
-import {ExpandLess, ExpandMore, Videocam} from '@mui/icons-material';
+import {ArrowBack, ExpandLess, ExpandMore, Videocam} from '@mui/icons-material';
 import FormatShapesIcon from '@mui/icons-material/FormatShapes';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
@@ -82,6 +82,11 @@ const getBasicConfigurationMenu = () => {
     camera: {
         getPath: (params: any) => `/configuration/${params.id}/camera/${params.camera_id}`,
         elements: [
+            {
+                to: '<configuration_general>',
+                primary: 'Back',
+                icon: <ArrowBack />,
+            },
             {
                 to: 'basics',
                 primary: 'Basics',
@@ -145,11 +150,15 @@ export default function ConfigurationPage() {
 
     const theme = responsiveFontSizes(createTheme());
     const params = ensure<{id: any}>(useParams() as any);
-    const type = ensure<{params:any}>(useMatch('/configuration/:id/:type/*'))
+    let type = ensure<{params:any}>(useMatch('/configuration/:id/:type/*'))
         .params.type as keyof IConfigurationList; // else how are we here?
     const matchesMD = useMediaQuery(
         theme.breakpoints.down('md'),
     );
+
+    if ('camera_id' in params) {
+        type = "camera";
+    }
 
     const id = params.id;
 
@@ -196,11 +205,16 @@ export default function ConfigurationPage() {
 
         const hasChildren = element.elements !== undefined;
 
+        const configuration_general = computedConfiguration.general.getPath(id);
+
         // if has children add handler to display the children on click,
         // else set the link to the redirect location
         const props = hasChildren ?
             {onClick: () => handleOpenNexted(i)} :
-            {to: `${basePath}/${element.to}`};
+            {
+                to: element.to === "<configuration_general>" 
+                    ? configuration_general : `${basePath}/${element.to}`
+            };
 
         const rendered = <ListItemLink
             className="configuration-option"
