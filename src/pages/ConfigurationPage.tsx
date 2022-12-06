@@ -80,7 +80,7 @@ const getBasicConfigurationMenu = () => {
             },
         ]},
     camera: {
-        getPath: (params: any) => `/configuration/${params.id}/camera/${params.camera_id}`,
+        getPath: (params: any) => `/configuration/${params.id}/general/camera/${params.camera_id}`,
         elements: [
             {
                 to: '<configuration_general>',
