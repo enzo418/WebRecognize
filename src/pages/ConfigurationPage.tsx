@@ -188,9 +188,10 @@ export default function ConfigurationPage() {
                 alignItems="center"
                 spacing={4}>
                 <Typography
-                    fontStyle="italic"
-                    fontWeight="bold"
-                    variant='h3'>{name}</Typography>
+                    //fontStyle="italic"
+                    fontWeight="500"
+                    variant='overline'
+                    fontSize={"1.5rem"}>{name}</Typography>
                 <EditIcon sx={{cursor: 'pointer', color: 'text.secondary'}}/>
             </Stack>
         </Box>);
