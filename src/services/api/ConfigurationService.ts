@@ -1,4 +1,5 @@
 import IHttpClient from '../../Http/IHttpClient';
+import processPromise from '../../Http/ProcessPromise';
 import TypedPromise from '../../TypedPromise';
 import DTOCamera from './interfaces/DTOCamera';
 import IProblemJson from './interfaces/IProblemJson';
@@ -11,20 +12,20 @@ export default class ConfigurationService extends Service {
 
     public setField(id: string, data: { field: string; value: any }) {
     // should be a patch following the verb rules!
-        return this.processPromise<any, IProblemJson>(
+        return processPromise<any, IProblemJson>(
             this.client.post(this.baseUrl + id, data, {headers: {}}),
         );
     }
 
     public getField(id: string, field: string) {
     // rnd is used to avoid browser cache
-        return this.processPromise<any, IProblemJson>(
+        return processPromise<any, IProblemJson>(
             this.client.get(this.baseUrl + id, { field: field, rnd: Math.random() }),
         );
     }
 
     public getAvailable() {
-        return this.processPromise<any, IProblemJson>(
+        return processPromise<any, IProblemJson>(
             this.client.get(this.baseUrl, {}),
         );
     }
@@ -33,7 +34,7 @@ export default class ConfigurationService extends Service {
     public create(configuration?:string) {
         const body = configuration ? configuration : {};
 
-        return this.processPromise<{id: string}, IProblemJson>(
+        return processPromise<{id: string}, IProblemJson>(
             this.client.post(this.baseUrl, body, {headers: {}}),
         );
     }

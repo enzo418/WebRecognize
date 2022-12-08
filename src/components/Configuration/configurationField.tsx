@@ -1,4 +1,4 @@
-import {CircularProgress, InputAdornment, Select, TextField} from '@mui/material';
+import {CircularProgress, InputAdornment, Select, Slider, TextField} from '@mui/material';
 import React from 'react';
 import {GetFieldCallback, UpdateFieldCallback} from '../../context/configurationContext';
 import _ from 'underscore';
@@ -9,12 +9,32 @@ interface IConfigurationFieldProps {
     data: {
         path: string;
         camera?: string | number;
+
         updateCB: UpdateFieldCallback;
         getFieldCB: GetFieldCallback;
+        
+        /**
+         * Helper function to format the received value.
+         * This will be called after we get the value from the api and before we set it
+         * to the internal state. It's expected to return the value to set, that means you 
+         * can use it and return a modified/formatted value to save.
+         */
+        beforeSetValue?: (value: any) => string | number | object | boolean;
+
+        /**
+         * Helper function to format the value to send.
+         * This function will be called after the user changed modified the value and before we send it
+         * to the api to notify the change. It's expected to return the value to send, so you can use
+         * it to validate/format the value before we send it.
+         */
+        beforeSendValue?: (value: any) => string | number | object | boolean;
+
 
         // onValueChanged is used to update live views or 
         // other component that depends on the current value of this configuration
         onValueChanged?: (newValue: any) => any;
+
+        defaultValue?: any;
     };
 
     [x: string | number | symbol] : unknown; // indexer, allows extra properties
@@ -49,7 +69,7 @@ export default function configurationField(
             this.completePath = ""; // initialized when needed            
 
             this.state = {
-                value: '',
+                value: props.data.defaultValue ? props.data.defaultValue : '',
                 state: 'initial',
                 errorMessage: '',
             };
@@ -63,7 +83,9 @@ export default function configurationField(
 
             this.props.data.getFieldCB.apply(null, [this.completePath])
                 .ok((r) => {
-                    this.setState(({value: r, state: 'initial', errorMessage: ''}));
+                    const formatted = this.props.data.beforeSetValue ? this.props.data.beforeSetValue(r) : r;
+
+                    this.setState(({value: formatted, state: 'initial', errorMessage: ''}));
 
                     if (this.props.data.onValueChanged) {
                         this.props.data.onValueChanged(r);
@@ -86,9 +108,12 @@ export default function configurationField(
         }
 
         updateField(value:any) {
-            this.props.data.updateCB.apply(null, [this.completePath, value])
+            const formatted = this.props.data.beforeSendValue ? this.props.data.beforeSendValue(value) : value;
+            
+            this.props.data.updateCB.apply(null, [this.completePath, formatted])
                 .ok((_) => {
                     this.setState(({state: 'updated'}));
+
                     if (this.props.data.onValueChanged) {
                         this.props.data.onValueChanged(value);
                     }
@@ -163,7 +188,17 @@ export default function configurationField(
 
 export const TextConfigurationField = configurationField(TextField, (p) => p);
 export const SelectConfigurationField = configurationField(Select, fixSelectProps);
+export const SliderConfigurationField = configurationField(Slider, fixSliderProps);
 
+function fixSliderProps(props:any) {
+    const fixed = props;
+
+    delete props.helperText;
+    delete props.InputProps;
+    delete props.error;
+
+    return fixed;
+}
 
 function fixSelectProps(props:any) {
     const fixed = props;
