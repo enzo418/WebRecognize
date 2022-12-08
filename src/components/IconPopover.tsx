@@ -57,10 +57,16 @@ export default function IconPopover(props:IconPopoverProps) {
     );
 }
 
+const ProcessStyle = (style?:object) => {
+    return Object.assign({
+        display: 'inline'
+    }, style);
+}
+
 export const HelpPopover = ({text, style}: {text: string, style?:any}) => (
-        <IconPopover text={text} style={style} iconElement={<HelpIcon />}/>
+        <IconPopover text={text} style={ProcessStyle(style)} iconElement={<HelpIcon />}/>
 );
 
 export const WarningPopover = ({text, style}: {text: string, style?:any}) => (
-    <IconPopover text={text} style={style} iconElement={<WarningIcon />}/>
+    <IconPopover text={text} style={ProcessStyle(style)} iconElement={<WarningIcon />}/>
 );

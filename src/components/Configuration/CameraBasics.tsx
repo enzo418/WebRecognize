@@ -134,11 +134,10 @@ export default function CameraBasics() {
                             Video scale
 
                             <HelpPopover 
-                                    style={{display: 'inline'}} 
-                                    text='Scales the images received from the camera.<br>You can see the effect in the output video' />
+                                    text='Scales the images received from the camera to this size.
+                                    <br>You can see the effect in the output video' />
 
                             <WarningPopover 
-                                    style={{display: 'inline'}} 
                                     text='This will also affect the resulting notification images/videos' />
 
                         </Typography>
@@ -162,6 +161,35 @@ export default function CameraBasics() {
                         </Stack>
                         <Typography variant="overline" color="GrayText">
                             Camera resolution {`W ${cameraDefault.size.width} x H ${cameraDefault.size.height}`}                            
+                        </Typography>
+                    </Box>
+                    
+                    <Box>
+                        <Typography gutterBottom>
+                        Video Validator Buffer Size
+
+                            <HelpPopover 
+                                    text='How much frames to use to validate the change.
+                                    <br>For example, if you want to validate an event in the 3 seconds
+                                    <br>before and after the change, you need to set it to fps * 3 * 2,
+                                    <br>multiply by 2 because half will be used for pre and half for post change.' />
+
+                            <WarningPopover text='Longer video validator buffer might improve the detection result
+                                                <br>but also will take longer and more memory. The memory problem 
+                                                <br>can be "solved" by reducing the "video scale".'/>
+                        </Typography>
+                        <Stack direction="row">
+                            <TextConfigurationField
+                                    label=""
+                                    variant="standard"
+                                    type="number"
+                                    fullWidth
+                                    data={{...commonData, path: 'videoValidatorBufferSize'}}
+                            />
+                            
+                        </Stack>
+                        <Typography variant="overline" color="GrayText">
+                            Camera frames per second (fps) is {`${cameraDefault.fps}`}
                         </Typography>
                     </Box>
                 </Stack>

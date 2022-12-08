@@ -4,9 +4,6 @@ import {
     createTheme,
     Grid,
     List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
     responsiveFontSizes,
     Stack,
     ThemeProvider,
@@ -38,9 +35,10 @@ import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
 import SensorOccupiedIcon from '@mui/icons-material/SensorOccupied';
 import TuneIcon from '@mui/icons-material/Tune';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+
 import {ConfigurationContext, UpdateFieldCallback} from '../context/configurationContext';
 import {configurationService} from '../services/api/Services';
-
 
 interface IConfigurationListElement {
     to: string; // relative path
@@ -92,16 +90,17 @@ const getBasicConfigurationMenu = () => {
                 primary: 'Basics',
                 icon: <TuneIcon />,
             },
+            {
+                to: 'detection',
+                primary: 'Detection',
+                icon: <TrackChangesIcon />,
+            },
             // {
             //    to: 'output',
             //    primary: 'Output',
             //    icon: <MonitorIcon />,
             // },
             {
-                to: 'processing',
-                primary: 'Processing',
-                icon: <CenterFocusStrongIcon />,
-            }, {
                 to: 'areas',
                 primary: 'Areas',
                 icon: <FormatShapesIcon />,

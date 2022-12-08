@@ -33,6 +33,7 @@ import CreateConfigurationFromFilePage from './pages/CreateConfigurationFromFile
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import DetectionCameraConfiguration from './components/Configuration/DetectionCameraConfiguration';
 
 function App() {
     return (
@@ -63,6 +64,7 @@ function App() {
                                     <Route path="video-output" element={<p>videoOutput</p>}></Route>
                                     <Route path="camera/:camera_id" element={<Outlet />}>
                                         <Route path="basics" element={<CameraBasics />}></Route>
+                                        <Route path="detection" element={<DetectionCameraConfiguration />}></Route>
                                         {/* <Route path="output" element={<p>camera output</p>}></Route>*/}
                                         <Route
                                             path="processing"
