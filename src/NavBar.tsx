@@ -7,7 +7,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 
-import {ThemeProvider, createTheme} from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -37,9 +37,9 @@ import './NavBar.scss';
 // }
 
 interface ListItemLinkProps {
-  icon?: React.ReactElement;
-  primary: string;
-  to: string;
+    icon?: React.ReactElement;
+    primary: string;
+    to: string;
 }
 
 const ListItemTheme = createTheme({
@@ -48,7 +48,8 @@ const ListItemTheme = createTheme({
             styleOverrides: {
                 root: {
                     margin: '0px 0px 1rem',
-                    transition: 'background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+                    transition:
+                        'background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
                     justifyContent: 'center',
                 },
             },
@@ -63,18 +64,23 @@ const ListItemTheme = createTheme({
     },
 });
 
-
 function ListItemLink(props: ListItemLinkProps) {
-    const {icon, to, ...rest} = props;
+    const { icon, to, ...rest } = props;
 
     const renderLink = React.useMemo(
         () =>
-            React.forwardRef<HTMLAnchorElement, Omit<RouterLinkProps, 'to'>>(function Link(
-                itemProps,
-                ref,
-            ) {
-                return <RouterLink to={to} ref={ref} {...itemProps} role={undefined} />;
-            }),
+            React.forwardRef<HTMLAnchorElement, Omit<RouterLinkProps, 'to'>>(
+                function Link(itemProps, ref) {
+                    return (
+                        <RouterLink
+                            to={to}
+                            ref={ref}
+                            {...itemProps}
+                            role={undefined}
+                        />
+                    );
+                },
+            ),
         [to],
     );
 
@@ -99,25 +105,36 @@ function ListItemLink(props: ListItemLinkProps) {
 //     );
 // }
 
-const NavBar: React.FC = (props:any) => {
-    const {sx, ...rest} = props;
+const NavBar: React.FC = (props: any) => {
+    const { sx, ...rest } = props;
 
     const finalSx = {
         ...{
             bgcolor: 'background.paper',
             overflowX: 'hidden',
-            borderRight: '1px solid #e5e6eb'}, /* TODO: add e5e6eb to vars*/
+            borderRight: '1px solid #e5e6eb',
+        } /* TODO: add e5e6eb to vars*/,
         ...(sx || {}),
     };
 
     return (
-        <Box className='simple-bar'
-            sx={finalSx} {...rest}>
-
-            <List sx={{height: '100%'}}>
-                <ListItemLink to="/configuration/" primary="" icon={<SettingsIcon />} />
-                <ListItemLink to="/notifications" primary="" icon={<NotificationsNoneIcon />} />
-                <ListItemLink to="/liveView" primary="" icon={<SettingsInputAntennaIcon />} />
+        <Box className="simple-bar" sx={finalSx} {...rest}>
+            <List sx={{ height: '100%' }}>
+                <ListItemLink
+                    to="/configuration/"
+                    primary=""
+                    icon={<SettingsIcon />}
+                />
+                <ListItemLink
+                    to="/notifications"
+                    primary=""
+                    icon={<NotificationsNoneIcon />}
+                />
+                <ListItemLink
+                    to="/liveView"
+                    primary=""
+                    icon={<SettingsInputAntennaIcon />}
+                />
             </List>
         </Box>
     );

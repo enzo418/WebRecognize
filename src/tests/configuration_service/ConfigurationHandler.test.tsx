@@ -3,8 +3,10 @@ import IHttpClient from '../../Http/IHttpClient';
 import ConfigurationService from '../../services/api/ConfigurationService';
 import IProblemJson from '../../services/api/interfaces/IProblemJson';
 
-const getBlobFromObject = (body:object) =>{
-    return new Blob([JSON.stringify(body, null, 2)], {type: 'application/json'});
+const getBlobFromObject = (body: object) => {
+    return new Blob([JSON.stringify(body, null, 2)], {
+        type: 'application/json',
+    });
 };
 
 class MockHttp extends IHttpClient {
@@ -15,12 +17,19 @@ class MockHttp extends IHttpClient {
         this.response = mockResponseCallback;
     }
 
-    public post(path:string, body: object, init:RequestInit = {}) : Promise<Response> {
+    public post(
+        path: string,
+        body: object,
+        init: RequestInit = {},
+    ): Promise<Response> {
         return this.response();
     }
 
     public get(
-        path:string, parameters: object = {}, init:RequestInit = {}) : Promise<Response> {
+        path: string,
+        parameters: object = {},
+        init: RequestInit = {},
+    ): Promise<Response> {
         return this.response();
     }
 
@@ -35,12 +44,12 @@ class MockHttp extends IHttpClient {
 }
 
 describe('Configuration service tree call', () => {
-    it('Should register a field and callback on successful update', (done) => {
+    it('Should register a field and callback on successful update', done => {
         /** **/
         const client = new MockHttp(() => {
-            return Promise.resolve(new Response(
-                getBlobFromObject({}), {status: 200},
-            ));
+            return Promise.resolve(
+                new Response(getBlobFromObject({}), { status: 200 }),
+            );
         });
 
         const service = new ConfigurationService(client);
@@ -49,7 +58,7 @@ describe('Configuration service tree call', () => {
         const section = config.createSectionHandler('section1');
         const field = section.createFieldHandler('field1');
 
-        field.subscribeToUpdateResponse((isOk:boolean, message:string) => {
+        field.subscribeToUpdateResponse((isOk: boolean, message: string) => {
             expect(isOk).toBe(true);
             done();
         });
@@ -58,7 +67,10 @@ describe('Configuration service tree call', () => {
         const spyConfigUpdate = jest.spyOn(config, 'update');
 
         const newValue1 = 'stringvaluetest';
-        const newValue2 = [{x: 23, y: 42}, {x: 33, y: 418}];
+        const newValue2 = [
+            { x: 23, y: 42 },
+            { x: 33, y: 418 },
+        ];
 
         /** **/
         field.update(newValue1);
@@ -81,16 +93,16 @@ describe('Configuration service tree call', () => {
         expect(spySectionUpdate).toHaveBeenNthCalledWith(
             1,
             'field1',
-            expect.objectContaining({value: newValue1}),
+            expect.objectContaining({ value: newValue1 }),
         );
         expect(spySectionUpdate).toHaveBeenNthCalledWith(
             2,
             'field1',
-            expect.objectContaining({value: newValue2}),
+            expect.objectContaining({ value: newValue2 }),
         );
     });
 
-    it('Should register a field and callback on failed update', (done) => {
+    it('Should register a field and callback on failed update', done => {
         const client = new MockHttp(() => {
             // have in mind that fetch only rejects on network failure or
             // if anything prevented the request from completing
@@ -98,7 +110,7 @@ describe('Configuration service tree call', () => {
 
             // On a server inability to respond as we wanted,
             // it should respond with a problem+json type.
-            const promblem:IProblemJson = {
+            const promblem: IProblemJson = {
                 status: 400,
                 title: 'invalid field',
                 invalidParams: {
@@ -109,14 +121,14 @@ describe('Configuration service tree call', () => {
                 },
             };
 
-            return Promise.resolve(new Response(
-                getBlobFromObject(promblem), {
+            return Promise.resolve(
+                new Response(getBlobFromObject(promblem), {
                     status: 400,
                     headers: {
                         'Content-Type': 'application/problem+json',
                     },
-                },
-            ));
+                }),
+            );
         });
 
         const service = new ConfigurationService(client);
@@ -125,13 +137,16 @@ describe('Configuration service tree call', () => {
         const section = config.createSectionHandler('section1');
         const field = section.createFieldHandler('field1');
 
-        field.subscribeToUpdateResponse((isOk:boolean, message:string) => {
+        field.subscribeToUpdateResponse((isOk: boolean, message: string) => {
             expect(isOk).toBe(false);
             expect(message).toBe('This field is required');
             done();
         });
 
-        const newValue2 = [{x: 23, y: 42}, {x: 33, y: 418}];
+        const newValue2 = [
+            { x: 23, y: 42 },
+            { x: 33, y: 418 },
+        ];
 
         /** **/
         field.update(newValue2);

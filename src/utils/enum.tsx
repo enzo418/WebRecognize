@@ -1,4 +1,4 @@
-import {combineArrayPos} from './array';
+import { combineArrayPos } from './array';
 
 type EnumType = Record<string, string | number>;
 
@@ -14,9 +14,12 @@ type EnumType = Record<string, string | number>;
  * @throws {Error} if cannot find a key
  * @return {number}
  */
-export function tryGetEnumValueFromDirtyString<T extends EnumType>(pEnum:T, type:string) : number {
-    const names = getEnumKeysNames(pEnum).map((t:string) => t.toLowerCase());
-    const cleanType:string = type.toLowerCase().trim();
+export function tryGetEnumValueFromDirtyString<T extends EnumType>(
+    pEnum: T,
+    type: string,
+): number {
+    const names = getEnumKeysNames(pEnum).map((t: string) => t.toLowerCase());
+    const cleanType: string = type.toLowerCase().trim();
     const indx = names.indexOf(cleanType);
     if (indx != -1) {
         // why so many conversions? We cannot use cleanType since
@@ -28,7 +31,6 @@ export function tryGetEnumValueFromDirtyString<T extends EnumType>(pEnum:T, type
     }
 }
 
-
 /**
  * Get the value of an enum based on the name of the key.
  *
@@ -38,11 +40,15 @@ export function tryGetEnumValueFromDirtyString<T extends EnumType>(pEnum:T, type
  * @param {string} type
  * @return {number}
  */
-export function getEnumAt<T extends EnumType>(pEnum:T, type:string) : number {
+export function getEnumAt<T extends EnumType>(pEnum: T, type: string): number {
     return pEnum[type as keyof typeof pEnum] as number;
 }
 
-export function getEnumNameAt<T extends EnumType>(pEnum:T, type:number, lower:boolean) : string {
+export function getEnumNameAt<T extends EnumType>(
+    pEnum: T,
+    type: number,
+    lower: boolean,
+): string {
     let res = pEnum[type as unknown as keyof typeof pEnum] as string;
 
     if (lower) {
@@ -52,10 +58,10 @@ export function getEnumNameAt<T extends EnumType>(pEnum:T, type:number, lower:bo
     return res;
 }
 
-export function getEnumKeys<T>(pEnum:T) : Array<number> {
+export function getEnumKeys<T>(pEnum: T): Array<number> {
     return Object.keys(pEnum)
-        .filter((v) => !isNaN(Number(v)))
-        .map((v) => parseInt(v));
+        .filter(v => !isNaN(Number(v)))
+        .map(v => parseInt(v));
 }
 
 /**
@@ -67,23 +73,32 @@ export function getEnumKeys<T>(pEnum:T) : Array<number> {
  * @param {boolean} [lower=false] convert names to lowercase
  * @return {Array<string>}
  */
-export function getEnumKeysNames<T>(pEnum:T, lower:boolean = false) : Array<string> {
-    let res = Object.keys(pEnum).filter((v) => isNaN(Number(v)));
+export function getEnumKeysNames<T>(
+    pEnum: T,
+    lower: boolean = false,
+): Array<string> {
+    let res = Object.keys(pEnum).filter(v => isNaN(Number(v)));
 
     if (lower) {
-        res = res.map((k) => k.toLowerCase());
+        res = res.map(k => k.toLowerCase());
     }
 
     return res;
 }
 
-export function getEnumKeysValueNames<T>(pEnum:T, lower:boolean = false) : Array<[number, string]> {
+export function getEnumKeysValueNames<T>(
+    pEnum: T,
+    lower: boolean = false,
+): Array<[number, string]> {
     const keys = getEnumKeys(pEnum);
     const names = getEnumKeysNames(pEnum, lower);
     return combineArrayPos(keys, names);
 }
 
-export function getEnumKeysNamesValue<T>(pEnum:T, lower:boolean = false) : Array<[string, number]> {
+export function getEnumKeysNamesValue<T>(
+    pEnum: T,
+    lower: boolean = false,
+): Array<[string, number]> {
     const names = getEnumKeysNames(pEnum, lower);
     const keys = getEnumKeys(pEnum);
     return combineArrayPos(names, keys);

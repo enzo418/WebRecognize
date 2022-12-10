@@ -5,10 +5,10 @@ interface LiveViewProps {
     onLoad: any;
     style?: object;
     feedID: string;
-};
+}
 
 interface LiveViewState {
-    socket: WebSocket|null;
+    socket: WebSocket | null;
 }
 
 class LiveView extends React.Component<LiveViewProps, LiveViewState> {
@@ -17,7 +17,7 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
         socket: null,
     };
 
-    constructor(props:LiveViewProps) {
+    constructor(props: LiveViewProps) {
         super(props);
 
         this.image = React.createRef();
@@ -36,7 +36,9 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
     componentDidMount() {
         if (this.state.socket == null) {
             console.log('connecting to socket');
-            this.setState({socket: this.getAndSetLiveView(this.props.feedID)});
+            this.setState({
+                socket: this.getAndSetLiveView(this.props.feedID),
+            });
         }
     }
 
@@ -45,13 +47,15 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
     }
 
     getAndSetLiveView = (feed: string) => {
-        const socket = new WebSocket(`${config.endpoints.websocket.liveView}${feed}`);
+        const socket = new WebSocket(
+            `${config.endpoints.websocket.liveView}${feed}`,
+        );
 
         // set socket as binary
         socket.binaryType = 'blob';
 
         // Listen for frames
-        socket.addEventListener('message', (event) => {
+        socket.addEventListener('message', event => {
             // - Blob:
             // eslint-disable-next-line max-len
             //   https://developer.mozilla.org/en-US/docs/Web/API/Blob#creating_a_url_representing_the_contents_of_a_typed_array
@@ -71,10 +75,12 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
     };
 
     render() {
-        return <img
-            ref={this.image}
-            onLoad={this.onImageLoaded}
-            style={this.props.style || {}}></img>;
+        return (
+            <img
+                ref={this.image}
+                onLoad={this.onImageLoaded}
+                style={this.props.style || {}}></img>
+        );
     }
 }
 

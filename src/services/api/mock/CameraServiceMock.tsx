@@ -3,20 +3,20 @@ import Camera from '../../../domain/Camera';
 import DTOCamera from '../interfaces/DTOCamera';
 import { ensure } from '../../../utils/error';
 
-const generateCameras = (n:number) => {
-    const generated:DTOCamera[] = [];
+const generateCameras = (n: number) => {
+    const generated: DTOCamera[] = [];
 
     for (let i = 0; i < n; i++) {
         generated.push({
             id: '' + i,
-            name: 'cam'+ i,
+            name: 'cam' + i,
         });
     }
 
     return generated;
 };
 
-const camerasMock:DTOCamera[] = generateCameras(500);
+const camerasMock: DTOCamera[] = generateCameras(500);
 
 // const camerasMock = [{
 //    id: '1',
@@ -29,7 +29,6 @@ const camerasMock:DTOCamera[] = generateCameras(500);
 //    name: 'cam3',
 // }];
 
-
 export default class CameraServiceMock implements ICameraService {
     cameras: DTOCamera[];
 
@@ -39,7 +38,7 @@ export default class CameraServiceMock implements ICameraService {
 
     get(id: string): Promise<Camera> {
         return new Promise((resolve, reject) => {
-            resolve(ensure(this.cameras.find((cam) => cam.id === id)));
+            resolve(ensure(this.cameras.find(cam => cam.id === id)));
         });
     }
 }

@@ -1,4 +1,3 @@
-
 /**
  * Simple http client to make it easier to make request.
  *
@@ -26,7 +25,11 @@ export default abstract class IHttpClient {
      * @param {RequestInit} [init={}] optional request parameters
      * @returns {Promise<Response>}
      */
-    abstract post(path: string, body: object, init: RequestInit): Promise<Response>;
+    abstract post(
+        path: string,
+        body: object,
+        init: RequestInit,
+    ): Promise<Response>;
 
     /**
      * Same function as above given for convenience
@@ -48,8 +51,11 @@ export default abstract class IHttpClient {
      * @param {RequestInit} [init={}] optinal request parameters
      * @return {Promise<Response>}
      */
-    abstract get(path: string, parameters: object, init: RequestInit): Promise<Response>;
-
+    abstract get(
+        path: string,
+        parameters: object,
+        init: RequestInit,
+    ): Promise<Response>;
 
     /**
      * Same function as above given for convenience
@@ -70,5 +76,5 @@ export default abstract class IHttpClient {
      * @param {object} query request parameters/query
      * @returns {Promise<Response>}
      */
-     abstract put(path: string, body: object, query?:object): Promise<Response>;
+    abstract put(path: string, body: object, query?: object): Promise<Response>;
 }

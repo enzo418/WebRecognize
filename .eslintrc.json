@@ -4,8 +4,9 @@
         "es2021": true
     },
     "extends": [
-        "plugin:react/recommended",
-        "google"
+        // "plugin:react/recommended",
+        // "google",
+        "prettier"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -17,20 +18,31 @@
     },
     "plugins": [
         "react",
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "prettier"
     ],
     "rules": {
-        "max-len": [
+        "prettier/prettier": [
             "error",
             {
-                "code": 100
+                "endOfLine": "auto"
+            },
+            {
+                "usePrettierrc": true
             }
         ],
-        "require-jsdoc": "off",
-        "indent": [
-            "error",
-            4
-        ],
+        // "max-len": [
+        //     "error",
+        //     {
+        //         "code": 100
+        //     }
+        // ],
+        // "max-len": "off",
+        // "require-jsdoc": "off",
+        // "indent": [
+        //     "error",
+        //     4
+        // ],
         "object-curly-spacing": "off",
         "no-unused-vars": "warn"
     }

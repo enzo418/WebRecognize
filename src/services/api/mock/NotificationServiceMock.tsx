@@ -1,49 +1,56 @@
 import { INotificationService } from '../interfaces/INotificationService';
-import Notification, {ENotificationType} from '../../../domain/Notification';
+import Notification, { ENotificationType } from '../../../domain/Notification';
 import ICameraService from '../interfaces/ICameraService';
-import { parseNotification, parseNotifications } from '../convert/ConvertDTOtoNotification';
+import {
+    parseNotification,
+    parseNotifications,
+} from '../convert/ConvertDTOtoNotification';
 import DTONotification from '../interfaces/DTONotification';
-import {ensure} from '../../../utils/error';
+import { ensure } from '../../../utils/error';
 import { subSeconds, subHours, addSeconds, addHours, format } from 'date-fns';
-import {random} from '../../../utils/random';
-import {getEnumAt, getEnumKeysNames} from '../../../utils/enum';
-import {dateToUnix, parseDate} from '../../../utils/date';
+import { random } from '../../../utils/random';
+import { getEnumAt, getEnumKeysNames } from '../../../utils/enum';
+import { dateToUnix, parseDate } from '../../../utils/date';
 
-
-const videos:string[] = [
+const videos: string[] = [
     'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
     'https://samplelib.com/lib/preview/mp4/sample-10s.mp4',
     'https://samplelib.com/lib/preview/mp4/sample-15s.mp4',
     'https://samplelib.com/lib/preview/mp4/sample-20s.mp4',
-    'https://samplelib.com/lib/preview/mp4/sample-30s.mp4'];
+    'https://samplelib.com/lib/preview/mp4/sample-30s.mp4',
+];
 
-const generateNotifications = (n:number, numberCams:number) => {
-    const generated:DTONotification[] = [];
+const generateNotifications = (n: number, numberCams: number) => {
+    const generated: DTONotification[] = [];
     // let lastID:number = -1;
-    let lastDate:Date = new Date();
+    let lastDate: Date = new Date();
 
     const types = getEnumKeysNames(ENotificationType);
 
     let lastNID = -1;
     for (let i = 0; i < n; i++) {
         types.forEach((t, ti) => {
-            let content:string = '';
+            let content: string = '';
 
             switch (getEnumAt(ENotificationType, t)) {
-            case ENotificationType.IMAGE:
-                content = `https://picsum.photos/640/360?random=1&cache=${random(i, 100000)}`;
-                break;
-            case ENotificationType.VIDEO:
-                content = videos[random(0, videos.length-1)];
-                break;
-            case ENotificationType.TEXT:
-                content = 'random text with lucky number: ' + random(0, 999);
-                break;
+                case ENotificationType.IMAGE:
+                    content = `https://picsum.photos/640/360?random=1&cache=${random(
+                        i,
+                        100000,
+                    )}`;
+                    break;
+                case ENotificationType.VIDEO:
+                    content = videos[random(0, videos.length - 1)];
+                    break;
+                case ENotificationType.TEXT:
+                    content =
+                        'random text with lucky number: ' + random(0, 999);
+                    break;
             }
 
             const newDate = addSeconds(lastDate, random(0, 15 * 60));
 
-            const g:DTONotification = {
+            const g: DTONotification = {
                 id: '' + (lastNID + ti + 1),
                 group: i,
                 cameraID: '' + random(0, numberCams),
@@ -64,9 +71,7 @@ const generateNotifications = (n:number, numberCams:number) => {
     return generated;
 };
 
-
 const notificationsMock: DTONotification[] = generateNotifications(1000, 450);
-
 
 // const baseDate = new Date();
 // const notificationsMock: DTONotification[] = [{
@@ -91,7 +96,7 @@ const notificationsMock: DTONotification[] = generateNotifications(1000, 450);
 //    date: addMinutes(subDays(baseDate, 6), 20),
 // }];
 
-type CallbackWS = (n:Notification) => Promise<boolean>;
+type CallbackWS = (n: Notification) => Promise<boolean>;
 
 export default class NotificationServiceMock implements INotificationService {
     private cameraService: ICameraService;
@@ -99,31 +104,41 @@ export default class NotificationServiceMock implements INotificationService {
     private pulseSender: NodeJS.Timer;
     private pulseCallers: CallbackWS[];
     private lastNotifSended: number;
-    private pulseInterval:number;
+    private pulseInterval: number;
 
-    constructor(pCameraService: ICameraService, pNots: DTONotification[]=notificationsMock) {
-        this.notifications=pNots;
-        this.cameraService=pCameraService;
+    constructor(
+        pCameraService: ICameraService,
+        pNots: DTONotification[] = notificationsMock,
+    ) {
+        this.notifications = pNots;
+        this.cameraService = pCameraService;
         this.lastNotifSended = 0;
         this.pulseCallers = [];
 
         this.pulseInterval = 2 * 1000;
 
-        this.pulseSender = setInterval(this.pulseHandler.bind(this), this.pulseInterval);
+        this.pulseSender = setInterval(
+            this.pulseHandler.bind(this),
+            this.pulseInterval,
+        );
     }
 
     get(id: string): Promise<Notification> {
         return new Promise((resolve, reject) => {
-            const found=ensure(this.notifications.find((not) => not.id==id));
+            const found = ensure(this.notifications.find(not => not.id == id));
 
             resolve(parseNotification(found, this.cameraService));
         });
     }
 
-    getAll(limit=100): Promise<Array<Notification>> {
+    getAll(limit = 100): Promise<Array<Notification>> {
         return new Promise((resolve, reject) => {
-            const found=[];
-            for (let i=0; i<Math.min(limit, this.notifications.length); i++) {
+            const found = [];
+            for (
+                let i = 0;
+                i < Math.min(limit, this.notifications.length);
+                i++
+            ) {
                 found.push(this.notifications[i]);
             }
 
@@ -131,14 +146,17 @@ export default class NotificationServiceMock implements INotificationService {
         });
     }
 
-    getBefore(before: string|Date, limit: number): Promise<Array<Notification>> {
+    getBefore(
+        before: string | Date,
+        limit: number,
+    ): Promise<Array<Notification>> {
         return new Promise((resolve, reject) => {
-            const found: DTONotification[]=[];
+            const found: DTONotification[] = [];
             const unixTimeBefore = dateToUnix(before);
-            this.notifications.forEach((not) => {
+            this.notifications.forEach(not => {
                 if (before instanceof Date && not.date < unixTimeBefore) {
                     found.push(not);
-                } else if (typeof before==='string'&&not.id<before) {
+                } else if (typeof before === 'string' && not.id < before) {
                     found.push(not);
                 }
             });
@@ -147,14 +165,17 @@ export default class NotificationServiceMock implements INotificationService {
         });
     }
 
-    getAfter(after: string|Date, limit: number): Promise<Array<Notification>> {
+    getAfter(
+        after: string | Date,
+        limit: number,
+    ): Promise<Array<Notification>> {
         return new Promise((resolve, reject) => {
-            const found: DTONotification[]=[];
+            const found: DTONotification[] = [];
             const unixTimeAfter = dateToUnix(after);
-            this.notifications.forEach((not) => {
+            this.notifications.forEach(not => {
                 if (after instanceof Date && not.date > unixTimeAfter) {
                     found.push(not);
-                } else if (typeof after==='string'&&not.id>after) {
+                } else if (typeof after === 'string' && not.id > after) {
                     found.push(not);
                 }
             });
@@ -166,17 +187,21 @@ export default class NotificationServiceMock implements INotificationService {
     getBetween<T, U extends T>(
         before: T,
         after: U,
-        limit: number): Promise<Array<Notification>> {
+        limit: number,
+    ): Promise<Array<Notification>> {
         return new Promise((resolve, reject) => {
-            const found: DTONotification[]=[];
+            const found: DTONotification[] = [];
             const unixTimeAfter = dateToUnix(after);
             const unixTimeBefore = dateToUnix(before);
-            this.notifications.forEach((not) => {
-                if (after instanceof Date&&
+            this.notifications.forEach(not => {
+                if (
+                    after instanceof Date &&
                     before instanceof Date &&
-                    not.date >= unixTimeAfter && not.date <= unixTimeBefore) {
+                    not.date >= unixTimeAfter &&
+                    not.date <= unixTimeBefore
+                ) {
                     found.push(not);
-                } else if (typeof after==='string'&&not.id>after) {
+                } else if (typeof after === 'string' && not.id > after) {
                     found.push(not);
                 }
             });
@@ -193,7 +218,7 @@ export default class NotificationServiceMock implements INotificationService {
         // });
     }
 
-    private async pulseHandler() : Promise<boolean> {
+    private async pulseHandler(): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             clearInterval(this.pulseSender);
 
@@ -202,15 +227,15 @@ export default class NotificationServiceMock implements INotificationService {
                 this.cameraService,
             );
 
-            const promises = this.pulseCallers.map((call) => call(not));
+            const promises = this.pulseCallers.map(call => call(not));
 
-            Promise.allSettled(promises).then((results) => {
-                const rejected = results.filter((r) => r.status == 'rejected');
+            Promise.allSettled(promises).then(results => {
+                const rejected = results.filter(r => r.status == 'rejected');
                 if (rejected.length > 0) {
                     console.error('Error! a callback was rejected', rejected);
                 }
 
-                if (this.notifications.length > this.lastNotifSended -1) {
+                if (this.notifications.length > this.lastNotifSended - 1) {
                     this.lastNotifSended++;
                     this.pulseSender = setInterval(
                         this.pulseHandler.bind(this),
@@ -222,5 +247,5 @@ export default class NotificationServiceMock implements INotificationService {
                 }
             });
         });
-    };
+    }
 }

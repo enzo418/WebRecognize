@@ -28,33 +28,43 @@ interface ListItemLinkProps extends ListItemProps {
 // also it's responsive because it hides the link text
 // if the screen size is less than `break_point`
 function ListItemLink(props: ListItemLinkProps) {
-    const {icon, to, primary, ...restProps} = props;
+    const { icon, to, primary, ...restProps } = props;
 
-    const renderLink = to && React.useMemo(
-        () =>
-            React.forwardRef<HTMLAnchorElement, Omit<RouterLinkProps, 'to'>>(function Link(
-                itemProps,
-                ref,
-            ) {
-                return <RouterLink to={to} ref={ref} {...itemProps} role={undefined} />;
-            }),
-        [to],
-    );
+    const renderLink =
+        to &&
+        React.useMemo(
+            () =>
+                React.forwardRef<
+                    HTMLAnchorElement,
+                    Omit<RouterLinkProps, 'to'>
+                >(function Link(itemProps, ref) {
+                    return (
+                        <RouterLink
+                            to={to}
+                            ref={ref}
+                            {...itemProps}
+                            role={undefined}
+                        />
+                    );
+                }),
+            [to],
+        );
 
     const theme = useTheme();
 
-    const matches = useMediaQuery(
-        theme.breakpoints.down('md'),
-    );
+    const matches = useMediaQuery(theme.breakpoints.down('md'));
 
     return (
-        <ListItem button component={to ? renderLink : 'li'} sx={props.sx} {...restProps}>
+        <ListItem
+            button
+            component={to ? renderLink : 'li'}
+            sx={props.sx}
+            {...restProps}>
             {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
             {!matches && <ListItemText primary={primary} />}
             {props.children}
         </ListItem>
     );
 }
-
 
 export default ListItemLink;

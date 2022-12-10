@@ -25,20 +25,22 @@ export interface INotificationFilters {
     before: Date | null;
     after: Date | null;
     fromCameras: CameraID[];
-};
+}
 
 export interface IFilterComponentProps {
-    onFilter: (filter:INotificationFilters) => any;
+    onFilter: (filter: INotificationFilters) => any;
     cameras: Camera[];
-};
+}
 
-function FilterNotification(props:IFilterComponentProps) {
+function FilterNotification(props: IFilterComponentProps) {
     const [dateFrom, setValueDateFrom] = React.useState<Date | null>(null);
     const [dateTo, setValueDateTo] = React.useState<Date | null>(null);
 
-    const [camerasSelected, setCamerasSelected] = React.useState<CameraID[]>([]);
+    const [camerasSelected, setCamerasSelected] = React.useState<CameraID[]>(
+        [],
+    );
 
-    const filter:INotificationFilters = {
+    const filter: INotificationFilters = {
         before: null,
         after: null,
         fromCameras: [],
@@ -58,16 +60,16 @@ function FilterNotification(props:IFilterComponentProps) {
         props.onFilter(filter);
     };
 
-    const handleDateFromChange = (value:Date| null) => {
-        if (!dateTo || value && dateTo >= value) {
+    const handleDateFromChange = (value: Date | null) => {
+        if (!dateTo || (value && dateTo >= value)) {
             setValueDateFrom(value);
         } else {
             // display error
         }
     };
 
-    const handleDateToChange = (value:Date | null) => {
-        if (!dateFrom || value && dateFrom <= value) {
+    const handleDateToChange = (value: Date | null) => {
+        if (!dateFrom || (value && dateFrom <= value)) {
             setValueDateTo(value);
         } else {
             // display error
@@ -76,7 +78,7 @@ function FilterNotification(props:IFilterComponentProps) {
 
     return (
         <div>
-            <Accordion TransitionProps={{unmountOnExit: true}} >
+            <Accordion TransitionProps={{ unmountOnExit: true }}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1a-content"
@@ -88,43 +90,40 @@ function FilterNotification(props:IFilterComponentProps) {
                         setCameras={setCamerasSelected}
                         cameras={props.cameras}
                         camerasSelected={camerasSelected}
-                        titleText={
-                            {
-                                display: true,
-                                text: 'Cameras',
-                            }
-                        } />
+                        titleText={{
+                            display: true,
+                            text: 'Cameras',
+                        }}
+                    />
 
                     <Typography
                         className="grey-title"
                         variant="body1"
-                        gutterBottom>Between this dates</Typography>
+                        gutterBottom>
+                        Between this dates
+                    </Typography>
                     <Stack direction="row" spacing={2}>
                         <DatePicker
                             label="From"
                             value={dateFrom}
-                            onChange={(newValue) => {
+                            onChange={newValue => {
                                 handleDateFromChange(newValue);
                             }}
-                            renderInput={(params) => <TextField {...params} />}
+                            renderInput={params => <TextField {...params} />}
                         />
 
                         <DatePicker
                             label="To"
                             value={dateTo}
-                            onChange={(newValue) => {
+                            onChange={newValue => {
                                 handleDateToChange(newValue);
                             }}
-                            renderInput={(params) => <TextField {...params} />}
+                            renderInput={params => <TextField {...params} />}
                         />
                     </Stack>
                 </AccordionDetails>
-                <Button onClick={handleFilterButton}>
-                Filter
-                </Button>
-                <Button onClick={handleClearFilterButton}>
-                Clear Filters
-                </Button>
+                <Button onClick={handleFilterButton}>Filter</Button>
+                <Button onClick={handleClearFilterButton}>Clear Filters</Button>
             </Accordion>
         </div>
     );

@@ -2,7 +2,6 @@
 import IUpdateAction from './IUpdateAction';
 
 export default interface IConfigurationHandler {
-
     /**
      * Update a field
      *
@@ -12,5 +11,5 @@ export default interface IConfigurationHandler {
      *
      * @param {IUpdateAction} value
      */
-    update(path: {field: string, path: string}, value: IUpdateAction) : void;
-};
+    update(path: { field: string; path: string }, value: IUpdateAction): void;
+}

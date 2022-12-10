@@ -1,8 +1,7 @@
-
 interface CatchCallback {
     upToIndex: number;
     callback: Function;
-};
+}
 
 /**
  * Shared context between promises.
@@ -19,19 +18,19 @@ class PromiseContext<OkType, FailType> {
 
     // value returned from each call to `then`, but initially is the same as `value`
     // if resolved, else undefined.
-    public thenValue : any;
+    public thenValue: any;
 
     public catchCallback: CatchCallback[] = [];
 
     // value returned from each call to `catch`, initially after resolve/reject is undefined
     // its initialized in the first `catch` call.
-    public thenError : any;
+    public thenError: any;
 
-    public okCallback : Function = () => {};
-    public value! : OkType;
+    public okCallback: Function = () => {};
+    public value!: OkType;
 
-    public failCallback : Function = () => {};
-    public error! : FailType;
+    public failCallback: Function = () => {};
+    public error!: FailType;
 
     public finallyCallback: Function = () => {};
 
@@ -41,7 +40,7 @@ class PromiseContext<OkType, FailType> {
      *
      * @param {Function} func
      */
-    public callAsFinally = (func:Function) => {
+    public callAsFinally = (func: Function) => {
         // thenValue is undefined if rejected, else it's processed `value`
         // we might have an error produced by reject call (error) or an
         // error produced by a throw inside a `then` call.
@@ -57,7 +56,7 @@ class PromiseContext<OkType, FailType> {
         /** it works since we only allow calls to catch
          * after a call to then, making each call to
          * this function to have a different this.thenCallbacks.length
-        **/
+         **/
         this.catchCallback.push({
             upToIndex: this.thenCallbacks.length - 1,
             callback,
@@ -72,7 +71,10 @@ class PromiseContext<OkType, FailType> {
      * @param {*} error
      * @return {any}
      */
-    public callCatchCallbackOrPropagate = (thenIndex:number, error:any): any => {
+    public callCatchCallbackOrPropagate = (
+        thenIndex: number,
+        error: any,
+    ): any => {
         if (this.catchCallback.length === 0) {
             throw error;
         }
@@ -108,7 +110,7 @@ class NotCatchableTypedPromise<OkType, FailType> {
      * @public
      * @param {Function} callback
      */
-    public fail(callback: (v:FailType) => any) : void {
+    public fail(callback: (v: FailType) => any): void {
         if (this.context.status === 'rejected') {
             callback(this.context.error);
         } else {
@@ -124,7 +126,7 @@ class NotCatchableTypedPromise<OkType, FailType> {
      * @param {Function} callback
      * @return {CatchableTypedPromise<OkType, FailType>}
      */
-    public then(callback:Function) : CatchableTypedPromise<OkType, FailType> {
+    public then(callback: Function): CatchableTypedPromise<OkType, FailType> {
         if (this.context.status === 'resolved') {
             this.context.thenValue = callback(this.context.thenValue);
         } else {
@@ -152,9 +154,13 @@ class NotCatchableTypedPromise<OkType, FailType> {
      * @param {Function} callback
      * @return {NotCatchableTypedPromise<OkType, FailType>}
      */
-    public finally(callback: (lastOkResult: any, lastError: any) => any)
-    : NotCatchableTypedPromise<OkType, FailType> {
-        if (this.context.status === 'resolved' || this.context.status === 'rejected') {
+    public finally(
+        callback: (lastOkResult: any, lastError: any) => any,
+    ): NotCatchableTypedPromise<OkType, FailType> {
+        if (
+            this.context.status === 'resolved' ||
+            this.context.status === 'rejected'
+        ) {
             this.context.callAsFinally(callback);
         } else {
             this.context.finallyCallback = callback;
@@ -164,7 +170,10 @@ class NotCatchableTypedPromise<OkType, FailType> {
     }
 }
 
-class CatchableTypedPromise<OkType, FailType> extends NotCatchableTypedPromise<OkType, FailType> {
+class CatchableTypedPromise<OkType, FailType> extends NotCatchableTypedPromise<
+    OkType,
+    FailType
+> {
     constructor(context: PromiseContext<OkType, FailType>) {
         super(context);
     }
@@ -176,7 +185,9 @@ class CatchableTypedPromise<OkType, FailType> extends NotCatchableTypedPromise<O
      * @param {Function} callback
      * @return {NotCatchableTypedPromise<OkType, FailType>}
      */
-    public catch(callback: Function): NotCatchableTypedPromise<OkType, FailType> {
+    public catch(
+        callback: Function,
+    ): NotCatchableTypedPromise<OkType, FailType> {
         if (this.context.status === 'rejected') {
             callback(this.context.error);
         } else {
@@ -220,21 +231,28 @@ export default class TypedPromise<OkType, FailType> {
     // following the State pattern
     private context: PromiseContext<OkType, FailType>;
 
-    constructor(action: (
-        okCallback: (val: OkType) => OkType | void,
-        failCallback: (val: FailType) => any) => void) {
+    constructor(
+        action: (
+            okCallback: (val: OkType) => OkType | void,
+            failCallback: (val: FailType) => any,
+        ) => void,
+    ) {
         this.context = new PromiseContext<OkType, FailType>();
 
         // if action throws it will propagate
         action(this.resolve.bind(this), this.reject.bind(this));
     }
 
-    public ok(callback: (val: OkType) => OkType|void) : NotCatchableTypedPromise<OkType, FailType> {
+    public ok(
+        callback: (val: OkType) => OkType | void,
+    ): NotCatchableTypedPromise<OkType, FailType> {
         if (this.context.status === 'resolved') {
             try {
-                this.context.value = callback(this.context.value) || this.context.value;
+                this.context.value =
+                    callback(this.context.value) || this.context.value;
             } catch (error) {
-                this.context.thenError = this.context.callCatchCallbackOrPropagate(0, error);
+                this.context.thenError =
+                    this.context.callCatchCallbackOrPropagate(0, error);
             }
         } else {
             this.context.okCallback = callback;
@@ -250,9 +268,14 @@ export default class TypedPromise<OkType, FailType> {
 
         // call ok
         try {
-            this.context.thenValue = this.context.okCallback(this.context.value);
+            this.context.thenValue = this.context.okCallback(
+                this.context.value,
+            );
         } catch (error) {
-            this.context.thenError = this.context.callCatchCallbackOrPropagate(0, error);
+            this.context.thenError = this.context.callCatchCallbackOrPropagate(
+                0,
+                error,
+            );
             return; // skip then
         }
 
@@ -261,7 +284,8 @@ export default class TypedPromise<OkType, FailType> {
             try {
                 this.context.thenValue = thenCallback(this.context.thenValue);
             } catch (error) {
-                this.context.thenError = this.context.callCatchCallbackOrPropagate(index, error);
+                this.context.thenError =
+                    this.context.callCatchCallbackOrPropagate(index, error);
             }
         });
 
@@ -276,4 +300,4 @@ export default class TypedPromise<OkType, FailType> {
 
         this.context.callAsFinally(this.context.finallyCallback);
     }
-};
+}

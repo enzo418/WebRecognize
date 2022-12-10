@@ -1,6 +1,5 @@
 import INotification from '../../../domain/Notification';
 
-
 /**
  * Notification service interface
  *
@@ -37,7 +36,10 @@ export abstract class INotificationService {
      * @param {number} limit max number of notifications
      * @returns {Promise<Array<INotification>>}
      */
-    abstract getBefore(before: string | Date, limit: number): Promise<Array<INotification>>;
+    abstract getBefore(
+        before: string | Date,
+        limit: number,
+    ): Promise<Array<INotification>>;
 
     /**
      * Get notifications after a notification (id) or
@@ -48,7 +50,10 @@ export abstract class INotificationService {
      * @param {number} limit max number of notifications
      * @returns {Promise<Array<INotification>>}
      */
-    abstract getAfter(after: string | Date, limit: number): Promise<Array<INotification>>;
+    abstract getAfter(
+        after: string | Date,
+        limit: number,
+    ): Promise<Array<INotification>>;
 
     /**
      * Get notifications between two notifications (id) or
@@ -65,7 +70,8 @@ export abstract class INotificationService {
     abstract getBetween<T, U extends T>(
         before: T,
         after: U,
-        limit: number): Promise<Array<INotification>>;
+        limit: number,
+    ): Promise<Array<INotification>>;
 
     /**
      * Subscribe to new notifications.
@@ -74,7 +80,6 @@ export abstract class INotificationService {
      * @param {*} callback Function to call when a new notification is available.
      */
     abstract subscribe(callback: (not: INotification[]) => any): void;
-
 
     /**
      * Unsubscribe from notifications

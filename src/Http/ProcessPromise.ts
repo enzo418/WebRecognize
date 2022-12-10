@@ -1,5 +1,5 @@
-import IProblemJson from "../services/api/interfaces/IProblemJson";
-import TypedPromise from "../TypedPromise";
+import IProblemJson from '../services/api/interfaces/IProblemJson';
+import TypedPromise from '../TypedPromise';
 
 /**
  * Handles the first interaction with a promise from the backend response.
@@ -17,40 +17,51 @@ import TypedPromise from "../TypedPromise";
  * @return {Promise<T>}
  */
 export default function processPromise<T, Problem extends IProblemJson>(
-    promise:Promise<Response>,
-) : TypedPromise<T, Problem> {
+    promise: Promise<Response>,
+): TypedPromise<T, Problem> {
     return new TypedPromise<T, Problem>((ok, fail) => {
         promise
-            .then(async (r) => ({
+            .then(async r => ({
                 status: r.status,
                 headers: r.headers,
                 ok: r.ok, // r oks if status is in [200-299]
                 body: await r.text(),
             }))
-            .then((r) => {
+            .then(r => {
                 if (!r.ok) {
-                    let rejectedJSON:any = {status: -1};
+                    let rejectedJSON: any = { status: -1 };
 
-                    if (r.headers.has('Content-Type') &&
-                        r.headers.get('Content-Type') == 'application/problem+json') {
+                    if (
+                        r.headers.has('Content-Type') &&
+                        r.headers.get('Content-Type') ==
+                            'application/problem+json'
+                    ) {
                         try {
                             rejectedJSON = JSON.parse(r.body);
                         } catch (e) {
-                            console.warn('Error parsing json on failed response', e);
+                            console.warn(
+                                'Error parsing json on failed response',
+                                e,
+                            );
                         }
                     } else {
-                        console.warn('Api server is misbehaving!' +
-                        'didn\'t respond with a problem+json');
+                        console.warn(
+                            'Api server is misbehaving!' +
+                                "didn't respond with a problem+json",
+                        );
                     }
 
                     fail(rejectedJSON);
                 } else {
-                    let json:any = {};
+                    let json: any = {};
 
                     try {
                         json = JSON.parse(r.body);
                     } catch (e) {
-                        console.warn('Error parsing json on sucessfull response, returning raw data', e);
+                        console.warn(
+                            'Error parsing json on sucessfull response, returning raw data',
+                            e,
+                        );
                         return ok(r.body as T);
                     }
 

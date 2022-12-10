@@ -1,8 +1,8 @@
-import React from "react";
-import PropTypes from "prop-types";
-import CanvasHandler from "./CanvasHandler";
-import {Point, Rectangle} from "../Geometry";
-import {getRectangleDimensions} from "../utils/geometry";
+import React from 'react';
+import PropTypes from 'prop-types';
+import CanvasHandler from './CanvasHandler';
+import { Point, Rectangle } from '../Geometry';
+import { getRectangleDimensions } from '../utils/geometry';
 
 type ROI = Rectangle;
 
@@ -20,8 +20,8 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
     constructor(props: CanvasHandlerROIProps) {
         super(props);
         this.ROI = props.initialROI;
-        this.p1 = {x: 0, y: 0}; // lt or rb
-        this.p2 = {x: 0, y: 0}; // rb or lt
+        this.p1 = { x: 0, y: 0 }; // lt or rb
+        this.p2 = { x: 0, y: 0 }; // rb or lt
 
         this.handlers = {
             onMouseMove: this.move.bind(this),
@@ -42,22 +42,32 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
         this.updateCanvasPosition();
     }
 
-    setROI(roi:ROI) {
+    setROI(roi: ROI) {
         this.ROI = roi;
     }
 
-    move(e:any) {
+    move(e: any) {
         e.preventDefault();
         e = (e.touches || [])[0] || e;
         if (this.clickPressed) {
             var image = new Image();
             image.onload = () => {
-                this.ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, 640, 360);
+                this.ctx.drawImage(
+                    image,
+                    0,
+                    0,
+                    image.width,
+                    image.height,
+                    0,
+                    0,
+                    640,
+                    360,
+                );
 
                 const x1 = e.clientX - this.x;
                 const y1 = e.clientY - this.y;
 
-                this.p2 = {x: x1, y: y1};
+                this.p2 = { x: x1, y: y1 };
 
                 const x0 = this.p1.x;
                 const y0 = this.p1.y;
@@ -72,27 +82,27 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
     }
 
     // Click or touch pressed
-    pressed(e:any) {
+    pressed(e: any) {
         e.preventDefault();
         e = (e.touches || [])[0] || e;
         this.clickPressed = true;
         const x = e.clientX - this.x;
         const y = e.clientY - this.y;
 
-        this.p1 = {x, y};
+        this.p1 = { x, y };
     }
 
     // Click or touch released
     release(e: any) {
         this.clickPressed = false;
 
-        const {lt, width, height} = getRectangleDimensions(this.p1, this.p2);
+        const { lt, width, height } = getRectangleDimensions(this.p1, this.p2);
 
         this.ROI = {
             x: lt.x,
             y: lt.y,
             width,
-            height
+            height,
         };
 
         this.props.onRoiUpdated(this.ROI);
@@ -103,18 +113,36 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
     /**
      * Callback to update the image displayed in the canvas
      */
-    onReady(frame:string, roi?: ROI) {
-        this.ROI = roi || {x: 0, y: 0, width: 0, height: 0};
+    onReady(frame: string, roi?: ROI) {
+        this.ROI = roi || { x: 0, y: 0, width: 0, height: 0 };
 
         let image = new Image();
         image.onload = () => {
-            this.ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, 640, 360);
+            this.ctx.drawImage(
+                image,
+                0,
+                0,
+                image.width,
+                image.height,
+                0,
+                0,
+                640,
+                360,
+            );
 
-            this.ctx.strokeStyle = "Red";
+            this.ctx.strokeStyle = 'Red';
             this.ctx.lineWidth = 5;
 
-            if ((this.ROI.x + this.ROI.y + this.ROI.width + this.ROI.height) > 0) {
-                this.ctx.strokeRect(this.ROI.x, this.ROI.y, this.ROI.width, this.ROI.height);
+            if (
+                this.ROI.x + this.ROI.y + this.ROI.width + this.ROI.height >
+                0
+            ) {
+                this.ctx.strokeRect(
+                    this.ROI.x,
+                    this.ROI.y,
+                    this.ROI.width,
+                    this.ROI.height,
+                );
             }
 
             this.updateCanvasPosition();
@@ -126,6 +154,13 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
     }
 
     render() {
-        return <canvas ref={this.canvas} {...this.handlers} width="640" height="360" />
+        return (
+            <canvas
+                ref={this.canvas}
+                {...this.handlers}
+                width="640"
+                height="360"
+            />
+        );
     }
 }

@@ -11,16 +11,19 @@ export default class ConfigurationService extends Service {
     }
 
     public setField(id: string, data: { field: string; value: any }) {
-    // should be a patch following the verb rules!
+        // should be a patch following the verb rules!
         return processPromise<any, IProblemJson>(
-            this.client.post(this.baseUrl + id, data, {headers: {}}),
+            this.client.post(this.baseUrl + id, data, { headers: {} }),
         );
     }
 
     public getField(id: string, field: string) {
-    // rnd is used to avoid browser cache
+        // rnd is used to avoid browser cache
         return processPromise<any, IProblemJson>(
-            this.client.get(this.baseUrl + id, { field: field, rnd: Math.random() }),
+            this.client.get(this.baseUrl + id, {
+                field: field,
+                rnd: Math.random(),
+            }),
         );
     }
 
@@ -31,19 +34,21 @@ export default class ConfigurationService extends Service {
     }
 
     // Creates
-    public create(configuration?:string) {
+    public create(configuration?: string) {
         const body = configuration ? configuration : {};
 
-        return processPromise<{id: string}, IProblemJson>(
-            this.client.post(this.baseUrl, body, {headers: {}}),
+        return processPromise<{ id: string }, IProblemJson>(
+            this.client.post(this.baseUrl, body, { headers: {} }),
         );
     }
 
-    public getConfigurationCameras(configurationId:string) {
-        return new TypedPromise<DTOCamera[], IProblemJson>((ok, fail) => { 
-            this.getField(configurationId, "cameras").ok(
-                (res) => ok(res.map((cfg:any) => ({id: cfg.id, name: cfg.name})))
-            ).fail(e => fail(e));            
+    public getConfigurationCameras(configurationId: string) {
+        return new TypedPromise<DTOCamera[], IProblemJson>((ok, fail) => {
+            this.getField(configurationId, 'cameras')
+                .ok(res =>
+                    ok(res.map((cfg: any) => ({ id: cfg.id, name: cfg.name }))),
+                )
+                .fail(e => fail(e));
         });
     }
 }

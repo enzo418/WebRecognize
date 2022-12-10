@@ -9,5 +9,5 @@ export default interface IProblemJson {
     title?: string; // summary of the problem type
     detail?: string; // explanation specific to this occurrence
     status: number; // The HTTP status code. -1 if couldn't make the request
-    invalidParams?: {[name:string]: {code: string, reason: string}};
-};
+    invalidParams?: { [name: string]: { code: string; reason: string } };
+}

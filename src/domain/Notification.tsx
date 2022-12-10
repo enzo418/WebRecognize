@@ -3,22 +3,22 @@ import Camera from './Camera';
 export enum ENotificationType {
     TEXT,
     IMAGE,
-    VIDEO
-};
+    VIDEO,
+}
 
 export default interface Notification {
-    id: string,
+    id: string;
     date: Date;
     group: number;
     camera: Camera;
     type: ENotificationType;
-// eslint-disable-next-line semi
-};
+    // eslint-disable-next-line semi
+}
 
 export interface MediaNotification extends Notification {
-    mediaURI:string;
-};
+    mediaURI: string;
+}
 
 export interface TextNotification extends Notification {
     text: string;
-};
+}

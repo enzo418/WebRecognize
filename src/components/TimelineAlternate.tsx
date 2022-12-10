@@ -8,13 +8,13 @@ import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 
-import {TimelineDotProps} from '@mui/lab/TimelineDot/TimelineDot';
-import {useVirtual} from 'react-virtual';
-import {Box} from '@mui/material';
+import { TimelineDotProps } from '@mui/lab/TimelineDot/TimelineDot';
+import { useVirtual } from 'react-virtual';
+import { Box } from '@mui/material';
 
 export interface ITimelineItemBase {
     readonly isSeparator: boolean;
-};
+}
 
 export interface ITimelineItem extends ITimelineItemBase {
     readonly isSeparator: false;
@@ -27,7 +27,7 @@ export interface ITimelineItem extends ITimelineItemBase {
 
     // if mark is true the knob will be different
     mark: boolean;
-};
+}
 
 export interface ITimelineItemSectionSeparator extends ITimelineItemBase {
     readonly isSeparator: true;
@@ -35,53 +35,57 @@ export interface ITimelineItemSectionSeparator extends ITimelineItemBase {
     text: string;
     textColor?: string;
     separatorColor?: string;
-};
+}
 
 import '../styles/DiscreteScrollbar.scss';
-import {Grid} from '@mui/material';
+import { Grid } from '@mui/material';
 
 export type ClickCallback = (id: ITimelineItem['id']) => any;
 
 interface ITimeLineAlternateProps {
     elements: Array<ITimelineItem | ITimelineItemSectionSeparator>;
     onclick: ClickCallback;
-};
+}
 
 interface TimeLineItemGeneratorProps {
-    index:number;
+    index: number;
     size: number;
     start: number;
     element: ITimelineItemBase;
     onclick: ClickCallback;
-};
+}
 
-function TimeLineItemGenerator(props:TimeLineItemGeneratorProps) {
-    const {index, size, start, element, onclick} = props;
+function TimeLineItemGenerator(props: TimeLineItemGeneratorProps) {
+    const { index, size, start, element, onclick } = props;
 
-    let htmlElem :any;
+    let htmlElem: any;
 
     if (element.isSeparator) {
-        htmlElem = (<TimeLineGenerateElementSeparator
-            index={index}
-            size={size}
-            start={start}
-            element={element}/>
+        htmlElem = (
+            <TimeLineGenerateElementSeparator
+                index={index}
+                size={size}
+                start={start}
+                element={element}
+            />
         );
     } else {
-        htmlElem = (<TimeLineGenerateElement
-            index={index}
-            size={size}
-            start={start}
-            element={element}
-            onclick={onclick}/>
+        htmlElem = (
+            <TimeLineGenerateElement
+                index={index}
+                size={size}
+                start={start}
+                element={element}
+                onclick={onclick}
+            />
         );
     }
 
     return htmlElem;
 }
 
-function TimeLineGenerateElementSeparator(props:any) {
-    const {size, start, element} = props;
+function TimeLineGenerateElementSeparator(props: any) {
+    const { size, start, element } = props;
 
     return (
         <TimelineItem
@@ -96,65 +100,78 @@ function TimeLineGenerateElementSeparator(props:any) {
             }}
             className="only-separator">
             <TimelineSeparator>
-                <TimelineConnector sx={{backgroundColor: element.separatorColor}}/>
+                <TimelineConnector
+                    sx={{ backgroundColor: element.separatorColor }}
+                />
             </TimelineSeparator>
 
-            <TimelineContent color={
-                ['both', 'right'].includes(element.grayOut) ?
-                    'text.secondary' :
-                    'text.primary'
-            }>{element.text}</TimelineContent>
-        </TimelineItem>);
+            <TimelineContent
+                color={
+                    ['both', 'right'].includes(element.grayOut)
+                        ? 'text.secondary'
+                        : 'text.primary'
+                }>
+                {element.text}
+            </TimelineContent>
+        </TimelineItem>
+    );
 }
 
-function TimeLineGenerateElement(props:any) {
-    const {size, start, element, onclick} = props;
+function TimeLineGenerateElement(props: any) {
+    const { size, start, element, onclick } = props;
 
-    return (<TimelineItem
-        style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: `${size}px`,
-            transform: `translateY(${start}px)`,
-            padding: 0,
-        }}
-        onClick={() => onclick(element.id)}>
-        <Grid container spacing={2}>
-            <Grid item xs={5}>
-                <TimelineContent
-                    color={
-                        ['both', 'left'].includes(element.grayOut) ?
-                            'text.secondary' :
-                            'text.primary'
-                    }
-                    sx={{ m: '0', px: 0, pr: '10px' }}
-                    align="right">
-                    {element.left}
-                </TimelineContent>
+    return (
+        <TimelineItem
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: `${size}px`,
+                transform: `translateY(${start}px)`,
+                padding: 0,
+            }}
+            onClick={() => onclick(element.id)}>
+            <Grid container spacing={2}>
+                <Grid item xs={5}>
+                    <TimelineContent
+                        color={
+                            ['both', 'left'].includes(element.grayOut)
+                                ? 'text.secondary'
+                                : 'text.primary'
+                        }
+                        sx={{ m: '0', px: 0, pr: '10px' }}
+                        align="right">
+                        {element.left}
+                    </TimelineContent>
+                </Grid>
+
+                <Grid item xs={2}>
+                    <TimelineSeparator>
+                        <TimelineDot
+                            sx={{
+                                backgroundColor: element.knobColor,
+                                cursor: 'pointer',
+                                border: element.mark ? '2px solid black' : '',
+                            }}
+                        />
+                        <TimelineConnector />
+                    </TimelineSeparator>
+                </Grid>
+
+                <Grid item xs={5}>
+                    <TimelineContent
+                        color={
+                            ['both', 'right'].includes(element.grayOut)
+                                ? 'text.secondary'
+                                : 'text.primary'
+                        }>
+                        {element.right}
+                    </TimelineContent>
+                </Grid>
             </Grid>
-
-            <Grid item xs={2}>
-                <TimelineSeparator>
-                    <TimelineDot sx={
-                        {backgroundColor: element.knobColor,
-                            cursor: 'pointer',
-                            border: element.mark ? '2px solid black' : ''}
-                    }/>
-                    <TimelineConnector />
-                </TimelineSeparator>
-            </Grid>
-
-            <Grid item xs={5}>
-                <TimelineContent color={
-                    ['both', 'right'].includes(element.grayOut) ?
-                        'text.secondary' :
-                        'text.primary'
-                }>{element.right}</TimelineContent></Grid>
-        </Grid>
-
-    </TimelineItem>);
+        </TimelineItem>
+    );
 }
 
 export default function TimeLineAlternate(props: ITimeLineAlternateProps) {
@@ -170,8 +187,8 @@ export default function TimeLineAlternate(props: ITimeLineAlternateProps) {
     return (
         <React.Fragment>
             <Box
-                className='discrete-scroll'
-                sx={{bgcolor: 'background.paper', overflowX: 'hidden'}}
+                className="discrete-scroll"
+                sx={{ bgcolor: 'background.paper', overflowX: 'hidden' }}
                 ref={parentRef}
                 style={{
                     height: `90vh`,
@@ -185,16 +202,17 @@ export default function TimeLineAlternate(props: ITimeLineAlternateProps) {
                             height: `${rowVirtualizer.totalSize}px`,
                             width: '100%',
                             position: 'relative',
-                        }}
-                    >
-                        {rowVirtualizer.virtualItems.map((virtualRow) => {
-                            return (<TimeLineItemGenerator
-                                key={virtualRow.index}
-                                index={virtualRow.index}
-                                size={virtualRow.size}
-                                start={virtualRow.start}
-                                element={props.elements[virtualRow.index]}
-                                onclick={props.onclick}/>
+                        }}>
+                        {rowVirtualizer.virtualItems.map(virtualRow => {
+                            return (
+                                <TimeLineItemGenerator
+                                    key={virtualRow.index}
+                                    index={virtualRow.index}
+                                    size={virtualRow.size}
+                                    start={virtualRow.start}
+                                    element={props.elements[virtualRow.index]}
+                                    onclick={props.onclick}
+                                />
                             );
                         })}
                     </div>

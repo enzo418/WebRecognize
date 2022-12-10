@@ -13,20 +13,20 @@ type CameraID = Camera['id'];
 interface TitleTextProp {
     display: boolean;
     text: string;
-};
+}
 
 export interface ICameraSelectorComponentProps {
     cameras: Camera[];
     camerasSelected: CameraID[];
     setCameras: any;
     titleText: TitleTextProp;
-};
+}
 
-function CamerasSelector(props:ICameraSelectorComponentProps) {
-    const toggleCamerasSelected = (id:string) => {
+function CamerasSelector(props: ICameraSelectorComponentProps) {
+    const toggleCamerasSelected = (id: string) => {
         props.setCameras((currentValues: CameraID[]) => {
             if (currentValues.indexOf(id) >= 0) {
-                return currentValues.filter((cid) => cid != id);
+                return currentValues.filter(cid => cid != id);
             } else {
                 return currentValues.concat([id]);
             }
@@ -35,17 +35,16 @@ function CamerasSelector(props:ICameraSelectorComponentProps) {
 
     return (
         <div>
-            {props.titleText.display&&
-                <Typography
-                    className="grey-title"
-                    variant="body1"
-                    gutterBottom>{props.titleText.text}</Typography>
-            }
+            {props.titleText.display && (
+                <Typography className="grey-title" variant="body1" gutterBottom>
+                    {props.titleText.text}
+                </Typography>
+            )}
 
-            <Stack direction="row" spacing={2} sx={{flexWrap: 'wrap'}}>
-                {
-                    props.cameras.map((camera, i) => {
-                        return <FormControlLabel
+            <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
+                {props.cameras.map((camera, i) => {
+                    return (
+                        <FormControlLabel
                             key={camera.id}
                             control={<Checkbox />}
                             label={camera.name}
@@ -53,9 +52,9 @@ function CamerasSelector(props:ICameraSelectorComponentProps) {
                                 props.camerasSelected.indexOf(camera.id) >= 0
                             }
                             onClick={() => toggleCamerasSelected(camera.id)}
-                        />;
-                    })
-                }
+                        />
+                    );
+                })}
             </Stack>
         </div>
     );

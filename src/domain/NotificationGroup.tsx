@@ -1,5 +1,5 @@
 import Camera from './Camera';
-import {MediaNotification, TextNotification} from './Notification';
+import { MediaNotification, TextNotification } from './Notification';
 
 export interface NotificationGroupTypeMap {
     text?: TextNotification;
@@ -11,4 +11,4 @@ export interface NotificationGroup extends NotificationGroupTypeMap {
     groupID: number;
     date: Date;
     camera: Camera;
-};
+}

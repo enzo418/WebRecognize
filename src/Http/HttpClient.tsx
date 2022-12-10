@@ -40,15 +40,22 @@ export default class HttpClient implements IHttpClient {
      * @param {RequestInit} [init={}] optional request parameters
      * @return {Promise<Response>}
      */
-    public post(path:string, body: object, init:RequestInit = {}) : Promise<Response> {
+    public post(
+        path: string,
+        body: object,
+        init: RequestInit = {},
+    ): Promise<Response> {
         // merge body and args into a single object
-        const reqParams = Object.assign({
-            body: JSON.stringify(body),
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+        const reqParams = Object.assign(
+            {
+                body: JSON.stringify(body),
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             },
-        }, init);
+            init,
+        );
 
         return fetch(this.baseUrl + path, reqParams);
     }
@@ -62,7 +69,11 @@ export default class HttpClient implements IHttpClient {
      * @param {RequestInit} [init={}] optinal request parameters
      * @return {Promise<Response>}
      */
-    public get(path:string, parameters: object = {}, init:RequestInit = {}) : Promise<Response> {
+    public get(
+        path: string,
+        parameters: object = {},
+        init: RequestInit = {},
+    ): Promise<Response> {
         let url: string = this.baseUrl + path;
         url += '?' + this.encodeObjectToQueryParams(parameters);
 
@@ -81,13 +92,16 @@ export default class HttpClient implements IHttpClient {
             url += '?' + this.encodeObjectToQueryParams(query);
         }
 
-        const reqParams = Object.assign({
-            body: JSON.stringify(body),
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
+        const reqParams = Object.assign(
+            {
+                body: JSON.stringify(body),
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             },
-        }, init);
+            init,
+        );
 
         return fetch(url, reqParams);
     }
@@ -102,10 +116,9 @@ export default class HttpClient implements IHttpClient {
      * @param {object} params
      * @return {string} encoded string
      */
-    protected encodeObjectToQueryParams(params:object) : string {
+    protected encodeObjectToQueryParams(params: object): string {
         return Object.entries(params)
-            .map((kvp) => [kvp[0], encodeURIComponent(kvp[1])]
-                .join('='))
+            .map(kvp => [kvp[0], encodeURIComponent(kvp[1])].join('='))
             .join('&');
     }
 }

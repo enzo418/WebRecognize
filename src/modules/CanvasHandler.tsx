@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface Size {
     width: number;
@@ -12,7 +12,10 @@ interface ICanvasHandlerState {
 /**
  * abstract class that adds functionality to a canvas
  */
-export default class CanvasHandler<Props> extends React.Component<Props, ICanvasHandlerState> {
+export default class CanvasHandler<Props> extends React.Component<
+    Props,
+    ICanvasHandlerState
+> {
     lastImage: string;
     x: number;
     y: number;
@@ -21,7 +24,7 @@ export default class CanvasHandler<Props> extends React.Component<Props, ICanvas
     headers: null;
     canvas: React.RefObject<HTMLCanvasElement>;
     ctx: any;
-    
+
     state = {
         size: {
             width: 640,
@@ -31,7 +34,7 @@ export default class CanvasHandler<Props> extends React.Component<Props, ICanvas
 
     constructor(props: Props) {
         super(props);
-        this.lastImage = "";
+        this.lastImage = '';
 
         this.x = 0; // canvas position in x
         this.y = 0; // canvas position in y (with scrollbar)
@@ -52,21 +55,21 @@ export default class CanvasHandler<Props> extends React.Component<Props, ICanvas
 
     // get the value
     getValue() {
-        return "";
+        return '';
     }
 
-    setImage(image:string) {
+    setImage(image: string) {
         this.lastImage = image;
     }
 
     componentDidMount() {
         if (this.canvas.current)
-            this.ctx = this.canvas.current.getContext("2d");
-        else throw "Missing canvas element."
+            this.ctx = this.canvas.current.getContext('2d');
+        else throw 'Missing canvas element.';
     }
 
-    setCanvasSize({width, height}: Size) {
-        this.setState((prev) => {
+    setCanvasSize({ width, height }: Size) {
+        this.setState(prev => {
             if (width) {
                 prev.size.width = width;
             }
@@ -84,7 +87,7 @@ export default class CanvasHandler<Props> extends React.Component<Props, ICanvas
     }
 
     updateCanvasPosition() {
-        if (!this.canvas.current) throw "Missing canvas element";
+        if (!this.canvas.current) throw 'Missing canvas element';
 
         var bounds = this.canvas.current.getBoundingClientRect();
         this.x = bounds.left;

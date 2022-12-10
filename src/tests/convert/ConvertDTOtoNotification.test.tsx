@@ -10,8 +10,8 @@ import {
     parseNotification,
     parseNotifications,
 } from '../../services/api/convert/ConvertDTOtoNotification';
-import {tryGetEnumValueFromDirtyString} from '../../utils/enum';
-import {dateToUnix, parseDate} from '../../utils/date';
+import { tryGetEnumValueFromDirtyString } from '../../utils/enum';
+import { dateToUnix, parseDate } from '../../utils/date';
 
 function ensure<T>(
     argument: T | undefined | null,
@@ -32,23 +32,23 @@ class MockCameraService implements ICameraService {
 
     get(id: string): Promise<Camera> {
         return new Promise((resolve, reject) => {
-            resolve(ensure(this.cameras.find((c) => c.id == id)));
+            resolve(ensure(this.cameras.find(c => c.id == id)));
         });
     }
 }
 
-const getNotificationContent = (n:Notification) => {
+const getNotificationContent = (n: Notification) => {
     let content = '';
     switch (n.type) {
-    case ENotificationType.IMAGE:
-        content = (n as MediaNotification).mediaURI;
-        break;
-    case ENotificationType.VIDEO:
-        content = (n as MediaNotification).mediaURI;
-        break;
-    case ENotificationType.TEXT:
-        content = (n as TextNotification).text;
-        break;
+        case ENotificationType.IMAGE:
+            content = (n as MediaNotification).mediaURI;
+            break;
+        case ENotificationType.VIDEO:
+            content = (n as MediaNotification).mediaURI;
+            break;
+        case ENotificationType.TEXT:
+            content = (n as TextNotification).text;
+            break;
     }
     return content;
 };
@@ -66,9 +66,7 @@ describe('Notification Service', () => {
             content: 'aaa',
         };
 
-        const cameras: Array<Camera> = [
-            { id: '123456', name: 'a' },
-        ];
+        const cameras: Array<Camera> = [{ id: '123456', name: 'a' }];
 
         const camService: MockCameraService = new MockCameraService(cameras);
 
@@ -94,35 +92,39 @@ describe('Notification Service', () => {
     it('should request all the notifications and all the cameras', async () => {
         const date = new Date(2010, 4, 28, 23, 33, 15);
 
-        const notResponse: DTONotification[] = [{
-            id: '1',
-            date: dateToUnix(parseDate('28/05/2010 23:33:15')),
-            cameraID: '1',
-            group: 99,
-            type: 'text',
-            content: 'hi',
-        }, {
-            id: '2',
-            date: dateToUnix(parseDate('28/05/2010 23:33:15')),
-            cameraID: '2',
-            group: 99,
-            type: 'image',
-            content: 'this_is_a_uri',
-        }, {
-            id: '3',
-            date: dateToUnix(parseDate('28/05/2010 23:33:15')),
-            cameraID: '2',
-            group: 1,
-            type: 'video',
-            content: 'this_is_a_uri2',
-        }];
+        const notResponse: DTONotification[] = [
+            {
+                id: '1',
+                date: dateToUnix(parseDate('28/05/2010 23:33:15')),
+                cameraID: '1',
+                group: 99,
+                type: 'text',
+                content: 'hi',
+            },
+            {
+                id: '2',
+                date: dateToUnix(parseDate('28/05/2010 23:33:15')),
+                cameraID: '2',
+                group: 99,
+                type: 'image',
+                content: 'this_is_a_uri',
+            },
+            {
+                id: '3',
+                date: dateToUnix(parseDate('28/05/2010 23:33:15')),
+                cameraID: '2',
+                group: 1,
+                type: 'video',
+                content: 'this_is_a_uri2',
+            },
+        ];
 
         const cameras: Array<Camera> = [
             { id: '1', name: 'a' },
             { id: '2', name: 'b' },
         ];
 
-        const camAt = (id: string) => ensure(cameras.find((c) => c.id == id));
+        const camAt = (id: string) => ensure(cameras.find(c => c.id == id));
 
         const camService: MockCameraService = new MockCameraService(cameras);
 
@@ -130,7 +132,10 @@ describe('Notification Service', () => {
 
         //
 
-        const response: Notification[] = await parseNotifications(notResponse, camService);
+        const response: Notification[] = await parseNotifications(
+            notResponse,
+            camService,
+        );
 
         //
 
@@ -152,8 +157,12 @@ describe('Notification Service', () => {
             expect(actual.group).toBe(expected.group);
             expect(actual.date).toStrictEqual(date);
             expect(actual.camera).toMatchObject(camAt(expected.cameraID));
-            expect(actual.type)
-                .toBe(tryGetEnumValueFromDirtyString(ENotificationType, expected.type));
+            expect(actual.type).toBe(
+                tryGetEnumValueFromDirtyString(
+                    ENotificationType,
+                    expected.type,
+                ),
+            );
 
             expect(getNotificationContent(actual)).toBe(expected.content);
         });

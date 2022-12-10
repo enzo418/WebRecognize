@@ -1,15 +1,17 @@
 import ICameraService from '../interfaces/ICameraService';
 import DTONotification from '../interfaces/DTONotification';
 import Camera from '../../../domain/Camera';
-import Notification,
-{
+import Notification, {
     ENotificationType,
     MediaNotification,
     TextNotification,
 } from '../../../domain/Notification';
-import {getEnumKeysNames, tryGetEnumValueFromDirtyString} from '../../../utils/enum';
+import {
+    getEnumKeysNames,
+    tryGetEnumValueFromDirtyString,
+} from '../../../utils/enum';
 
-import {parseDate} from '../../../utils/date';
+import { parseDate } from '../../../utils/date';
 
 import config from '../../../config';
 
@@ -29,7 +31,8 @@ import config from '../../../config';
 
 export async function parseNotification(
     pNot: DTONotification,
-    cameraService: ICameraService): Promise<Notification> {
+    cameraService: ICameraService,
+): Promise<Notification> {
     return new Promise(async (resolve, reject) => {
         const camera: Camera = await cameraService.get(pNot.cameraID);
 
@@ -39,54 +42,62 @@ export async function parseNotification(
                 date: new Date(pNot.date * 1000),
                 group: pNot.group,
                 camera: camera,
-                type: tryGetEnumValueFromDirtyString(ENotificationType, pNot.type),
+                type: tryGetEnumValueFromDirtyString(
+                    ENotificationType,
+                    pNot.type,
+                ),
             };
 
             const absoluteURL = new URL(pNot.content, config.server).href;
 
             switch (notification.type) {
-            case ENotificationType.IMAGE:
-                notification = {
-                    ...notification,
-                    mediaURI: absoluteURL,
-                } as MediaNotification;
-                break;
-            case ENotificationType.VIDEO:
-                notification = {
-                    ...notification,
-                    mediaURI: absoluteURL,
-                } as MediaNotification;
-                break;
-            case ENotificationType.TEXT:
-                notification = {
-                    ...notification,
-                    text: pNot.content,
-                } as TextNotification;
-                break;
+                case ENotificationType.IMAGE:
+                    notification = {
+                        ...notification,
+                        mediaURI: absoluteURL,
+                    } as MediaNotification;
+                    break;
+                case ENotificationType.VIDEO:
+                    notification = {
+                        ...notification,
+                        mediaURI: absoluteURL,
+                    } as MediaNotification;
+                    break;
+                case ENotificationType.TEXT:
+                    notification = {
+                        ...notification,
+                        text: pNot.content,
+                    } as TextNotification;
+                    break;
             }
 
             resolve(notification);
         } else {
-            reject(new Error(`Couldn't get the camera with id: '${pNot.cameraID}'`));
+            reject(
+                new Error(
+                    `Couldn't get the camera with id: '${pNot.cameraID}'`,
+                ),
+            );
         }
     });
 }
 
 export function parseNotifications(
     pDTONotifs: Array<DTONotification>,
-    cameraService: ICameraService): Promise<Array<Notification>> {
+    cameraService: ICameraService,
+): Promise<Array<Notification>> {
     return new Promise((resolve, reject) => {
         const notifications: Array<Notification> = [];
 
         // get a promise per notification
-        const promises:Promise<Notification>[] = pDTONotifs.map(
-            (DTONot) => parseNotification(DTONot, cameraService),
+        const promises: Promise<Notification>[] = pDTONotifs.map(DTONot =>
+            parseNotification(DTONot, cameraService),
         );
 
         // resolve once all the promises are settled (rejected/fullfiled)
         Promise.allSettled(promises)
-            .then((results) => {
-                results.forEach((result) => {
+            .then(results => {
+                results.forEach(result => {
                     if (result.status === 'rejected') {
                         reject(result.reason);
                     } else {

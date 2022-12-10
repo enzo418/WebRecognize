@@ -9,11 +9,11 @@ interface IWrapperWebSocket {
     onError(listener: (ev: Event) => any): void;
     onClose(listener: (ev: Event) => any): void;
     onOpen(listener: (ev: Event) => any): void;
-    onMessage(messageID:string, listener: (ev: EventData) => any): void;
+    onMessage(messageID: string, listener: (ev: EventData) => any): void;
 }
 
 type Callback = (ev: Event) => any;
-type MessageCallback = (ev: EventData) => any
+type MessageCallback = (ev: EventData) => any;
 
 /**
  * Wrappers the WebSocket default implementation
@@ -45,14 +45,14 @@ export class WrapperWebSocket implements IWrapperWebSocket {
     // handler for each message id
     m_messageHandlers: Record<string, MessageCallback[]>;
 
-    constructor(url:string) {
+    constructor(url: string) {
         this.m_socket = new WebSocket(url);
         this.m_messageHandlerRegistered = false;
         this.m_openHandlerRegistered = false;
         this.m_closeHandlerRegistered = false;
         this.m_errorHandlerRegistered = false;
 
-        this.m_handlers = {open: [], close: []};
+        this.m_handlers = { open: [], close: [] };
         this.m_messageHandlers = {};
     }
 
@@ -79,7 +79,7 @@ export class WrapperWebSocket implements IWrapperWebSocket {
         try {
             message = JSON.parse(evData);
         } catch (error) {
-            throw new Error('Couldn\'t parse the websocket data event.');
+            throw new Error("Couldn't parse the websocket data event.");
         }
 
         const keys = Object.keys(message);
@@ -87,7 +87,7 @@ export class WrapperWebSocket implements IWrapperWebSocket {
         if (keys.length === 1) {
             const id = keys[0];
             const content = message[id];
-            const res: EventData = {data: content, ...ev};
+            const res: EventData = { data: content, ...ev };
 
             // call the handlers
             this.callMessageHandlers(id, res);
@@ -97,23 +97,24 @@ export class WrapperWebSocket implements IWrapperWebSocket {
         }
     }
 
-    private onclose(ev: Event) : void {
+    private onclose(ev: Event): void {
         this.callInternalHandlers('close', ev);
     }
 
-    private onopen(ev: Event) : void {
+    private onopen(ev: Event): void {
         this.callInternalHandlers('open', ev);
     }
 
-    private onerror(ev: Event) : void {
+    private onerror(ev: Event): void {
         this.callInternalHandlers('error', ev);
     }
 
-    private registerMessageEventHandler(
-        id: string,
-        callback: MessageCallback) {
+    private registerMessageEventHandler(id: string, callback: MessageCallback) {
         if (!this.m_messageHandlerRegistered) {
-            this.m_socket.addEventListener('message', this.onmessage.bind(this));
+            this.m_socket.addEventListener(
+                'message',
+                this.onmessage.bind(this),
+            );
             this.m_messageHandlerRegistered = true;
         }
 
@@ -160,7 +161,7 @@ export class WrapperWebSocket implements IWrapperWebSocket {
         this.m_handlers.error.push(callback);
     }
 
-    private callInternalHandlers(id:string, ev: Event) {
+    private callInternalHandlers(id: string, ev: Event) {
         for (let i = 0; i < this.m_handlers[id].length; i++) {
             this.m_handlers[id][i](ev);
         }
