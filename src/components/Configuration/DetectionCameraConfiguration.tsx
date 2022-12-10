@@ -18,9 +18,11 @@ import {useConfiguration} from '../../context/configurationContext';
 import HttpClient from '../../Http/HttpClient';
 import processPromise from '../../Http/ProcessPromise';
 import IProblemJson from '../../services/api/interfaces/IProblemJson';
+import CameraFrameBox from '../CameraFrameBox';
 import {HelpPopover, WarningPopover} from '../IconPopover';
 import LiveViewBox from '../LiveViewBox';
 import {SelectConfigurationField, SliderConfigurationField, TextConfigurationField} from './configurationField';
+import ROICanvasInputField from './ROICanvasInputField';
 
 interface Props {
     updateField: (field:string, value:any) => any;
@@ -142,6 +144,40 @@ export default function DetectionCameraConfiguration() {
                         Previous stage resize was {`W ${cameraResize.width} x H ${cameraResize.height}`}                            
                     </Typography>
                 </Box>
+
+                <Box>
+                    <Typography gutterBottom>
+                        Noise Threshold
+
+                        <HelpPopover 
+                                text="This field helps to improve detection accuracy. 
+                                <br>A large value (> 50) may cause the system to miss 
+                                <br>some events, and too small a value (< 30) may cause
+                                <br>it to analyze false positives, resulting in wasted CPU time."/>
+                    </Typography>
+                    
+                    <Stack direction="row" spacing={{xs: 1, md: 2}}>
+                        <TextConfigurationField
+                            label=""
+                            variant="standard"
+                            type="number"
+                            fullWidth
+                            data={{...commonData, path: 'processingConfiguration/noiseThreshold'}}
+                        />
+
+                    </Stack>
+                </Box>
+            </Grid>
+
+            <Grid item xs={12} sm={12} md={8}>
+                <Typography gutterBottom>
+                    Camera region of interest
+                </Typography>
+                <ROICanvasInputField 
+                        camera_id={params?.camera_id} 
+                        updateCB={updateCB} 
+                        getFieldCB={getFieldCB}
+                        fieldPath="processingConfiguration/roi" />
             </Grid>
             {/* Not used in recognize */}
             {/*<Grid item xs={12} sm={12} md={4}>

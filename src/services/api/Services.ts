@@ -4,7 +4,7 @@ import ConfigurationService from './ConfigurationService';
 import LiveViewService from './LiveViewService';
 import ConfigurationServiceMock from './mock/ConfigurationServiceMock';
 
-const client = new HttpClient(config.server);
+export const client = new HttpClient(config.server);
 
 export const configurationService = new ConfigurationService(client);
 

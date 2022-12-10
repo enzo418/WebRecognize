@@ -139,6 +139,8 @@ export default function ConfigurationPage() {
             getBasicConfigurationMenu()
     );
 
+    const [configName, setConfigName] = useState<string>("Configuration Name");
+
     const handleOpenNexted = (i:number) => {
         if (open.includes(i)) {
             setOpen(open.filter((e) => e != i));
@@ -161,6 +163,12 @@ export default function ConfigurationPage() {
 
     const id = params.id;
 
+    // CONTEXT CALLBACKS
+    const updateCB:UpdateFieldCallback = (path:string, value:any) =>
+        configurationService.setField(params.id, {field: path, value});
+    
+    const getFieldCB = (path:string) => configurationService.getField(params.id, path);
+
     useEffect(() => {
         configurationService.getConfigurationCameras(id)
             .ok(cameras => {
@@ -178,6 +186,10 @@ export default function ConfigurationPage() {
                 // trick react to re render  
                 setComputedConfiguration({...computedConfiguration});
             }).fail(e => console.error("Could not get configuration cameras", e));
+
+            getFieldCB("/name").ok((name:string) => {
+                setConfigName(name);
+            }).fail(e => console.error("Could not get the configuration name: ", e));
     }, []);
 
 
@@ -250,12 +262,6 @@ export default function ConfigurationPage() {
         (basePath:string, elements:IConfigurationListElement[], padding:number) =>
             elements.map((el, i) => renderConfigurationListElement(basePath, el, i, padding));
 
-    // CONTEXT CALLBACKS
-    const updateCB:UpdateFieldCallback = (path:string, value:any) =>
-        configurationService.setField(params.id, {field: path, value});
-    
-    const getFieldCB = (path:string) => configurationService.getField(params.id, path);
-
     // RENDER
 
     return <ThemeProvider theme={theme}>
@@ -266,7 +272,7 @@ export default function ConfigurationPage() {
                 spacing={2}
                 sx={{pl: '0px'}}>
                 {/* header */}
-                <ConfigurationHeader name="Configuration Name"/>
+                <ConfigurationHeader name={configName}/>
 
                 {/* content */}
                 <Grid

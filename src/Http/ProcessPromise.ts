@@ -50,7 +50,8 @@ export default function processPromise<T, Problem extends IProblemJson>(
                     try {
                         json = JSON.parse(r.body);
                     } catch (e) {
-                        console.warn('Error parsing json on sucessfull response', e);
+                        console.warn('Error parsing json on sucessfull response, returning raw data', e);
+                        return ok(r.body as T);
                     }
 
                     return ok(json);
