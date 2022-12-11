@@ -1,5 +1,6 @@
 import {
     ListItem,
+    ListItemButton,
     ListItemIcon,
     ListItemProps,
     ListItemText,
@@ -15,6 +16,7 @@ import {
     Link as RouterLink,
     LinkProps as RouterLinkProps,
 } from 'react-router-dom';
+import { ensure } from '../utils/error';
 
 interface ListItemLinkProps extends ListItemProps {
     icon?: React.ReactElement;
@@ -30,40 +32,36 @@ interface ListItemLinkProps extends ListItemProps {
 function ListItemLink(props: ListItemLinkProps) {
     const { icon, to, primary, ...restProps } = props;
 
-    const renderLink =
-        to &&
-        React.useMemo(
-            () =>
-                React.forwardRef<
-                    HTMLAnchorElement,
-                    Omit<RouterLinkProps, 'to'>
-                >(function Link(itemProps, ref) {
+    const renderLink = React.useMemo(
+        () =>
+            React.forwardRef<HTMLAnchorElement, Omit<RouterLinkProps, 'to'>>(
+                function Link(itemProps, ref) {
                     return (
                         <RouterLink
-                            to={to}
+                            to={ensure(to)}
                             ref={ref}
                             {...itemProps}
                             role={undefined}
                         />
                     );
-                }),
-            [to],
-        );
+                },
+            ),
+        [to],
+    );
 
     const theme = useTheme();
 
     const matches = useMediaQuery(theme.breakpoints.down('md'));
 
     return (
-        <ListItem
-            button
+        <ListItemButton
             component={to ? renderLink : 'li'}
             sx={props.sx}
             {...restProps}>
             {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
             {!matches && <ListItemText primary={primary} />}
             {props.children}
-        </ListItem>
+        </ListItemButton>
     );
 }
 
