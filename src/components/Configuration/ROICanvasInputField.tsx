@@ -16,9 +16,15 @@ interface ROICanvasInputFieldProps {
     uri?: string;
     camera_id?: string;
     fieldPath: string;
+    enableEditing: boolean;
+    fullScreen?: boolean;
 
     updateCB: UpdateFieldCallback;
     getFieldCB: GetFieldCallback;
+
+    onRoiSelected?: () => any;
+
+    canvasSize: Size;
 }
 
 export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
@@ -64,8 +70,10 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
                                 `cameras/${props.camera_id}/processingConfiguration/resize`,
                             ])
                             .ok((resize: Size) => {
-                                const scaleX = 640.0 / resize.width;
-                                const scaleY = 360.0 / resize.height;
+                                const scaleX =
+                                    props.canvasSize.width / resize.width;
+                                const scaleY =
+                                    props.canvasSize.height / resize.height;
 
                                 setInitialROI(
                                     scaleRectangle(storedRoi, scaleX, scaleY),
@@ -106,8 +114,8 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
                 `cameras/${props.camera_id}/processingConfiguration/resize`,
             ])
             .ok((resize: Size) => {
-                const scaleX = resize.width / 640.0;
-                const scaleY = resize.height / 360.0;
+                const scaleX = resize.width / props.canvasSize.width;
+                const scaleY = resize.height / props.canvasSize.height;
 
                 const scaledRoi = scaleRectangle(roi, scaleX, scaleY);
 
@@ -116,7 +124,9 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
                         `cameras/${props.camera_id}/${props.fieldPath}`,
                         scaledRoi,
                     ])
-                    .ok(() => {})
+                    .ok(() => {
+                        if (props.onRoiSelected) props.onRoiSelected();
+                    })
                     .fail(e => console.error('Could not update ROI', e));
             })
             .fail(e =>
@@ -127,12 +137,19 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
     return (
         <>
             {loading ? (
-                <Skeleton variant="rectangular" width={640} height={360} />
+                <Skeleton
+                    variant="rectangular"
+                    width={props.canvasSize.width}
+                    height={props.canvasSize.height}
+                />
             ) : (
                 <CanvasHandlerROI
                     image={image}
                     onRoiUpdated={onRoiUpdated}
                     initialROI={initialROI}
+                    enableEditing={props.enableEditing}
+                    canvasSize={props.canvasSize}
+                    fullScreen={props.fullScreen}
                 />
             )}
         </>

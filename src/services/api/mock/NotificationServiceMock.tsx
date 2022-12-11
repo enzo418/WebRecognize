@@ -96,7 +96,7 @@ const notificationsMock: DTONotification[] = generateNotifications(1000, 450);
 //    date: addMinutes(subDays(baseDate, 6), 20),
 // }];
 
-type CallbackWS = (n: Notification) => Promise<boolean>;
+type CallbackWS = (n: Notification[]) => Promise<boolean>;
 
 export default class NotificationServiceMock implements INotificationService {
     private cameraService: ICameraService;
@@ -218,6 +218,10 @@ export default class NotificationServiceMock implements INotificationService {
         // });
     }
 
+    unsubscribe(callback: CallbackWS): void {
+        this.pulseCallers = this.pulseCallers.filter(c => c != callback);
+    }
+
     private async pulseHandler(): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             clearInterval(this.pulseSender);
@@ -227,7 +231,7 @@ export default class NotificationServiceMock implements INotificationService {
                 this.cameraService,
             );
 
-            const promises = this.pulseCallers.map(call => call(not));
+            const promises = this.pulseCallers.map(call => call([not]));
 
             Promise.allSettled(promises).then(results => {
                 const rejected = results.filter(r => r.status == 'rejected');

@@ -1,8 +1,10 @@
 import {
     CircularProgress,
+    FormControlLabel,
     InputAdornment,
     Select,
     Slider,
+    Switch,
     TextField,
 } from '@mui/material';
 import React from 'react';
@@ -49,7 +51,7 @@ interface IConfigurationFieldProps {
 }
 
 interface IConfigurationFieldState {
-    value: string | number;
+    value: string | number | boolean;
     state: 'initial' | 'updated' | 'updating' | 'error';
     errorMessage: string;
 }
@@ -161,8 +163,20 @@ export default function configurationField(
         handleChange(e: React.ChangeEvent<HTMLInputElement>) {
             const inputType = e.target.type;
 
-            const value =
-                inputType == 'number' ? e.target.valueAsNumber : e.target.value;
+            let value;
+
+            switch (inputType) {
+                case 'number':
+                    value = e.target.valueAsNumber;
+                    break;
+                case 'checkbox':
+                    value = e.target.checked;
+                    break;
+                default:
+                    value = e.target.value;
+                    break;
+            }
+
             this.setState({
                 value: value,
                 state: 'updating',
@@ -196,6 +210,7 @@ export default function configurationField(
                 error: this.state.state === 'error',
                 helperText: this.state.errorMessage,
                 value: this.state.value,
+                checked: this.state.value,
                 onChange: this.handleChange,
                 InputProps: {
                     endAdornment: (
@@ -211,31 +226,60 @@ export default function configurationField(
     };
 }
 
-export const TextConfigurationField = configurationField(TextField, p => p);
+export const TextConfigurationField = configurationField(TextField, p =>
+    removeChecked(p),
+);
+
 export const SelectConfigurationField = configurationField(
     Select,
     fixSelectProps,
 );
+
 export const SliderConfigurationField = configurationField(
     Slider,
     fixSliderProps,
 );
 
+//export const SwitchConfigurationField = configurationField((p: any) => {
+//    const control = <Switch defaultChecked />;
+//    const merged = Object.assign({ control }, p);
+
+//    return FormControlLabel(merged);
+//}, fixSliderProps);
+export const SwitchConfigurationField = configurationField(
+    Switch,
+    fixSwitchProps,
+);
+
 function fixSliderProps(props: any) {
-    const fixed = props;
+    props = removeChecked(props);
 
     delete props.helperText;
     delete props.InputProps;
     delete props.error;
 
-    return fixed;
+    return props;
 }
 
 function fixSelectProps(props: any) {
+    props = removeChecked(props);
+
+    delete props.helperText;
+    delete props.InputProps;
+
+    return props;
+}
+
+function fixSwitchProps(props: any) {
     const fixed = props;
 
     delete props.helperText;
     delete props.InputProps;
 
     return fixed;
+}
+
+function removeChecked(props: any) {
+    delete props.checked;
+    return props;
 }

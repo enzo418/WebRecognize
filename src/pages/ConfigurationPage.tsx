@@ -27,7 +27,6 @@ import {
     useMatch,
     useNavigate,
 } from 'react-router-dom';
-import withParams from '../utils/missingHooks';
 import { ensure } from '../utils/error';
 import {
     ArrowBack,

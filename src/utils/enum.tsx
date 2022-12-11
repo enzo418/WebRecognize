@@ -58,7 +58,7 @@ export function getEnumNameAt<T extends EnumType>(
     return res;
 }
 
-export function getEnumKeys<T>(pEnum: T): Array<number> {
+export function getEnumKeys<T extends object>(pEnum: T): Array<number> {
     return Object.keys(pEnum)
         .filter(v => !isNaN(Number(v)))
         .map(v => parseInt(v));
@@ -73,7 +73,7 @@ export function getEnumKeys<T>(pEnum: T): Array<number> {
  * @param {boolean} [lower=false] convert names to lowercase
  * @return {Array<string>}
  */
-export function getEnumKeysNames<T>(
+export function getEnumKeysNames<T extends object>(
     pEnum: T,
     lower: boolean = false,
 ): Array<string> {
@@ -86,7 +86,7 @@ export function getEnumKeysNames<T>(
     return res;
 }
 
-export function getEnumKeysValueNames<T>(
+export function getEnumKeysValueNames<T extends object>(
     pEnum: T,
     lower: boolean = false,
 ): Array<[number, string]> {
@@ -95,7 +95,7 @@ export function getEnumKeysValueNames<T>(
     return combineArrayPos(keys, names);
 }
 
-export function getEnumKeysNamesValue<T>(
+export function getEnumKeysNamesValue<T extends object>(
     pEnum: T,
     lower: boolean = false,
 ): Array<[string, number]> {

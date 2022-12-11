@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import CanvasHandler from './CanvasHandler';
-import { Point, Rectangle } from '../Geometry';
+import { Point, Rectangle, Size } from '../Geometry';
 import { getRectangleDimensions } from '../utils/geometry';
 
 type ROI = Rectangle;
@@ -10,6 +10,9 @@ interface CanvasHandlerROIProps {
     image: string;
     initialROI: ROI;
     onRoiUpdated: (roi: ROI) => any;
+    enableEditing: boolean;
+    canvasSize: Size;
+    fullScreen?: boolean;
 }
 
 export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProps> {
@@ -35,10 +38,21 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
 
     componentDidMount() {
         super.componentDidMount();
+
+        if (this.props.fullScreen) {
+            /**
+             * Insted of doing
+             *  this.canvas.current?.requestFullscreen();
+             * we request it to the body because otherwise the canvas will
+             * appear in the center, which causes problems in detecting its boundaries.
+             * It's better to make it the only element on the screen with a modal
+             * and then request the full screen in the body.
+             */
+            document.body.requestFullscreen();
+        }
+
         this.onReady(this.props.image, this.props.initialROI);
 
-        // console.log(this.canvas);
-        // console.log("context:", this.ctx);
         this.updateCanvasPosition();
     }
 
@@ -47,8 +61,11 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
     }
 
     move(e: any) {
+        if (!this.props.enableEditing) return;
+
         e.preventDefault();
         e = (e.touches || [])[0] || e;
+
         if (this.clickPressed) {
             var image = new Image();
             image.onload = () => {
@@ -60,8 +77,8 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
                     image.height,
                     0,
                     0,
-                    640,
-                    360,
+                    this.props.canvasSize.width,
+                    this.props.canvasSize.height,
                 );
 
                 const x1 = e.clientX - this.x;
@@ -83,6 +100,8 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
 
     // Click or touch pressed
     pressed(e: any) {
+        if (!this.props.enableEditing) return;
+
         e.preventDefault();
         e = (e.touches || [])[0] || e;
         this.clickPressed = true;
@@ -94,6 +113,8 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
 
     // Click or touch released
     release(e: any) {
+        if (!this.props.enableEditing) return;
+
         this.clickPressed = false;
 
         const { lt, width, height } = getRectangleDimensions(this.p1, this.p2);
@@ -126,8 +147,8 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
                 image.height,
                 0,
                 0,
-                640,
-                360,
+                this.props.canvasSize.width,
+                this.props.canvasSize.height,
             );
 
             this.ctx.strokeStyle = 'Red';
@@ -156,10 +177,11 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
     render() {
         return (
             <canvas
+                style={{ width: 'max-content' }}
                 ref={this.canvas}
                 {...this.handlers}
-                width="640"
-                height="360"
+                width={this.props.canvasSize.width + ''}
+                height={this.props.canvasSize.height + ''}
             />
         );
     }

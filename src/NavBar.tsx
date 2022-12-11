@@ -105,7 +105,11 @@ function ListItemLink(props: ListItemLinkProps) {
 //     );
 // }
 
-const NavBar: React.FC = (props: any) => {
+interface NavBarProps {
+    sx: object;
+}
+
+export default function NavBar(props: NavBarProps) {
     const { sx, ...rest } = props;
 
     const finalSx = {
@@ -138,6 +142,4 @@ const NavBar: React.FC = (props: any) => {
             </List>
         </Box>
     );
-};
-
-export default NavBar;
+}

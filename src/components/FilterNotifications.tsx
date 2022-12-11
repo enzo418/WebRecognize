@@ -10,7 +10,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Stack from '@mui/material/Stack';
 
 import DatePicker from '@mui/lab/DatePicker';
-import TextField from '@mui/material/TextField';
+import TextField, { TextFieldProps } from '@mui/material/TextField';
 
 import Camera from '../domain/Camera';
 
@@ -106,19 +106,23 @@ function FilterNotification(props: IFilterComponentProps) {
                         <DatePicker
                             label="From"
                             value={dateFrom}
-                            onChange={newValue => {
+                            onChange={(newValue: Date | null) => {
                                 handleDateFromChange(newValue);
                             }}
-                            renderInput={params => <TextField {...params} />}
+                            renderInput={(params: any) => (
+                                <TextField {...params} />
+                            )}
                         />
 
                         <DatePicker
                             label="To"
                             value={dateTo}
-                            onChange={newValue => {
+                            onChange={(newValue: Date | null) => {
                                 handleDateToChange(newValue);
                             }}
-                            renderInput={params => <TextField {...params} />}
+                            renderInput={(params: any) => (
+                                <TextField {...params} />
+                            )}
                         />
                     </Stack>
                 </AccordionDetails>

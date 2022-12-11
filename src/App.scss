@@ -51,3 +51,7 @@ iframe {
     align-items: center;
     justify-content: center;
 }
+
+.disable-touch-reloading {
+    overscroll-behavior-y: contain;
+}
