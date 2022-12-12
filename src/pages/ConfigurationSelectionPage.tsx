@@ -12,36 +12,9 @@ import React, { useEffect } from 'react';
 import DTOConfigurationDetails from '../services/api/interfaces/DTOConfigurationDetails';
 import { configurationService } from '../services/api/Services';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import SelectConfiguration from '../components/SelectConfiguration';
 
-interface ConfigurationSelectionPageProps {}
-
-export default function ConfigurationSelection(
-    props: ConfigurationSelectionPageProps,
-) {
-    const [selectedID, setSelectedID] = React.useState<string>('');
-
-    const [availableConfigurations, setAvailableConfigurations] =
-        React.useState<DTOConfigurationDetails[]>([]);
-
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        configurationService
-            .getAvailable()
-            .ok(cfgs => {
-                setAvailableConfigurations(cfgs);
-            })
-            .fail(error => {
-                console.error(error);
-            });
-    }, []);
-
-    useEffect(() => {
-        if (selectedID.length > 0) {
-            navigate(`/configuration/${selectedID}/general`);
-        }
-    }, [selectedID]);
-
+export default function ConfigurationSelection() {
     const onNewConfiguration = () => {
         configurationService
             .create()
@@ -49,8 +22,12 @@ export default function ConfigurationSelection(
             .fail(e => console.error("Couldn't create the configuration", e));
     };
 
-    const onChangeConfigurationSelected = (ev: any) => {
-        setSelectedID(ev?.target?.value as string);
+    const navigate = useNavigate();
+
+    const onChangeConfigurationSelected = (selected: string) => {
+        if (selected.length > 0) {
+            navigate(`/configuration/${selected}/general`);
+        }
     };
 
     return (
@@ -65,17 +42,11 @@ export default function ConfigurationSelection(
                         <InputLabel id="select-db-configuration">
                             Select
                         </InputLabel>
-                        <Select
+                        <SelectConfiguration
                             labelId="select-db-configuration"
-                            value={selectedID}
                             label="Configuration"
-                            onChange={onChangeConfigurationSelected}>
-                            {availableConfigurations.map(config => (
-                                <MenuItem key={config.id} value={config.id}>
-                                    {config.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
+                            onSelected={onChangeConfigurationSelected}
+                        />
                     </FormControl>
                 </Box>
 

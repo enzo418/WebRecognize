@@ -33,6 +33,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DetectionCameraConfiguration from './components/Configuration/DetectionCameraConfiguration';
 import VideoOutputGeneral from './components/Configuration/VideoOutputGeneral';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
     return (
@@ -48,6 +49,9 @@ function App() {
                             <Route
                                 path="/liveView"
                                 element={<LiveViewPage />}></Route>
+                            <Route
+                                path="/dashboard"
+                                element={<DashboardPage />}></Route>
                             <Route
                                 path="/configuration"
                                 element={<ConfigurationSelection />}></Route>

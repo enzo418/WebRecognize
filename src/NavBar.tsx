@@ -22,6 +22,7 @@ import {
 // import {StaticRouter} from 'react-router-dom/server';
 
 import './NavBar.scss';
+import { Dashboard } from '@mui/icons-material';
 
 // function Router(props: { children?: React.ReactNode }) {
 //     const {children} = props;
@@ -139,6 +140,7 @@ export default function NavBar(props: NavBarProps) {
                     primary=""
                     icon={<SettingsInputAntennaIcon />}
                 />
+                <ListItemLink to="/dashboard" primary="" icon={<Dashboard />} />
             </List>
         </Box>
     );
