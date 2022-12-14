@@ -26,7 +26,7 @@ export default function ConfigurationSelection() {
 
     const onChangeConfigurationSelected = (selected: string) => {
         if (selected.length > 0) {
-            navigate(`/configuration/${selected}/general`);
+            navigate(`/configuration/${selected}/general/basics`);
         }
     };
 

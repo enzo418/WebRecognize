@@ -16,7 +16,7 @@ import DataObjectIcon from '@mui/icons-material/DataObject';
 import EditNotificationsIcon from '@mui/icons-material/EditNotifications';
 import MonitorIcon from '@mui/icons-material/Monitor';
 
-import '../styles/GeneralConfiguration.scss';
+import '../styles/ConfigurationPage.scss';
 import ListItemLink from '../components/ListItemLink';
 
 import {
@@ -146,8 +146,6 @@ const getBasicConfigurationMenu = () => {
 // on the current location. Therefore you can find those configurations in the Route in App.tsx
 // Also, this container shows the menu with all the configurations available.
 export default function ConfigurationPage() {
-    // Redirect if missing type in the parameters
-
     const [open, setOpen] = React.useState<number[]>([]);
     const [computedConfiguration, setComputedConfiguration] =
         useState<IConfigurationList>(getBasicConfigurationMenu());
@@ -240,7 +238,9 @@ export default function ConfigurationPage() {
         const hasChildren = element.elements !== undefined;
 
         const configuration_general =
-            computedConfiguration.general.getPath(params);
+            computedConfiguration.general.getPath(params) + '/basics';
+
+        let isSelected = 'to' in element && location.href.includes(element.to);
 
         // if has children add handler to display the children on click,
         // else set the link to the redirect location
@@ -255,7 +255,9 @@ export default function ConfigurationPage() {
 
         const rendered = (
             <ListItemLink
-                className="configuration-option"
+                className={
+                    'configuration-option ' + (isSelected ? 'selected' : '')
+                }
                 key={element.primary + i}
                 icon={element.icon}
                 sx={{ pl: padding }}
