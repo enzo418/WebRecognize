@@ -51,7 +51,10 @@ export default function ConfigurationSelection() {
                 </Box>
 
                 <Box sx={{ padding: '10px' }} className="centered">
-                    <Stack direction="row" spacing={4}>
+                    <Stack direction="row" spacing={4} alignItems={'center'}>
+                        <Typography variant="subtitle1" color="GrayText">
+                            ADD
+                        </Typography>
                         <Button
                             variant="outlined"
                             component={RouterLink}
