@@ -240,8 +240,6 @@ export default function ConfigurationPage() {
         const configuration_general =
             computedConfiguration.general.getPath(params) + '/basics';
 
-        let isSelected = 'to' in element && location.href.includes(element.to);
-
         // if has children add handler to display the children on click,
         // else set the link to the redirect location
         const props = hasChildren
@@ -252,6 +250,8 @@ export default function ConfigurationPage() {
                           ? configuration_general
                           : `${basePath}/${element.to}`,
               };
+
+        const isSelected = props.to && location.href.includes(props.to);
 
         const rendered = (
             <ListItemLink
