@@ -67,6 +67,13 @@ export default function processPromise<T, Problem extends IProblemJson>(
 
                     return ok(json);
                 }
+            })
+            .catch(e => {
+                fail({
+                    title: 'Network error',
+                    detail: e.message,
+                    status: 0,
+                } as Problem);
             });
     });
 }
