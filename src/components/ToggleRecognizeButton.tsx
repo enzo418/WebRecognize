@@ -26,7 +26,7 @@ export default function ToggleRecognizeButton(props: Props) {
             {!props.status.running && (
                 <Zoom in={!props.status.running}>
                     <Button
-                        sx={{ color: '#fff' }}
+                        sx={{ color: 'CaptionText' }}
                         startIcon={<PlayArrowRounded color="success" />}
                         onClick={() => props.onClickStart(selected)}>
                         Start with
@@ -37,7 +37,7 @@ export default function ToggleRecognizeButton(props: Props) {
             {props.status.running && (
                 <Zoom in={props.status.running}>
                     <Button
-                        sx={{ color: '#fff' }}
+                        sx={{ color: 'CaptionText' }}
                         startIcon={<Square color="error" />}
                         onClick={() => props.onClickStop()}>
                         Stop

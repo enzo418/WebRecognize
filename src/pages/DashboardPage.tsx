@@ -7,7 +7,7 @@ import { observerService } from '../services/api/Services';
 export default function DashboardPage() {
     const [observerStatus, setObserverStatus] = useState<DTOObserverStatus>({
         running: false,
-        config_id: ''
+        config_id: '',
     });
 
     const updateObserverStatus = () => {
