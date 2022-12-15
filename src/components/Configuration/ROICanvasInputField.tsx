@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import config from '../../config';
 import { Rectangle, Size } from '../../Geometry';
 import CanvasHandlerROI from '../../modules/CanvasHandlerROI';
-import { client } from '../../services/api/Services';
+import { cameraService, client } from '../../services/api/Services';
 
 import {
     GetFieldCallback,
@@ -40,20 +40,13 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
     const getCameraPreview = () => {
         setLoading(true);
 
-        const query = props.uri
+        const id = props.uri
             ? { uri: props.uri }
             : { camera_id: props.camera_id };
 
-        client
-            .get(config.endpoints.api.cameraFrame, query, {
-                cache: 'force-cache',
-            })
-            .then(res => res.arrayBuffer())
-            .then(buffer => {
-                const blob = new Blob([buffer], {
-                    type: 'image/jpeg',
-                });
-
+        cameraService
+            .getFrame(id)
+            .ok(blob => {
                 setImage(URL.createObjectURL(blob));
 
                 // we need to get the field value now
@@ -63,6 +56,11 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
                     ])
                     .ok(storedRoi => {
                         ensure<Rectangle>(storedRoi);
+
+                        // TODO: This shouldn't be like this because if you change the processingConfiguration/resize
+                        // after you set the roi it won't longer be what you selected. It would be better to just use
+                        // the camera resolution WxH as a reference, and then you scale it up/down depending on the
+                        // resize.
 
                         // we need the resize at the processing stage to scale down/up the selected ROI
                         props.getFieldCB
@@ -93,7 +91,7 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
                         });
                     });
             })
-            .catch(e => {
+            .fail(e => {
                 console.error('Could not get the camera frame: ', e);
             });
     };

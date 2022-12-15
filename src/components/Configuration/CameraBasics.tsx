@@ -17,7 +17,9 @@ import config from '../../config';
 import { useConfiguration } from '../../context/configurationContext';
 import HttpClient from '../../Http/HttpClient';
 import processPromise from '../../Http/ProcessPromise';
+import { DTOCameraDefaults } from '../../services/api/interfaces/DTOCamera';
 import IProblemJson from '../../services/api/interfaces/IProblemJson';
+import { cameraService } from '../../services/api/Services';
 import { HelpPopover, WarningPopover } from '../IconPopover';
 import LiveViewBox from '../LiveViewBox';
 import {
@@ -49,11 +51,6 @@ interface IConfigurationFieldProps {
 //    />;
 // }
 
-interface DTOCameraDefaults {
-    fps: number;
-    size: { width: number; height: number };
-}
-
 export default function CameraBasics() {
     const { params, updateCB, getFieldCB } = useConfiguration();
 
@@ -72,9 +69,8 @@ export default function CameraBasics() {
     // Update camera defaults on url change
     useEffect(() => {
         if (url.length > 0) {
-            processPromise<DTOCameraDefaults, IProblemJson>(
-                client.get(config.endpoints.api.cameraDefaults, { uri: url }),
-            )
+            cameraService
+                .getDefaults({ uri: url })
                 .ok(defaults => {
                     setCameraDefaults(defaults);
                 })

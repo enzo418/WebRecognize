@@ -34,6 +34,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import DetectionCameraConfiguration from './components/Configuration/DetectionCameraConfiguration';
 import VideoOutputGeneral from './components/Configuration/VideoOutputGeneral';
 import DashboardPage from './pages/DashboardPage';
+import AreasCameraConfiguration from './components/Configuration/AreasCameraConfiguration';
 
 function App() {
     return (
@@ -95,7 +96,7 @@ function App() {
                                         <Route
                                             path="areas"
                                             element={
-                                                <p>camera areas</p>
+                                                <AreasCameraConfiguration />
                                             }></Route>
                                         <Route
                                             path="blobs"

@@ -56,10 +56,6 @@ export default class CanvasHandlerROI extends CanvasHandler<CanvasHandlerROIProp
         this.updateCanvasPosition();
     }
 
-    setROI(roi: ROI) {
-        this.ROI = roi;
-    }
-
     move(e: any) {
         if (!this.props.enableEditing) return;
 

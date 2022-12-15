@@ -4,7 +4,7 @@ import config from '../config';
 import processPromise from '../Http/ProcessPromise';
 import LiveView from '../modules/LiveView';
 import IProblemJson from '../services/api/interfaces/IProblemJson';
-import { client } from '../services/api/Services';
+import { cameraService, client } from '../services/api/Services';
 
 interface CameraFrameBoxProps {
     uri?: string;
@@ -39,25 +39,20 @@ export default class CameraFrameBox extends React.Component<
     }
 
     updateLiveFeed() {
-        const query = this.props.uri
+        const id = this.props.uri
             ? { uri: this.props.uri }
             : { camera_id: this.props.camera_id };
 
-        client
-            .get(config.endpoints.api.cameraFrame, query, {
-                cache: 'force-cache',
-            })
-            .then(res => res.arrayBuffer())
-            .then(buffer => {
-                const blob = new Blob([buffer], { type: 'image/jpeg' });
-
+        cameraService
+            .getFrame(id)
+            .ok(blob => {
                 if (this.image.current) {
                     this.image.current.src = URL.createObjectURL(blob);
                 }
 
                 this.setState({ loading: false, error: '' });
             })
-            .catch(e => {
+            .fail(e => {
                 this.setState({
                     loading: false,
                     error: e.title || 'unknown error',

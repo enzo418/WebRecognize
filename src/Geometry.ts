@@ -14,3 +14,5 @@ export interface Rectangle {
     width: number;
     height: number;
 }
+
+export type Mask = Array<Point>;

@@ -282,7 +282,7 @@ export default function DetectionCameraConfiguration() {
                     fullScreen
                     open={showModalROI}
                     ref={refModalRoi}
-                    sx={{ overflow: 'hideen', touchAction: 'none' }}>
+                    sx={{ overflow: 'hidden', touchAction: 'none' }}>
                     <ROICanvasInputField
                         {...GetROIprops({
                             enableEditing: true,

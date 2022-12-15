@@ -28,6 +28,7 @@
     "react-toastify": "^9.1.1",
     "react-virtual": "^2.10.4",
     "sass": "^1.49.9",
+    "simplify-js": "^1.2.4",
     "underscore": "^1.13.4",
     "web-vitals": "^2.1.4"
   },

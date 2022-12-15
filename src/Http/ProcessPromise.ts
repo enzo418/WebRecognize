@@ -77,3 +77,50 @@ export default function processPromise<T, Problem extends IProblemJson>(
             });
     });
 }
+
+export function processPromiseAsArrayBuffer<Problem extends IProblemJson>(
+    promise: Promise<Response>,
+): TypedPromise<ArrayBuffer, Problem> {
+    return new TypedPromise<ArrayBuffer, Problem>((ok, fail) => {
+        promise
+            .then(async r => ({
+                status: r.status,
+                headers: r.headers,
+                ok: r.ok, // r oks if status is in [200-299]
+                body: await r.arrayBuffer(),
+            }))
+            .then(r => {
+                if (!r.ok) {
+                    let rejectedJSON: any = { status: -1 };
+
+                    if (
+                        r.headers.has('Content-Type') &&
+                        r.headers.get('Content-Type') ==
+                            'application/problem+json'
+                    ) {
+                        try {
+                            const decoder = new TextDecoder('utf-8');
+
+                            const text = decoder.decode(r.body);
+
+                            rejectedJSON = JSON.parse(text);
+                        } catch (e) {
+                            console.warn(
+                                'Error parsing json on failed response',
+                                e,
+                            );
+                        }
+                    } else {
+                        console.warn(
+                            'Api server is misbehaving!' +
+                                "didn't respond with a problem+json",
+                        );
+                    }
+
+                    fail(rejectedJSON);
+                } else {
+                    return ok(r.body);
+                }
+            });
+    });
+}
