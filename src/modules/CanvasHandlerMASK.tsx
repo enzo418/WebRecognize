@@ -70,7 +70,6 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
     }
 
     drawAll(afterDrawImage = () => {}) {
-        console.log({ before: this.masks });
         const image = new Image();
 
         const fillBlackAlpha = () => {
@@ -154,10 +153,7 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
 
             this.ctx.restore();
 
-            //if (this.masks.length) alert('after draw image');
             afterDrawImage();
-
-            console.log({ after: this.masks });
         };
 
         image.src = this.props.image;
@@ -186,8 +182,6 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
 
     // Click or touch pressed
     pressed(e: any) {
-        console.log('pressed');
-
         if (!this.props.enableEditing) return;
 
         e.preventDefault();
