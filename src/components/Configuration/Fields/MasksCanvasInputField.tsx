@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import config from '../../config';
-import { Mask, Rectangle, Size } from '../../Geometry';
-import CanvasHandlerROI from '../../modules/CanvasHandlerROI';
-import { cameraService, client } from '../../services/api/Services';
+import config from '../../../config';
+import { Mask, Rectangle, Size } from '../../../Geometry';
+import CanvasHandlerROI from '../../../modules/CanvasHandlerROI';
+import { cameraService, client } from '../../../services/api/Services';
 
 import {
     GetFieldCallback,
     UpdateFieldCallback,
-} from '../../context/configurationContext';
+} from '../../../context/configurationContext';
 import {
     Box,
     Button,
@@ -17,9 +17,9 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import { ensure } from '../../utils/error';
-import { scaleMasks, scaleRectangle } from '../../utils/geometry';
-import CanvasHandlerMask from '../../modules/CanvasHandlerMASK';
+import { ensure } from '../../../utils/error';
+import { scaleMasks, scaleRectangle } from '../../../utils/geometry';
+import CanvasHandlerMask from '../../../modules/CanvasHandlerMASK';
 import {
     AddCircleOutline,
     CloseFullscreen,
@@ -27,7 +27,7 @@ import {
     Redo,
     Undo,
 } from '@mui/icons-material';
-import { HelpPopover } from '../IconPopover';
+import { HelpPopover } from '../../IconPopover';
 
 interface MasksCanvasInputFieldProps {
     uri?: string;

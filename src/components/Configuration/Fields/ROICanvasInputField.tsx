@@ -1,17 +1,15 @@
+import { Skeleton } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import config from '../../config';
-import { Rectangle, Size } from '../../Geometry';
-import CanvasHandlerROI from '../../modules/CanvasHandlerROI';
-import { cameraService, client } from '../../services/api/Services';
-
+import { toast } from 'react-toastify';
 import {
     GetFieldCallback,
     UpdateFieldCallback,
-} from '../../context/configurationContext';
-import { Skeleton } from '@mui/material';
-import { ensure } from '../../utils/error';
-import { scaleRectangle } from '../../utils/geometry';
-import { toast } from 'react-toastify';
+} from '../../../context/configurationContext';
+import { Size, Rectangle } from '../../../Geometry';
+import CanvasHandlerROI from '../../../modules/CanvasHandlerROI';
+import { cameraService } from '../../../services/api/Services';
+import { ensure } from '../../../utils/error';
+import { scaleRectangle } from '../../../utils/geometry';
 
 interface ROICanvasInputFieldProps {
     uri?: string;

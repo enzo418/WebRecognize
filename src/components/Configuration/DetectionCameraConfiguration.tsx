@@ -31,7 +31,7 @@ import {
     SliderConfigurationField,
     TextConfigurationField,
 } from './configurationField';
-import ROICanvasInputField from './ROICanvasInputField';
+import ROICanvasInputField from './Fields/ROICanvasInputField';
 
 interface Props {
     updateField: (field: string, value: any) => any;

@@ -3,7 +3,7 @@ import { Box, Button, Dialog, Stack, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useConfiguration } from '../../context/configurationContext';
 import { HelpPopover } from '../IconPopover';
-import MasksCanvasInputField from './MasksCanvasInputField';
+import MasksCanvasInputField from './Fields/MasksCanvasInputField';
 
 export default function AreasCameraConfiguration() {
     const { params, updateCB, getFieldCB } = useConfiguration();
