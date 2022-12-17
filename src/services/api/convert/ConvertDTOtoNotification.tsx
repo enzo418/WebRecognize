@@ -33,65 +33,67 @@ export async function parseNotification(
     pNot: DTONotification,
     cameraService: ICameraService,
 ): Promise<Notification> {
-    return new Promise(async (resolve, reject) => {
-        const camera: Camera = await cameraService.get(pNot.cameraID);
+    return new Promise((resolve, reject) => {
+        console.log(pNot);
+        cameraService
+            .get(pNot.camera.id)
+            .ok(camera => {
+                let notification: Notification = {
+                    id: pNot.id,
+                    date: new Date(pNot.datetime * 1000),
+                    group: pNot.groupID,
+                    camera: camera,
+                    type: tryGetEnumValueFromDirtyString(
+                        ENotificationType,
+                        pNot.type,
+                    ),
+                };
 
-        if (camera) {
-            let notification: Notification = {
-                id: pNot.id,
-                date: new Date(pNot.datetime * 1000),
-                group: pNot.groupID,
-                camera: camera,
-                type: tryGetEnumValueFromDirtyString(
-                    ENotificationType,
-                    pNot.type,
-                ),
-            };
+                const absoluteURL = new URL(pNot.content, config.server).href;
 
-            const absoluteURL = new URL(pNot.content, config.server).href;
+                switch (notification.type) {
+                    case ENotificationType.IMAGE:
+                        notification = {
+                            ...notification,
+                            mediaURI: absoluteURL,
+                        } as MediaNotification;
+                        break;
+                    case ENotificationType.VIDEO:
+                        notification = {
+                            ...notification,
+                            mediaURI: absoluteURL,
+                        } as MediaNotification;
+                        break;
+                    case ENotificationType.TEXT:
+                        notification = {
+                            ...notification,
+                            text: pNot.content,
+                        } as TextNotification;
+                        break;
+                }
 
-            switch (notification.type) {
-                case ENotificationType.IMAGE:
-                    notification = {
-                        ...notification,
-                        mediaURI: absoluteURL,
-                    } as MediaNotification;
-                    break;
-                case ENotificationType.VIDEO:
-                    notification = {
-                        ...notification,
-                        mediaURI: absoluteURL,
-                    } as MediaNotification;
-                    break;
-                case ENotificationType.TEXT:
-                    notification = {
-                        ...notification,
-                        text: pNot.content,
-                    } as TextNotification;
-                    break;
-            }
-
-            resolve(notification);
-        } else {
-            reject(
-                new Error(
-                    `Couldn't get the camera with id: '${pNot.cameraID}'`,
-                ),
-            );
-        }
+                resolve(notification);
+            })
+            .fail(e => {
+                reject(
+                    new Error(
+                        `Couldn't get the camera with id: '${pNot.camera.id}', error: ${e.title}`,
+                    ),
+                );
+            });
     });
 }
 
 export function parseNotifications(
-    pDTONotifs: Array<DTONotification>,
+    pDTONotifications: Array<DTONotification>,
     cameraService: ICameraService,
 ): Promise<Array<Notification>> {
     return new Promise((resolve, reject) => {
         const notifications: Array<Notification> = [];
 
         // get a promise per notification
-        const promises: Promise<Notification>[] = pDTONotifs.map(DTONot =>
-            parseNotification(DTONot, cameraService),
+        const promises: Promise<Notification>[] = pDTONotifications.map(
+            DTONot => parseNotification(DTONot, cameraService),
         );
 
         // resolve once all the promises are settled (rejected/fullfiled)

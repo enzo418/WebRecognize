@@ -16,16 +16,7 @@ import Skeleton from '@mui/material/Skeleton';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-import { useEffect } from 'react';
-
 import '../styles/Notifications.scss';
-
-import CameraServiceMock from '../services/api/mock/CameraServiceMock';
-import NotificationServiceMock from '../services/api/mock/NotificationServiceMock';
-
-import NotificationService from '../services/api/NotificationService';
-
-import HttpClient from '../Http/HttpClient';
 
 import config from '../config';
 
@@ -50,8 +41,8 @@ import { intersect } from '../utils/array';
 import SkeletonImage from '../components/SkeletonImage';
 import SkeletonVideo from '../components/SkeletonVideo';
 import { INotificationService } from '../services/api/interfaces/INotificationService';
-import ICameraService from '../services/api/interfaces/ICameraService';
 import { FormControlLabel, Switch } from '@mui/material';
+import { notificationService } from '../services/api/Services';
 
 interface INotificationBodyDisplayMediaProps {
     mediaURI: string;
@@ -296,39 +287,6 @@ function NotificationItem(props: INotificationItemProps) {
     );
 }
 
-class SingletonCameraService {
-    private static instance: ICameraService;
-
-    private constructor() {}
-
-    public static getInstance(): ICameraService {
-        if (!SingletonCameraService.instance) {
-            SingletonCameraService.instance = new CameraServiceMock();
-        }
-
-        return SingletonCameraService.instance;
-    }
-}
-
-class SingletonNotificationService {
-    private static instance: INotificationService;
-
-    private constructor() {}
-
-    public static getInstance(
-        cameraService: ICameraService,
-    ): INotificationService {
-        if (!SingletonNotificationService.instance) {
-            SingletonNotificationService.instance = new NotificationService(
-                new HttpClient(config.server),
-                cameraService,
-            );
-        }
-
-        return SingletonNotificationService.instance;
-    }
-}
-
 type NotificationsProps = {};
 
 type NotificationsState = {
@@ -367,18 +325,12 @@ export default class Notifications extends React.Component<
         },
     };
 
-    notificationService: INotificationService;
-
     notificationAudioPlayer: React.RefObject<any>;
 
     constructor(props: NotificationsProps) {
         super(props);
 
-        this.notificationService = SingletonNotificationService.getInstance(
-            SingletonCameraService.getInstance(),
-        );
-
-        this.processNotificationRequest(this.notificationService.getAll(100));
+        this.processNotificationRequest(notificationService.getAll(100));
 
         this.notificationAudioPlayer = React.createRef();
     }
@@ -395,7 +347,7 @@ export default class Notifications extends React.Component<
     };
 
     componentWillUnmount() {
-        this.notificationService.unsubscribe(this.handleNewNotification);
+        notificationService.unsubscribe(this.handleNewNotification);
     }
 
     filterNotifications = (filter: INotificationFilters) => {
@@ -403,7 +355,7 @@ export default class Notifications extends React.Component<
         if (filter.active) {
             if (filter.before && filter.after) {
                 this.processNotificationRequest(
-                    this.notificationService.getBetween(
+                    notificationService.getBetween(
                         filter.before,
                         filter.after,
                         100,
@@ -411,17 +363,15 @@ export default class Notifications extends React.Component<
                 );
             } else if (filter.before && !filter.after) {
                 this.processNotificationRequest(
-                    this.notificationService.getBefore(filter.before, 100),
+                    notificationService.getBefore(filter.before, 100),
                 );
             } else if (!filter.before && filter.after) {
                 this.processNotificationRequest(
-                    this.notificationService.getAfter(filter.after, 100),
+                    notificationService.getAfter(filter.after, 100),
                 );
             }
         } else {
-            this.processNotificationRequest(
-                this.notificationService.getAll(100),
-            );
+            this.processNotificationRequest(notificationService.getAll(100));
         }
 
         // TODO: Add camera filters
@@ -648,7 +598,7 @@ export default class Notifications extends React.Component<
 
     componentDidMount() {
         this.notificationAudioPlayer.current.volume = 0.3;
-        this.notificationService.subscribe(this.handleNewNotification);
+        notificationService.subscribe(this.handleNewNotification);
     }
 
     render() {

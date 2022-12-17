@@ -2,6 +2,8 @@ import ICameraService from '../interfaces/ICameraService';
 import Camera from '../../../domain/Camera';
 import DTOCamera from '../interfaces/DTOCamera';
 import { ensure } from '../../../utils/error';
+import TypedPromise from '../../../TypedPromise';
+import IProblemJson from '../interfaces/IProblemJson';
 
 const generateCameras = (n: number) => {
     const generated: DTOCamera[] = [];
@@ -10,6 +12,7 @@ const generateCameras = (n: number) => {
         generated.push({
             id: '' + i,
             name: 'cam' + i,
+            url: '' + i,
         });
     }
 
@@ -36,8 +39,8 @@ export default class CameraServiceMock implements ICameraService {
         this.cameras = cams;
     }
 
-    get(id: string): Promise<Camera> {
-        return new Promise((resolve, reject) => {
+    get(id: string) {
+        return new TypedPromise<Camera, IProblemJson>((resolve, reject) => {
             resolve(ensure(this.cameras.find(cam => cam.id === id)));
         });
     }

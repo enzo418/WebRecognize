@@ -5,12 +5,19 @@ import processPromise, {
 } from '../../Http/ProcessPromise';
 import TypedPromise from '../../TypedPromise';
 import DTOCamera, { DTOCameraDefaults } from './interfaces/DTOCamera';
+import ICameraService from './interfaces/ICameraService';
 import IProblemJson from './interfaces/IProblemJson';
 import Service from './Service';
 
-export default class CameraService extends Service {
+export default class CameraService extends Service implements ICameraService {
     constructor(httpClient: IHttpClient) {
         super(httpClient, '/api/');
+    }
+
+    public get(id: string) {
+        return processPromise<DTOCamera, IProblemJson>(
+            this.client.get(this.baseUrl + 'camera/' + id, {}),
+        );
     }
 
     public getDefaults(id: { uri?: string; camera_id?: string }) {

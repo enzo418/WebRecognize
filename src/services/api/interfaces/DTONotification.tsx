@@ -9,7 +9,10 @@ export default interface DTONotification {
     id: string;
     datetime: number; // unix date
     groupID: number;
-    cameraID: string;
+    camera: {
+        id: string;
+        name: string;
+    };
     type: string;
     content: string;
     // eslint-disable-next-line semi
