@@ -11,6 +11,7 @@ import {
 import { Skeleton } from '@mui/material';
 import { ensure } from '../../utils/error';
 import { scaleRectangle } from '../../utils/geometry';
+import { toast } from 'react-toastify';
 
 interface ROICanvasInputFieldProps {
     uri?: string;
@@ -37,12 +38,10 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
         height: 0,
     });
 
+    const id = props.uri ? { uri: props.uri } : { camera_id: props.camera_id };
+
     const getCameraPreview = () => {
         setLoading(true);
-
-        const id = props.uri
-            ? { uri: props.uri }
-            : { camera_id: props.camera_id };
 
         cameraService
             .getFrame(id)
@@ -57,21 +56,14 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
                     .ok(storedRoi => {
                         ensure<Rectangle>(storedRoi);
 
-                        // TODO: This shouldn't be like this because if you change the processingConfiguration/resize
-                        // after you set the roi it won't longer be what you selected. It would be better to just use
-                        // the camera resolution WxH as a reference, and then you scale it up/down depending on the
-                        // resize.
-
-                        // we need the resize at the processing stage to scale down/up the selected ROI
-                        props.getFieldCB
-                            .apply(null, [
-                                `cameras/${props.camera_id}/processingConfiguration/resize`,
-                            ])
-                            .ok((resize: Size) => {
+                        // The roi is selected relative to the camera resolution
+                        cameraService
+                            .getDefaults(id)
+                            .ok(({ size }) => {
                                 const scaleX =
-                                    props.canvasSize.width / resize.width;
+                                    props.canvasSize.width / size.width;
                                 const scaleY =
-                                    props.canvasSize.height / resize.height;
+                                    props.canvasSize.height / size.height;
 
                                 setInitialROI(
                                     scaleRectangle(storedRoi, scaleX, scaleY),
@@ -107,13 +99,12 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
 
     const onRoiUpdated = (roi: Rectangle) => {
         // We need to get the resize again because it might have been changed here or by another user
-        props.getFieldCB
-            .apply(null, [
-                `cameras/${props.camera_id}/processingConfiguration/resize`,
-            ])
-            .ok((resize: Size) => {
-                const scaleX = resize.width / props.canvasSize.width;
-                const scaleY = resize.height / props.canvasSize.height;
+        props.getFieldCB;
+        cameraService
+            .getDefaults(id)
+            .ok(({ size }) => {
+                const scaleX = size.width / props.canvasSize.width;
+                const scaleY = size.height / props.canvasSize.height;
 
                 const scaledRoi = scaleRectangle(roi, scaleX, scaleY);
 
@@ -123,7 +114,10 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
                         scaledRoi,
                     ])
                     .ok(() => {
-                        if (props.onRoiSelected) props.onRoiSelected();
+                        if (props.onRoiSelected) {
+                            props.onRoiSelected();
+                            toast.success('Roi updated', { delay: 2000 });
+                        }
                     })
                     .fail(e => console.error('Could not update ROI', e));
             })
