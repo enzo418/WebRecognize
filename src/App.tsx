@@ -35,6 +35,8 @@ import DetectionCameraConfiguration from './components/Configuration/DetectionCa
 import VideoOutputGeneral from './components/Configuration/VideoOutputGeneral';
 import DashboardPage from './pages/DashboardPage';
 import AreasCameraConfiguration from './components/Configuration/AreasCameraConfiguration';
+import NotificationsTelegramConfiguration from './components/Configuration/NotificationsTelegramConfiguration';
+import NotificationsLocalConfiguration from './components/Configuration/NotificationsLocalConfiguration';
 
 function App() {
     return (
@@ -70,7 +72,19 @@ function App() {
                                         element={<p>basics</p>}></Route>
                                     <Route
                                         path="notifications"
-                                        element={<p>notifications</p>}></Route>
+                                        element={<Outlet />}>
+                                        <Route
+                                            path="telegram"
+                                            element={
+                                                <NotificationsTelegramConfiguration />
+                                            }></Route>
+
+                                        <Route
+                                            path="local"
+                                            element={
+                                                <NotificationsLocalConfiguration />
+                                            }></Route>
+                                    </Route>
                                     <Route
                                         path="video-output"
                                         element={

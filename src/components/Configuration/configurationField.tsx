@@ -51,7 +51,7 @@ interface IConfigurationFieldProps {
 }
 
 interface IConfigurationFieldState {
-    value: string | number | boolean;
+    value: string | number | boolean | string[] | number[];
     state: 'initial' | 'updated' | 'updating' | 'error';
     errorMessage: string;
 }

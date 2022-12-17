@@ -32,6 +32,7 @@ import {
     ArrowBack,
     ExpandLess,
     ExpandMore,
+    Telegram,
     Videocam,
 } from '@mui/icons-material';
 import FormatShapesIcon from '@mui/icons-material/FormatShapes';
@@ -78,6 +79,18 @@ const getBasicConfigurationMenu = () => {
                     to: 'notifications',
                     primary: 'Notifications',
                     icon: <EditNotificationsIcon />,
+                    elements: [
+                        {
+                            to: 'telegram',
+                            primary: 'Telegram',
+                            icon: <Telegram />,
+                        },
+                        {
+                            to: 'local',
+                            primary: 'Local',
+                            icon: <EditNotificationsIcon />,
+                        },
+                    ],
                 },
                 {
                     to: 'video-output',
