@@ -27,6 +27,10 @@ export default class ConfigurationService extends Service {
         );
     }
 
+    /**
+     * Get the configurations that backend has stored
+     * @returns
+     */
     public getAvailable() {
         return processPromise<any, IProblemJson>(
             this.client.get(this.baseUrl, {}),
@@ -42,7 +46,34 @@ export default class ConfigurationService extends Service {
         );
     }
 
+    public clone(id: string) {
+        return processPromise<{ id: string }, IProblemJson>(
+            this.client.post(
+                this.baseUrl,
+                {
+                    clone_id: id,
+                },
+                { headers: {} },
+            ),
+        );
+    }
+
+    public createCamera(configurationID: string, toCloneID?: string) {
+        const body = toCloneID ? { clone_id: toCloneID } : {};
+
+        return processPromise<{ id: string }, IProblemJson>(
+            this.client.post(
+                this.baseUrl + configurationID + '/camera/',
+                body,
+                {
+                    headers: {},
+                },
+            ),
+        );
+    }
+
     public getConfigurationCameras(configurationId: string) {
+        // TODO: Improve this, we are getting the whole camera
         return new TypedPromise<DTOCamera[], IProblemJson>((ok, fail) => {
             this.getField(configurationId, 'cameras')
                 .ok(res =>

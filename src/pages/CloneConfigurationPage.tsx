@@ -13,20 +13,23 @@ import DTOConfigurationDetails from '../services/api/interfaces/DTOConfiguration
 import { configurationService } from '../services/api/Services';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import SelectConfiguration from '../components/SelectConfiguration';
+import { toast } from 'react-toastify';
 
 export default function ConfigurationSelection() {
-    const onNewConfiguration = () => {
-        configurationService
-            .create()
-            .ok(res => navigate(res.id))
-            .fail(e => console.error("Couldn't create the configuration", e));
-    };
-
     const navigate = useNavigate();
 
     const onChangeConfigurationSelected = (selected: string) => {
         if (selected.length > 0) {
-            navigate(`/configuration/${selected}/general/basics`);
+            configurationService
+                .clone(selected)
+                .ok(({ id }) => {
+                    navigate(`/configuration/${id}/general/basics`);
+                })
+                .fail(e => {
+                    toast.error(
+                        'Could not clone the configuration, got: ' + e.title,
+                    );
+                });
         }
     };
 
@@ -35,7 +38,7 @@ export default function ConfigurationSelection() {
             <Box className="centered" sx={{ height: '100vh', gap: '20vh' }}>
                 <Box className="centered">
                     <Typography variant="h5" gutterBottom>
-                        Select a configuration to open
+                        Select the configuration to clone
                     </Typography>
                     <FormControl
                         sx={{ width: 'fit-content', minWidth: '30vw' }}>
@@ -48,29 +51,6 @@ export default function ConfigurationSelection() {
                             onSelected={onChangeConfigurationSelected}
                         />
                     </FormControl>
-                </Box>
-
-                <Box sx={{ padding: '10px' }} className="centered">
-                    <Stack direction="row" spacing={4} alignItems={'center'}>
-                        <Typography variant="subtitle1" color="GrayText">
-                            ADD
-                        </Typography>
-                        <Button
-                            variant="outlined"
-                            component={RouterLink}
-                            to="/configuration_file">
-                            From file
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            component={RouterLink}
-                            to="/configuration-clone">
-                            Clone from existing configuration
-                        </Button>
-                        <Button variant="outlined" onClick={onNewConfiguration}>
-                            New
-                        </Button>
-                    </Stack>
                 </Box>
             </Box>
         </Box>

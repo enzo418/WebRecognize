@@ -37,6 +37,8 @@ import DashboardPage from './pages/DashboardPage';
 import AreasCameraConfiguration from './components/Configuration/AreasCameraConfiguration';
 import NotificationsTelegramConfiguration from './components/Configuration/NotificationsTelegramConfiguration';
 import NotificationsLocalConfiguration from './components/Configuration/NotificationsLocalConfiguration';
+import CloneConfigurationPage from './pages/CloneConfigurationPage';
+import AddCamera from './components/Configuration/AddCamera';
 
 function App() {
     return (
@@ -64,6 +66,14 @@ function App() {
                                     <CreateConfigurationFromFilePage />
                                 }></Route>
                             <Route
+                                path="/configuration-clone"
+                                element={<CloneConfigurationPage />}></Route>
+                            <Route
+                                path="/configuration_file"
+                                element={
+                                    <CreateConfigurationFromFilePage />
+                                }></Route>
+                            <Route
                                 path="/configuration/:id"
                                 element={<ConfigurationPage />}>
                                 <Route path="general" element={<Outlet />}>
@@ -85,6 +95,9 @@ function App() {
                                                 <NotificationsLocalConfiguration />
                                             }></Route>
                                     </Route>
+                                    <Route
+                                        path="add-camera"
+                                        element={<AddCamera />}></Route>
                                     <Route
                                         path="video-output"
                                         element={

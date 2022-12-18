@@ -29,6 +29,7 @@ import {
 } from 'react-router-dom';
 import { ensure } from '../utils/error';
 import {
+    AddAPhotoOutlined,
     ArrowBack,
     ExpandLess,
     ExpandMore,
@@ -104,7 +105,7 @@ const getBasicConfigurationMenu = () => {
                 `/configuration/${params.id}/general/camera/${params.camera_id}`,
             elements: [
                 {
-                    to: '<configuration_general>',
+                    to: '<configuration_general>/basics',
                     primary: 'Back',
                     icon: <ArrowBack />,
                 },
@@ -193,24 +194,40 @@ export default function ConfigurationPage() {
         configurationService.getField(params.id, path);
 
     useEffect(() => {
-        configurationService
-            .getConfigurationCameras(id)
-            .ok(cameras => {
-                computedConfiguration.general.elements.push({
-                    to: 'camera',
-                    primary: 'Cameras',
-                    icon: <Videocam />,
-                    elements: cameras.map(cam => ({
-                        to: cam.id + '/basics',
-                        primary: cam.name,
+        if (
+            computedConfiguration.general.elements[
+                computedConfiguration.general.elements.length - 1
+            ].to != 'camera'
+        ) {
+            configurationService
+                .getConfigurationCameras(id)
+                .ok(cameras => {
+                    computedConfiguration.general.elements.push({
+                        to: 'camera',
+                        primary: 'Cameras',
                         icon: <Videocam />,
-                    })),
-                });
+                        elements: cameras.map(cam => ({
+                            to: cam.id + '/basics',
+                            primary: cam.name,
+                            icon: <Videocam />,
+                        })),
+                    });
 
-                // trick react to re render
-                setComputedConfiguration({ ...computedConfiguration });
-            })
-            .fail(e => console.error('Could not get configuration cameras', e));
+                    computedConfiguration.general.elements[
+                        computedConfiguration.general.elements.length - 1
+                    ].elements?.push({
+                        to: '<configuration_general>/add-camera',
+                        primary: 'Add new',
+                        icon: <AddAPhotoOutlined />,
+                    });
+
+                    // trick react to re render
+                    setComputedConfiguration({ ...computedConfiguration });
+                })
+                .fail(e =>
+                    console.error('Could not get configuration cameras', e),
+                );
+        }
 
         getFieldCB('/name')
             .ok((name: string) => {
@@ -251,17 +268,19 @@ export default function ConfigurationPage() {
         const hasChildren = element.elements !== undefined;
 
         const configuration_general =
-            computedConfiguration.general.getPath(params) + '/basics';
+            computedConfiguration.general.getPath(params);
 
         // if has children add handler to display the children on click,
         // else set the link to the redirect location
         const props = hasChildren
             ? { onClick: () => handleOpenNexted(i) }
             : {
-                  to:
-                      element.to === '<configuration_general>'
-                          ? configuration_general
-                          : `${basePath}/${element.to}`,
+                  to: element.to.includes('<configuration_general>')
+                      ? element.to.replace(
+                            '<configuration_general>',
+                            configuration_general,
+                        )
+                      : `${basePath}/${element.to}`,
               };
 
         const isSelected = props.to && location.href.includes(props.to);
