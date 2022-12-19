@@ -7,8 +7,9 @@ import {
 } from './configurationField';
 
 export default function VideoOutputGeneral() {
-    const { params, updateCB, getFieldCB } = useConfiguration();
-    const commonData = { getFieldCB, updateCB };
+    const { params, updateCB, getFieldCB, getInitialValue } =
+        useConfiguration();
+    const commonData = { getFieldCB, updateCB, getInitialValue };
 
     return (
         <Grid container spacing={{ xs: 2, md: 1 }}>
@@ -19,6 +20,7 @@ export default function VideoOutputGeneral() {
                             data={{
                                 ...commonData,
                                 path: 'outputConfiguration/showOutput',
+                                defaultValue: false,
                             }}
                         />
                     }
@@ -33,6 +35,7 @@ export default function VideoOutputGeneral() {
                             data={{
                                 ...commonData,
                                 path: 'outputConfiguration/showIgnoredAreas',
+                                defaultValue: false,
                             }}
                         />
                     }
@@ -47,6 +50,7 @@ export default function VideoOutputGeneral() {
                             data={{
                                 ...commonData,
                                 path: 'outputConfiguration/showProcessedFrames',
+                                defaultValue: false,
                             }}
                         />
                     }

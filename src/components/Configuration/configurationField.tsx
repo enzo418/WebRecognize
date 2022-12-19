@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 import {
+    GetCachedFieldCallback,
     GetFieldCallback,
     UpdateFieldCallback,
 } from '../../context/configurationContext';
@@ -23,6 +24,7 @@ interface IConfigurationFieldProps {
 
         updateCB: UpdateFieldCallback;
         getFieldCB: GetFieldCallback;
+        getInitialValue: GetCachedFieldCallback;
 
         /**
          * Helper function to format the received value.
@@ -80,22 +82,28 @@ export default function configurationField(
                 leading: false,
             });
 
-            this.completePath = ''; // initialized when needed
+            this.completePath = this.calculatePath(); // initialized when needed
 
             this.state = {
-                value: props.data.defaultValue ? props.data.defaultValue : '',
+                value: props.data.defaultValue !== undefined
+                    ? props.data.defaultValue
+                    : props.data.getInitialValue(this.completePath) || '',
                 state: 'initial',
                 errorMessage: '',
             };
         }
 
-        getValue() {
-            this.completePath =
+        private calculatePath() {
+            const p =
                 this.props.data.camera !== undefined
                     ? `cameras/${this.props.data.camera}/`
                     : '';
 
-            this.completePath += this.props.data.path;
+            return p + this.props.data.path;
+        }
+
+        getValue() {
+            this.completePath = this.calculatePath();
 
             this.props.data.getFieldCB
                 .apply(null, [this.completePath])
@@ -275,6 +283,7 @@ function fixSwitchProps(props: any) {
 
     delete props.helperText;
     delete props.InputProps;
+    delete props.error;
 
     return fixed;
 }

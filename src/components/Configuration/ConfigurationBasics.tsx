@@ -10,12 +10,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConfiguration } from '../../context/configurationContext';
 import { configurationService } from '../../services/api/Services';
-import {TextConfigurationField} from './configurationField';
+import { TextConfigurationField } from './configurationField';
 
 export default function ConfigurationBasics() {
-    const { params, updateCB, getFieldCB } = useConfiguration();
+    const { params, updateCB, getFieldCB, getInitialValue } =
+        useConfiguration();
 
-    const commonData = {updateCB, getFieldCB};
+    const commonData = { updateCB, getFieldCB, getInitialValue };
 
     const [showDeleteConfigurationDialog, setShowDeleteConfigurationDialog] =
         useState<boolean>(false);
@@ -49,7 +50,7 @@ export default function ConfigurationBasics() {
                 />
             </Grid>
 
-            <Grid item xs={12} paddingTop='10px'>
+            <Grid item xs={12} paddingTop="10px">
                 <Button
                     variant="contained"
                     color="warning"

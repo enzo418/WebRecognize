@@ -67,7 +67,8 @@ interface DTOCameraDefaults {
 }
 
 export default function DetectionCameraConfiguration() {
-    const { params, updateCB, getFieldCB } = useConfiguration();
+    const { params, updateCB, getFieldCB, getInitialValue } =
+        useConfiguration();
     const theme = useTheme();
 
     const [cameraResize, setCameraResize] = useState<Size>({
@@ -92,7 +93,12 @@ export default function DetectionCameraConfiguration() {
     // the first time and then true, so i will keep using screen width instead
     const isBiggerThanMD = screen.width >= 900; // by default md is 900
 
-    const commonData = { getFieldCB, updateCB, camera: params?.camera_id };
+    const commonData = {
+        getFieldCB,
+        updateCB,
+        getInitialValue,
+        camera: params?.camera_id,
+    };
 
     const GetROIprops = (cfg: {
         enableEditing: boolean;

@@ -63,9 +63,15 @@ interface IConfigurationFieldProps {
 // }
 
 export default function CameraBasics() {
-    const { params, updateCB, getFieldCB } = useConfiguration();
+    const { params, updateCB, getFieldCB, getInitialValue } =
+        useConfiguration();
 
-    const commonData = { getFieldCB, updateCB, camera: params?.camera_id };
+    const commonData = {
+        getFieldCB,
+        updateCB,
+        camera: params?.camera_id,
+        getInitialValue,
+    };
 
     const [url, setUrl] = useState<string>('');
 

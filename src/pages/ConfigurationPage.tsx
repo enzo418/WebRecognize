@@ -48,6 +48,9 @@ import {
     UpdateFieldCallback,
 } from '../context/configurationContext';
 import { configurationService } from '../services/api/Services';
+import TypedPromise from '../TypedPromise';
+import IProblemJson from '../services/api/interfaces/IProblemJson';
+import CachedConfiguration from '../modules/CachedConfiguration';
 
 interface IConfigurationListElement {
     to: string; // relative path
@@ -166,6 +169,9 @@ export default function ConfigurationPage() {
 
     const [configName, setConfigName] = useState<string>('Configuration Name');
 
+    const [cacheConfiguration, setCacheConfiguration] =
+        useState<CachedConfiguration>(new CachedConfiguration());
+
     const handleOpenNexted = (i: number) => {
         if (open.includes(i)) {
             setOpen(open.filter(e => e != i));
@@ -187,11 +193,22 @@ export default function ConfigurationPage() {
     const id = params.id;
 
     // CONTEXT CALLBACKS
-    const updateCB: UpdateFieldCallback = (path: string, value: any) =>
-        configurationService.setField(params.id, { field: path, value });
+    const updateCB: UpdateFieldCallback = (path: string, value: any) => {
+        cacheConfiguration.update(path, value);
+        return configurationService.setField(params.id, { field: path, value });
+    };
 
-    const getFieldCB = (path: string) =>
-        configurationService.getField(params.id, path);
+    const getFieldCB = (path: string) => {
+        return new TypedPromise<any, IProblemJson>((ok, fail) => {
+            configurationService
+                .getField(params.id, path)
+                .ok(v => {
+                    cacheConfiguration.update(path, v);
+                    ok(v);
+                })
+                .fail(e => fail(e));
+        });
+    };
 
     useEffect(() => {
         if (
@@ -343,7 +360,12 @@ export default function ConfigurationPage() {
     return (
         <ThemeProvider theme={theme}>
             <ConfigurationContext.Provider
-                value={{ params: params, updateCB, getFieldCB }}>
+                value={{
+                    params: params,
+                    updateCB,
+                    getFieldCB,
+                    getInitialValue: p => cacheConfiguration.get(p),
+                }}>
                 <Stack
                     direction="column"
                     justifyContent="center"

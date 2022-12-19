@@ -20,8 +20,9 @@ import {
 } from './configurationField';
 
 export default function NotificationsTelegramConfiguration(props: any) {
-    const { params, updateCB, getFieldCB } = useConfiguration();
-    const commonData = { getFieldCB, updateCB };
+    const { params, updateCB, getFieldCB, getInitialValue } =
+        useConfiguration();
+    const commonData = { getFieldCB, updateCB, getInitialValue };
 
     return (
         <Grid container spacing={{ xs: 2, md: 1 }}>
@@ -32,6 +33,7 @@ export default function NotificationsTelegramConfiguration(props: any) {
                             data={{
                                 ...commonData,
                                 path: 'telegramConfiguration/enabled',
+                                defaultValue: false
                             }}
                         />
                     }
