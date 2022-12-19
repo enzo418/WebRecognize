@@ -1,5 +1,12 @@
+import { DeleteForever } from '@mui/icons-material';
 import {
     Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     FormControl,
     Grid,
     InputAdornment,
@@ -13,13 +20,17 @@ import {
 } from '@mui/material';
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import config from '../../config';
 import { useConfiguration } from '../../context/configurationContext';
 import HttpClient from '../../Http/HttpClient';
 import processPromise from '../../Http/ProcessPromise';
 import { DTOCameraDefaults } from '../../services/api/interfaces/DTOCamera';
 import IProblemJson from '../../services/api/interfaces/IProblemJson';
-import { cameraService } from '../../services/api/Services';
+import {
+    cameraService,
+    configurationService,
+} from '../../services/api/Services';
 import { HelpPopover, WarningPopover } from '../IconPopover';
 import LiveViewBox from '../LiveViewBox';
 import {
@@ -58,13 +69,16 @@ export default function CameraBasics() {
 
     const [url, setUrl] = useState<string>('');
 
+    const [showDeleteCameraDialog, setShowDeleteCameraDialog] =
+        useState<boolean>(false);
+
     /* ------------------- CAMERA DEFAULTS ------------------ */
     const [cameraDefault, setCameraDefaults] = useState<DTOCameraDefaults>({
         fps: 0,
         size: { width: 0, height: 0 },
     });
 
-    const client = new HttpClient(config.server);
+    const navigate = useNavigate();
 
     // Update camera defaults on url change
     useEffect(() => {
@@ -82,6 +96,18 @@ export default function CameraBasics() {
                 );
         }
     }, [url]);
+
+    const handleCloseDeleteDialog = () => setShowDeleteCameraDialog(false);
+
+    const handleAcceptDeleteDialog = () => {
+        configurationService
+            .deleteCamera(params.id, commonData.camera)
+            .ok(() => {
+                handleCloseDeleteDialog();
+                navigate(`/configuration/${params.id}/general/basics`);
+            })
+            .fail(e => console.error("Couldn't delete the camera: ", e));
+    };
 
     return (
         <Grid container spacing={{ xs: 2, md: 2 }}>
@@ -211,6 +237,36 @@ export default function CameraBasics() {
                     uri={url}
                     keepSkeletonOnError={true}
                 />
+            </Grid>
+            <Grid item xs={12} sm={12} md={8}>
+                <Button
+                    variant="contained"
+                    color="warning"
+                    startIcon={<DeleteForever />}
+                    onClick={() => setShowDeleteCameraDialog(true)}>
+                    Delete camera
+                </Button>
+
+                <Dialog
+                    open={showDeleteCameraDialog}
+                    onClose={handleCloseDeleteDialog}
+                    aria-labelledby="delete-dialog-title"
+                    aria-describedby="delete-dialog-description">
+                    <DialogTitle id="delete-dialog-title">
+                        {'Delete camera?'}
+                    </DialogTitle>
+                    {/*<DialogContent>
+                    <DialogContentText id="delete-dialog-description">
+                        It will be deleted forever
+                    </DialogContentText>
+                    </DialogContent>*/}
+                    <DialogActions>
+                        <Button onClick={handleCloseDeleteDialog} autoFocus>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleAcceptDeleteDialog}>YES</Button>
+                    </DialogActions>
+                </Dialog>
             </Grid>
         </Grid>
     );

@@ -13,7 +13,7 @@ export default class ConfigurationService extends Service {
     public setField(id: string, data: { field: string; value: any }) {
         // should be a patch following the verb rules!
         return processPromise<any, IProblemJson>(
-            this.client.post(this.baseUrl + id, data, { headers: {} }),
+            this.client.post(this.baseUrl + id, data),
         );
     }
 
@@ -38,11 +38,11 @@ export default class ConfigurationService extends Service {
     }
 
     // Creates
-    public create(configuration?: string) {
+    public create(configuration?: object) {
         const body = configuration ? configuration : {};
 
         return processPromise<{ id: string }, IProblemJson>(
-            this.client.post(this.baseUrl, body, { headers: {} }),
+            this.client.post(this.baseUrl, body),
         );
     }
 
@@ -62,12 +62,14 @@ export default class ConfigurationService extends Service {
         const body = toCloneID ? { clone_id: toCloneID } : {};
 
         return processPromise<{ id: string }, IProblemJson>(
-            this.client.post(
-                this.baseUrl + configurationID + '/camera/',
-                body,
-                {
-                    headers: {},
-                },
+            this.client.post(this.baseUrl + configurationID + '/camera/', body),
+        );
+    }
+
+    public deleteCamera(configurationID: string, cameraID: string) {
+        return processPromise<{ id: string }, IProblemJson>(
+            this.client.delete(
+                this.baseUrl + configurationID + '/camera/' + cameraID,
             ),
         );
     }

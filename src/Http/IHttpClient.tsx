@@ -77,4 +77,22 @@ export default abstract class IHttpClient {
      * @returns {Promise<Response>}
      */
     abstract put(path: string, body: object, query?: object): Promise<Response>;
+
+    /**
+     * DELETE verb
+     *
+     * @abstract
+     * @param {string} path
+     * @param {object} query request parameters/query
+     * @returns {Promise<Response>}
+     */
+    abstract delete(
+        path: string,
+        extra: { query?: object; init?: RequestInit },
+    ): Promise<Response>;
+
+    abstract delete(
+        path: string,
+        extra?: { query?: object; init?: RequestInit },
+    ): Promise<Response>;
 }

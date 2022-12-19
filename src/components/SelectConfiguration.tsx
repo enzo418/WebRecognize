@@ -28,7 +28,7 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
 
                 if (selectFirstByDefault && cfgs.length > 0) {
                     onChangeConfigurationSelected({
-                         target: { value: cfgs[0].id },
+                        target: { value: cfgs[0].id },
                     });
                 }
             })

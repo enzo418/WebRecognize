@@ -106,6 +106,26 @@ export default class HttpClient implements IHttpClient {
         return fetch(url, reqParams);
     }
 
+    public delete(
+        path: string,
+        { query, init }: { query?: object; init?: RequestInit } = {},
+    ): Promise<Response> {
+        let url: string = this.baseUrl + path;
+
+        if (query && Object.keys(query).length > 0) {
+            url += '?' + this.encodeObjectToQueryParams(query);
+        }
+
+        const reqParams = Object.assign(
+            {
+                method: 'DELETE',
+            },
+            init,
+        );
+
+        return fetch(url, reqParams);
+    }
+
     /**
      * Converts an object (key-value) to a string
      * in the format

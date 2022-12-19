@@ -13,21 +13,26 @@ export default function CreateConfigurationFromFilePage() {
 
         const reader = new FileReader();
         reader.addEventListener('load', event => {
-            let content = JSON.stringify(
-                JSON.parse(event?.target?.result as string),
-            );
+            let parsed;
 
-            content = content.replace(/(\r\n|\n|\r|\t)/gm, '');
+            try {
+                parsed = JSON.parse(event?.target?.result as string);
+            } catch (e: any) {
+                toast.error("File isn't a valid json: " + e?.message || '', {
+                    autoClose: 5000,
+                });
+                return;
+            }
 
-            sendFile(content);
+            sendFile(parsed);
         });
 
         reader.readAsText(file);
     };
 
-    const sendFile = (fileContent: string) => {
+    const sendFile = (config: object) => {
         configurationService
-            .create(fileContent)
+            .create(config)
             .ok(res => navigate('/configuration/' + res.id + '/general/basics'))
             .fail(e => {
                 const extraMessage =
