@@ -10,9 +10,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConfiguration } from '../../context/configurationContext';
 import { configurationService } from '../../services/api/Services';
+import {TextConfigurationField} from './configurationField';
 
 export default function ConfigurationBasics() {
     const { params, updateCB, getFieldCB } = useConfiguration();
+
+    const commonData = {updateCB, getFieldCB};
 
     const [showDeleteConfigurationDialog, setShowDeleteConfigurationDialog] =
         useState<boolean>(false);
@@ -34,13 +37,27 @@ export default function ConfigurationBasics() {
 
     return (
         <Grid item xs={12} sm={12} md={8}>
-            <Button
-                variant="contained"
-                color="warning"
-                startIcon={<DeleteForever />}
-                onClick={() => setShowDeleteConfigurationDialog(true)}>
-                Delete configuration
-            </Button>
+            <Grid item xs={12} sm={12} md={4}>
+                <TextConfigurationField
+                    label="name"
+                    variant="standard"
+                    fullWidth
+                    data={{
+                        ...commonData,
+                        path: 'name',
+                    }}
+                />
+            </Grid>
+
+            <Grid item xs={12} paddingTop='10px'>
+                <Button
+                    variant="contained"
+                    color="warning"
+                    startIcon={<DeleteForever />}
+                    onClick={() => setShowDeleteConfigurationDialog(true)}>
+                    Delete configuration
+                </Button>
+            </Grid>
 
             <Dialog
                 open={showDeleteConfigurationDialog}
