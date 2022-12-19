@@ -74,6 +74,12 @@ export default class ConfigurationService extends Service {
         );
     }
 
+    public deleteConfiguration(configurationID: string) {
+        return processPromise<{ id: string }, IProblemJson>(
+            this.client.delete(this.baseUrl + configurationID),
+        );
+    }
+
     public getConfigurationCameras(configurationId: string) {
         // TODO: Improve this, we are getting the whole camera
         return new TypedPromise<DTOCamera[], IProblemJson>((ok, fail) => {

@@ -39,6 +39,7 @@ import NotificationsTelegramConfiguration from './components/Configuration/Notif
 import NotificationsLocalConfiguration from './components/Configuration/NotificationsLocalConfiguration';
 import CloneConfigurationPage from './pages/CloneConfigurationPage';
 import AddCamera from './components/Configuration/AddCamera';
+import ConfigurationBasics from './components/Configuration/ConfigurationBasics';
 
 function App() {
     return (
@@ -79,7 +80,9 @@ function App() {
                                 <Route path="general" element={<Outlet />}>
                                     <Route
                                         path="basics"
-                                        element={<p>basics</p>}></Route>
+                                        element={
+                                            <ConfigurationBasics />
+                                        }></Route>
                                     <Route
                                         path="notifications"
                                         element={<Outlet />}>
