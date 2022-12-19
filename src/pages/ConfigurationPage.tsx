@@ -178,7 +178,7 @@ export default function ConfigurationPage() {
     const params = ensure<{ id: any }>(useParams() as any);
     let type = ensure<{ params: any }>(useMatch('/configuration/:id/:type/*'))
         .params.type as keyof IConfigurationList; // else how are we here?
-    const matchesMD = useMediaQuery(theme.breakpoints.down('md'));
+    const belowMD = useMediaQuery(theme.breakpoints.down('md'));
 
     if ('camera_id' in params) {
         type = 'camera';
@@ -295,13 +295,15 @@ export default function ConfigurationPage() {
                 sx={{ pl: padding }}
                 primary={element.primary}
                 {...props}>
-                {!matchesMD &&
+                {
+                    //!belowMD &&
                     hasChildren &&
-                    (open.includes(i) ? <ExpandLess /> : <ExpandMore />)}
+                        (open.includes(i) ? <ExpandLess /> : <ExpandMore />)
+                }
             </ListItemLink>
         );
 
-        const respPadding = !matchesMD ? padding + 4 : 0;
+        const respPadding = belowMD ? Math.min(padding + 4, 8) : padding + 4;
 
         const children = hasChildren && (
             <Collapse
@@ -357,8 +359,7 @@ export default function ConfigurationPage() {
                         spacing={{ xs: 2, md: 2 }}
                         // className="grid-padding-0"
                         sx={{ overflowWrap: 'anywhere', pl: '0px' }}>
-                        <Grid item xs sm={1} md={2}>
-                            {/* LeftMenuItems */}
+                        <Grid item xs={12} md={2}>
                             <List
                                 sx={{
                                     width: '100%',
@@ -376,11 +377,11 @@ export default function ConfigurationPage() {
                         </Grid>
                         <Grid
                             item
-                            xs={10}
-                            sm={11}
-                            md={10}
+                            xs
+                            md
                             sx={{
-                                borderLeft: '1px solid #e5e6eb',
+                                borderLeft: belowMD ? '' : '1px solid #e5e6eb',
+                                borderTop: belowMD ? '1px solid #e5e6eb' : '',
                                 width: '99%',
                             }}>
                             <Outlet />

@@ -51,7 +51,7 @@ function ListItemLink(props: ListItemLinkProps) {
 
     const theme = useTheme();
 
-    const matches = useMediaQuery(theme.breakpoints.down('md'));
+    //const matches = useMediaQuery(theme.breakpoints.down('md'));
 
     return (
         <ListItemButton
@@ -59,7 +59,10 @@ function ListItemLink(props: ListItemLinkProps) {
             sx={props.sx}
             {...restProps}>
             {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-            {!matches && <ListItemText primary={primary} />}
+            {
+                //!matches  &&
+                <ListItemText primary={primary} />
+            }
             {props.children}
         </ListItemButton>
     );

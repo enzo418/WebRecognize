@@ -129,7 +129,7 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
             {loading ? (
                 <Skeleton
                     variant="rectangular"
-                    width={props.canvasSize.width}
+                    width={`min(${props.canvasSize.width}px, 100%)`}
                     height={props.canvasSize.height}
                 />
             ) : (

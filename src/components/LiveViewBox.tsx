@@ -70,7 +70,7 @@ export default class LiveViewBox extends React.Component<
                     (this.state.loading ? (
                         <Skeleton
                             variant="rectangular"
-                            width={640}
+                            width={`min(${640}px, 100%)`}
                             height={360}
                         />
                     ) : (
