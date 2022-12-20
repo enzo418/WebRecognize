@@ -9,6 +9,7 @@ import {
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConfiguration } from '../../context/configurationContext';
+import eventBus from '../../EventBus';
 import { configurationService } from '../../services/api/Services';
 import { TextConfigurationField } from './configurationField';
 
@@ -30,6 +31,7 @@ export default function ConfigurationBasics() {
         configurationService
             .deleteConfiguration(params.id)
             .ok(() => {
+                eventBus.dispatch('removed-configuration', { id: params.id });
                 handleCloseDeleteDialog();
                 navigate(`/configuration/`);
             })

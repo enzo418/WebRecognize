@@ -23,6 +23,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import config from '../../config';
 import { useConfiguration } from '../../context/configurationContext';
+import eventBus from '../../EventBus';
 import HttpClient from '../../Http/HttpClient';
 import processPromise from '../../Http/ProcessPromise';
 import { DTOCameraDefaults } from '../../services/api/interfaces/DTOCamera';
@@ -109,6 +110,7 @@ export default function CameraBasics() {
         configurationService
             .deleteCamera(params.id, commonData.camera)
             .ok(() => {
+                eventBus.dispatch('removed-camera', { id: commonData.camera });
                 handleCloseDeleteDialog();
                 navigate(`/configuration/${params.id}/general/basics`);
             })

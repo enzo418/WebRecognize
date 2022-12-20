@@ -10,7 +10,7 @@ import {
     Typography,
     useMediaQuery,
 } from '@mui/material';
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import EditNotificationsIcon from '@mui/icons-material/EditNotifications';
@@ -51,6 +51,7 @@ import { configurationService } from '../services/api/Services';
 import TypedPromise from '../TypedPromise';
 import IProblemJson from '../services/api/interfaces/IProblemJson';
 import CachedConfiguration from '../modules/CachedConfiguration';
+import eventBus from '../EventBus';
 
 interface IConfigurationListElement {
     to: string; // relative path
@@ -169,8 +170,9 @@ export default function ConfigurationPage() {
 
     const [configName, setConfigName] = useState<string>('Configuration Name');
 
-    const [cacheConfiguration, setCacheConfiguration] =
-        useState<CachedConfiguration>(new CachedConfiguration());
+    const [cacheConfiguration, _] = useState<CachedConfiguration>(
+        new CachedConfiguration(),
+    );
 
     const handleOpenNexted = (i: number) => {
         if (open.includes(i)) {
@@ -195,67 +197,98 @@ export default function ConfigurationPage() {
     // CONTEXT CALLBACKS
     const updateCB: UpdateFieldCallback = (path: string, value: any) => {
         cacheConfiguration.update(path, value);
+        eventBus.dispatch('updated-configuration', { path, value });
         return configurationService.setField(params.id, { field: path, value });
     };
 
-    const getFieldCB = (path: string) => {
-        return new TypedPromise<any, IProblemJson>((ok, fail) => {
-            configurationService
-                .getField(params.id, path)
-                .ok(v => {
-                    cacheConfiguration.update(path, v);
-                    ok(v);
-                })
-                .fail(e => fail(e));
-        });
-    };
+    const getFieldCB = useCallback(
+        (path: string) => {
+            return new TypedPromise<any, IProblemJson>((ok, fail) => {
+                configurationService
+                    .getField(params.id, path)
+                    .ok(v => {
+                        cacheConfiguration.update(path, v);
+                        ok(v);
+                    })
+                    .fail(e => fail(e));
+            });
+        },
+        [cacheConfiguration, params.id],
+    );
 
     useEffect(() => {
-        if (
-            computedConfiguration.general.elements[
-                computedConfiguration.general.elements.length - 1
-            ].to != 'camera'
-        ) {
-            configurationService
-                .getConfigurationCameras(id)
-                .ok(cameras => {
-                    // trick react to re render
-                    setComputedConfiguration(prevComputed => {
-                        prevComputed.general.elements.push({
-                            to: 'camera',
-                            primary: 'Cameras',
-                            icon: <Videocam />,
-                            elements: cameras.map(cam => ({
-                                to: cam.id + '/basics',
-                                primary: cam.name,
+        function onCamerasUpdated(force: boolean) {
+            const indxFound = computedConfiguration.general.elements.findIndex(
+                el => el.to == 'camera',
+            );
+
+            if (force || indxFound == -1) {
+                configurationService
+                    .getConfigurationCameras(id)
+                    .ok(cameras => {
+                        // trick react to re render
+                        setComputedConfiguration(prevComputed => {
+                            if (force && indxFound != -1) {
+                                // remove cameras entry so we calculate it again
+                                prevComputed.general.elements.splice(
+                                    indxFound,
+                                    1,
+                                );
+                            }
+
+                            prevComputed.general.elements.push({
+                                to: 'camera',
+                                primary: 'Cameras',
                                 icon: <Videocam />,
-                            })),
-                        });
+                                elements: cameras.map(cam => ({
+                                    to: cam.id + '/basics',
+                                    primary: cam.name,
+                                    icon: <Videocam />,
+                                })),
+                            });
 
-                        prevComputed.general.elements[
-                            prevComputed.general.elements.length - 1
-                        ].elements?.push({
-                            to: '<configuration_general>/add-camera',
-                            primary: 'Add new',
-                            icon: <AddAPhotoOutlined />,
-                        });
+                            prevComputed.general.elements[
+                                prevComputed.general.elements.length - 1
+                            ].elements?.push({
+                                to: '<configuration_general>/add-camera',
+                                primary: 'Add new',
+                                icon: <AddAPhotoOutlined />,
+                            });
 
-                        return { ...prevComputed };
-                    });
-                })
-                .fail(e =>
-                    console.error('Could not get configuration cameras', e),
-                );
+                            return { ...prevComputed };
+                        });
+                    })
+                    .fail(e =>
+                        console.error('Could not get configuration cameras', e),
+                    );
+            }
         }
 
-        //getFieldCB('/name')
-        //    .ok((name: string) => {
-        //        setConfigName(name);
-        //    })
-        //    .fail(e =>
-        //        console.error('Could not get the configuration name: ', e),
-        //    );
-    }, [computedConfiguration.general.elements, id]);
+        onCamerasUpdated(false);
+
+        getFieldCB('/name')
+            .ok((name: string) => {
+                setConfigName(name);
+            })
+            .fail(e =>
+                console.error('Could not get the configuration name: ', e),
+            );
+
+        const eventCallback = () => onCamerasUpdated(true);
+        eventBus.on('removed-camera', eventCallback);
+        eventBus.on('added-camera', eventCallback);
+
+        return () => {
+            eventBus.remove('removed-camera', eventCallback);
+            eventBus.remove('added-camera', eventCallback);
+        };
+    }, [computedConfiguration.general.elements, getFieldCB, id]);
+
+    eventBus.on('updated-configuration', ({ path, value }) => {
+        if (path == '/name' || path == 'name') {
+            setConfigName(value);
+        }
+    });
 
     const renderConfigurationListElement = (
         basePath: string,
@@ -371,14 +404,8 @@ export default function ConfigurationPage() {
                                 fontWeight="500"
                                 variant="overline"
                                 fontSize={'1.5rem'}>
-                                {cacheConfiguration.map['name'] || configName}
+                                {configName}
                             </Typography>
-                            <EditIcon
-                                sx={{
-                                    cursor: 'pointer',
-                                    color: 'text.secondary',
-                                }}
-                            />
                         </Stack>
                     </Box>
 

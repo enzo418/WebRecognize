@@ -13,6 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useConfiguration } from '../../context/configurationContext';
+import eventBus from '../../EventBus';
 import DTOCamera from '../../services/api/interfaces/DTOCamera';
 import { configurationService } from '../../services/api/Services';
 
@@ -44,6 +45,7 @@ export default function AddCamera() {
         configurationService
             .createCamera(configID)
             .ok(({ id }) => {
+                eventBus.dispatch('added-camera', { id });
                 navigate(
                     `/configuration/${configID}/general/camera/${id}/basics`,
                 );
@@ -58,6 +60,7 @@ export default function AddCamera() {
         configurationService
             .createCamera(configID, cloneID)
             .ok(({ id }) => {
+                eventBus.dispatch('added-camera', { id });
                 navigate(
                     `/configuration/${configID}/general/camera/${id}/basics`,
                 );
