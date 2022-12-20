@@ -1,3 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+// I disabled it because it's a complex dance between dependencies and
+// if prefer to handle it myself
+
 import React, { useEffect, useState } from 'react';
 import config from '../../../config';
 import { Mask, Rectangle, Size } from '../../../Geometry';

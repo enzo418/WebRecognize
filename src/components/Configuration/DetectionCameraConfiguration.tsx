@@ -81,24 +81,24 @@ export default function DetectionCameraConfiguration() {
     // used to reload the ROI displayed when we know it changed
     const [roiForceUpdate, setRoiForceUpdate] = useState<number>(0);
 
-    useEffect(() => {
-        getFieldCB(`cameras/${commonData.camera}/resizeTo`)
-            .ok((res: Size) => setCameraResize(res))
-            .fail(e => console.error("Couldn't get camera resize to: ", e));
-    }, [params?.camera_id]);
-
-    const refModalRoi = React.createRef<HTMLDivElement>();
-
-    // i do not know why but useMediaQuery(theme.breakpoints.up('md')) returns false
-    // the first time and then true, so i will keep using screen width instead
-    const isBiggerThanMD = screen.width >= 900; // by default md is 900
-
     const commonData = {
         getFieldCB,
         updateCB,
         getInitialValue,
         camera: params?.camera_id,
     };
+
+    useEffect(() => {
+        getFieldCB(`cameras/${commonData.camera}/resizeTo`)
+            .ok((res: Size) => setCameraResize(res))
+            .fail(e => console.error("Couldn't get camera resize to: ", e));
+    }, [commonData.camera, getFieldCB]);
+
+    const refModalRoi = React.createRef<HTMLDivElement>();
+
+    // i do not know why but useMediaQuery(theme.breakpoints.up('md')) returns false
+    // the first time and then true, so i will keep using screen width instead
+    const isBiggerThanMD = screen.width >= 900; // by default md is 900
 
     const GetROIprops = (cfg: {
         enableEditing: boolean;

@@ -36,7 +36,7 @@ export default function AddCamera() {
                     e,
                 ),
             );
-    }, []);
+    }, [configID]);
 
     const navigate = useNavigate();
 

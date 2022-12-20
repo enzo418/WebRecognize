@@ -219,60 +219,43 @@ export default function ConfigurationPage() {
             configurationService
                 .getConfigurationCameras(id)
                 .ok(cameras => {
-                    computedConfiguration.general.elements.push({
-                        to: 'camera',
-                        primary: 'Cameras',
-                        icon: <Videocam />,
-                        elements: cameras.map(cam => ({
-                            to: cam.id + '/basics',
-                            primary: cam.name,
-                            icon: <Videocam />,
-                        })),
-                    });
-
-                    computedConfiguration.general.elements[
-                        computedConfiguration.general.elements.length - 1
-                    ].elements?.push({
-                        to: '<configuration_general>/add-camera',
-                        primary: 'Add new',
-                        icon: <AddAPhotoOutlined />,
-                    });
-
                     // trick react to re render
-                    setComputedConfiguration({ ...computedConfiguration });
+                    setComputedConfiguration(prevComputed => {
+                        prevComputed.general.elements.push({
+                            to: 'camera',
+                            primary: 'Cameras',
+                            icon: <Videocam />,
+                            elements: cameras.map(cam => ({
+                                to: cam.id + '/basics',
+                                primary: cam.name,
+                                icon: <Videocam />,
+                            })),
+                        });
+
+                        prevComputed.general.elements[
+                            prevComputed.general.elements.length - 1
+                        ].elements?.push({
+                            to: '<configuration_general>/add-camera',
+                            primary: 'Add new',
+                            icon: <AddAPhotoOutlined />,
+                        });
+
+                        return { ...prevComputed };
+                    });
                 })
                 .fail(e =>
                     console.error('Could not get configuration cameras', e),
                 );
         }
 
-        getFieldCB('/name')
-            .ok((name: string) => {
-                setConfigName(name);
-            })
-            .fail(e =>
-                console.error('Could not get the configuration name: ', e),
-            );
-    }, []);
-
-    const ConfigurationHeader = ({ name }: any) => (
-        <Box sx={{ width: '100%', borderBottom: '1px solid #e5e6eb' }}>
-            <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-                spacing={4}>
-                <Typography
-                    //fontStyle="italic"
-                    fontWeight="500"
-                    variant="overline"
-                    fontSize={'1.5rem'}>
-                    {name}
-                </Typography>
-                <EditIcon sx={{ cursor: 'pointer', color: 'text.secondary' }} />
-            </Stack>
-        </Box>
-    );
+        //getFieldCB('/name')
+        //    .ok((name: string) => {
+        //        setConfigName(name);
+        //    })
+        //    .fail(e =>
+        //        console.error('Could not get the configuration name: ', e),
+        //    );
+    }, [computedConfiguration.general.elements, id]);
 
     const renderConfigurationListElement = (
         basePath: string,
@@ -373,7 +356,31 @@ export default function ConfigurationPage() {
                     spacing={2}
                     sx={{ pl: '0px' }}>
                     {/* header */}
-                    <ConfigurationHeader name={configName} />
+                    <Box
+                        sx={{
+                            width: '100%',
+                            borderBottom: '1px solid #e5e6eb',
+                        }}>
+                        <Stack
+                            direction="row"
+                            justifyContent="center"
+                            alignItems="center"
+                            spacing={4}>
+                            <Typography
+                                //fontStyle="italic"
+                                fontWeight="500"
+                                variant="overline"
+                                fontSize={'1.5rem'}>
+                                {cacheConfiguration.map['name'] || configName}
+                            </Typography>
+                            <EditIcon
+                                sx={{
+                                    cursor: 'pointer',
+                                    color: 'text.secondary',
+                                }}
+                            />
+                        </Stack>
+                    </Box>
 
                     {/* content */}
                     <Grid

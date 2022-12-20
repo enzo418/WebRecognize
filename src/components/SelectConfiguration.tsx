@@ -1,5 +1,5 @@
 import { MenuItem, Select, SxProps, Theme } from '@mui/material';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import DTOConfigurationDetails from '../services/api/interfaces/DTOConfigurationDetails';
 import { configurationService } from '../services/api/Services';
 
@@ -20,6 +20,15 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
 
     const { onSelected, selectFirstByDefault, ...rest } = props;
 
+    const onChangeConfigurationSelected = useCallback(
+        (ev: any) => {
+            const selected = ev?.target?.value as string;
+            setSelectedID(selected);
+            props.onSelected(selected);
+        },
+        [props],
+    );
+
     useEffect(() => {
         configurationService
             .getAvailable()
@@ -35,13 +44,7 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
             .fail(error => {
                 console.error(error);
             });
-    }, []);
-
-    const onChangeConfigurationSelected = (ev: any) => {
-        const selected = ev?.target?.value as string;
-        setSelectedID(selected);
-        props.onSelected(selected);
-    };
+    }, [onChangeConfigurationSelected, selectFirstByDefault]);
 
     return (
         <Select

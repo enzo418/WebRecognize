@@ -33,7 +33,7 @@ export default function NotificationsLocalConfiguration(props: any) {
                             data={{
                                 ...commonData,
                                 path: 'localWebConfiguration/enabled',
-                                defaultValue: false
+                                defaultValue: false,
                             }}
                         />
                     }

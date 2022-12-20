@@ -33,7 +33,7 @@ export default function NotificationsTelegramConfiguration(props: any) {
                             data={{
                                 ...commonData,
                                 path: 'telegramConfiguration/enabled',
-                                defaultValue: false
+                                defaultValue: false,
                             }}
                         />
                     }

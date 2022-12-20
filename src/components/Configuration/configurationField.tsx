@@ -85,9 +85,10 @@ export default function configurationField(
             this.completePath = this.calculatePath(); // initialized when needed
 
             this.state = {
-                value: props.data.defaultValue !== undefined
-                    ? props.data.defaultValue
-                    : props.data.getInitialValue(this.completePath) || '',
+                value:
+                    props.data.defaultValue !== undefined
+                        ? props.data.defaultValue
+                        : props.data.getInitialValue(this.completePath) || '',
                 state: 'initial',
                 errorMessage: '',
             };

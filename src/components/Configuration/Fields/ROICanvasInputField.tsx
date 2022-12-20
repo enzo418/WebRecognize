@@ -1,5 +1,5 @@
 import { Skeleton } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
     GetFieldCallback,
@@ -36,7 +36,10 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
         height: 0,
     });
 
-    const id = props.uri ? { uri: props.uri } : { camera_id: props.camera_id };
+    const id = useMemo(
+        () => (props.uri ? { uri: props.uri } : { camera_id: props.camera_id }),
+        [props.camera_id, props.uri],
+    );
 
     const getCameraPreview = () => {
         setLoading(true);
@@ -86,14 +89,22 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
             });
     };
 
-    useEffect(getCameraPreview, [props.uri, props.camera_id]);
+    useEffect(getCameraPreview, [
+        props.uri,
+        props.camera_id,
+        id,
+        props.getFieldCB,
+        props.fieldPath,
+        props.canvasSize.width,
+        props.canvasSize.height,
+    ]);
 
     useEffect(() => {
         return () => {
             // free image from memory
             URL.revokeObjectURL(image);
         };
-    }, []);
+    }, [image]);
 
     const onRoiUpdated = (roi: Rectangle) => {
         // We need to get the resize again because it might have been changed here or by another user
