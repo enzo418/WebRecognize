@@ -44,7 +44,7 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
             .fail(error => {
                 console.error(error);
             });
-    }, [onChangeConfigurationSelected, selectFirstByDefault]);
+    }, []);
 
     return (
         <Select

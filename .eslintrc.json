@@ -19,8 +19,8 @@
     "plugins": [
         "react",
         "@typescript-eslint",
-        "prettier",
-        "react-hooks"
+        "prettier"
+        //"react-hooks"
     ],
     "rules": {
         "prettier/prettier": [
@@ -46,7 +46,7 @@
         // ],
         "object-curly-spacing": "off",
         "no-unused-vars": "off",
-        "react-hooks/rules-of-hooks": "error",
-        "react-hooks/exhaustive-deps": "warn"
+        //"react-hooks/rules-of-hooks": "error",
+        //"react-hooks/exhaustive-deps": "warn"
     }
 }
