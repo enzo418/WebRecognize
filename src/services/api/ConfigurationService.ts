@@ -48,13 +48,9 @@ export default class ConfigurationService extends Service {
 
     public clone(id: string) {
         return processPromise<{ id: string }, IProblemJson>(
-            this.client.post(
-                this.baseUrl,
-                {
-                    clone_id: id,
-                },
-                { headers: {} },
-            ),
+            this.client.post(this.baseUrl, {
+                clone_id: id,
+            }),
         );
     }
 
