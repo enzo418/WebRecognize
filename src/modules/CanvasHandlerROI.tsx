@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import CanvasHandler from './CanvasHandler';
 import { Point, Rectangle, Size } from '../Geometry';
 import { getRectangleDimensions } from '../utils/geometry';

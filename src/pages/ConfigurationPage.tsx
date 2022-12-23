@@ -31,6 +31,7 @@ import { ensure } from '../utils/error';
 import {
     AddAPhotoOutlined,
     ArrowBack,
+    Contrast,
     ExpandLess,
     ExpandMore,
     Telegram,
@@ -150,8 +151,13 @@ const getBasicConfigurationMenu = () => {
                         },
                         {
                             to: 'contours-filters',
-                            primary: 'Countours filters',
+                            primary: 'Contours filters',
                             icon: <DataObjectIcon />,
+                        },
+                        {
+                            to: 'threshold-parameters',
+                            primary: 'Image processing parameters',
+                            icon: <Contrast />,
                         },
                     ],
                 },

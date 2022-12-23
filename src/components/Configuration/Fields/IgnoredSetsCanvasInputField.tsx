@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import config from '../../../config';
-import { Mask, Rectangle, Size } from '../../../Geometry';
-import CanvasHandlerROI from '../../../modules/CanvasHandlerROI';
-import { cameraService, client } from '../../../services/api/Services';
+import { Polygon, Rectangle, Size } from '../../../Geometry';
+import { cameraService } from '../../../services/api/Services';
 
 import {
     GetFieldCallback,
     UpdateFieldCallback,
 } from '../../../context/configurationContext';
+
 import {
     Box,
     Button,
@@ -17,8 +16,6 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import { ensure } from '../../../utils/error';
-import { scaleMasks, scaleRectangle } from '../../../utils/geometry';
 import CanvasHandlerPOLY from '../../../modules/CanvasHandlerPOLY';
 import {
     AddCircleOutline,
@@ -27,19 +24,24 @@ import {
     Redo,
     Undo,
 } from '@mui/icons-material';
-import { HelpPopover } from '../../IconPopover';
+import { ensure } from '../../../utils/error';
+import { scalePolygons } from '../../../utils/geometry';
+import { toast } from 'react-toastify';
 
-interface MasksCanvasInputFieldProps {
+interface IgnoredSetsCanvasProps {
     uri?: string;
     camera_id?: string;
+
     fieldPath: string;
+    referenceSizePath: string;
+
     enableEditing: boolean;
     fullScreen?: boolean;
 
     updateCB: UpdateFieldCallback;
     getFieldCB: GetFieldCallback;
 
-    onMasksUpdated: () => any;
+    onSetsUpdated: () => any;
     onExit?: () => any;
 
     canvasSize: Size;
@@ -52,12 +54,12 @@ enum Mode {
     DELETE,
 }
 
-export default function MasksCanvasInputField(
-    props: MasksCanvasInputFieldProps,
+export default function IgnoredSetsCanvasInputField(
+    props: IgnoredSetsCanvasProps,
 ) {
     const [image, setImage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(true);
-    const [initialMasks, setInitialMasks] = useState<Mask[]>([]);
+    const [initialPolygons, setInitialPolygons] = useState<Polygon[]>([]);
     const [calculatedCanvasSize, setCalculatedCanvasSize] = useState<Size>({
         width: 0,
         height: 0,
@@ -67,7 +69,6 @@ export default function MasksCanvasInputField(
     const id = props.uri ? { uri: props.uri } : { camera_id: props.camera_id };
 
     const buttonHeaderRef = React.createRef<HTMLDivElement>();
-
     const canvasHandlerRef = React.createRef<CanvasHandlerPOLY>();
 
     const getCameraPreview = () => {
@@ -87,27 +88,33 @@ export default function MasksCanvasInputField(
                     .apply(null, [
                         `cameras/${props.camera_id}/${props.fieldPath}`,
                     ])
-                    .ok(storedMasks => {
-                        ensure<Mask[]>(storedMasks);
+                    .ok(storedPolygons => {
+                        ensure<Polygon[]>(storedPolygons);
 
-                        cameraService
-                            .getDefaults(id)
-                            .ok(({ size }) => {
-                                // we need the resize it from the real camera size to the canvas size
+                        props.getFieldCB
+                            .apply(null, [
+                                `cameras/${props.camera_id}/${props.referenceSizePath}`,
+                            ])
+                            .ok(({ width, height }) => {
+                                // we need the resize it from the reference size to the canvas size
                                 const scaleX =
-                                    calculatedCanvasSize.width / size.width;
+                                    calculatedCanvasSize.width / width;
                                 const scaleY =
-                                    calculatedCanvasSize.height / size.height;
+                                    calculatedCanvasSize.height / height;
 
-                                setInitialMasks(
-                                    scaleMasks(storedMasks, scaleX, scaleY),
+                                setInitialPolygons(
+                                    scalePolygons(
+                                        storedPolygons,
+                                        scaleX,
+                                        scaleY,
+                                    ),
                                 );
 
                                 setLoading(false);
                             })
                             .fail(e =>
                                 console.error(
-                                    'Could not get last resize (processing): ',
+                                    'Could not get reference size:',
                                     e,
                                 ),
                             );
@@ -161,25 +168,49 @@ export default function MasksCanvasInputField(
         calculatedCanvasSize,
     ]);
 
-    const onMasksChanged = (masks: Mask[]) => {
+    const onPolysChanged = (polys: Polygon[]) => {
         // We need to get the resize again because it might have been changed here or by another user
-        cameraService
-            .getDefaults(id)
-            .ok(({ size }) => {
-                const scaleX = size.width / calculatedCanvasSize.width;
-                const scaleY = size.height / calculatedCanvasSize.height;
+        props.getFieldCB
+            .apply(null, [
+                `cameras/${props.camera_id}/${props.referenceSizePath}`,
+            ])
+            .ok(({ width, height }) => {
+                const scaleX = width / calculatedCanvasSize.width;
+                const scaleY = height / calculatedCanvasSize.height;
 
-                const scaledMasks = scaleMasks(masks, scaleX, scaleY);
+                const scaledPolys = scalePolygons(polys, scaleX, scaleY);
 
-                props.updateCB
-                    .apply(null, [
-                        `cameras/${props.camera_id}/${props.fieldPath}`,
-                        scaledMasks,
-                    ])
-                    .ok(() => {
-                        if (props.onMasksUpdated) props.onMasksUpdated();
-                    })
-                    .fail(e => console.error('Could not update masks', e));
+                // TODO: Design a retry system
+                const MAX_TRY = 5;
+                let try_times = MAX_TRY;
+                const sendSets = () => {
+                    props.updateCB
+                        .apply(null, [
+                            `cameras/${props.camera_id}/${props.fieldPath}`,
+                            scaledPolys,
+                        ])
+                        .ok(() => {
+                            if (props.onSetsUpdated) props.onSetsUpdated();
+
+                            if (try_times < MAX_TRY) {
+                                toast.success('Updated!');
+                            }
+                        })
+                        .fail(e => {
+                            if (try_times-- > 0) {
+                                toast.error(
+                                    "Couldn't update the field, trying again",
+                                );
+                                setTimeout(() => sendSets(), 1000);
+                            } else {
+                                toast.error(
+                                    "Couldn't update the field. Check that the server is ok",
+                                );
+                            }
+                        });
+                };
+
+                sendSets();
             })
             .fail(e => console.error('Could not get camera defaults: ', e));
     };
@@ -253,11 +284,12 @@ export default function MasksCanvasInputField(
                         <CanvasHandlerPOLY
                             ref={canvasHandlerRef}
                             image={image}
-                            initialPolys={initialMasks}
+                            initialPolys={initialPolygons}
                             enableEditing={props.enableEditing}
-                            onPolygonsChanged={onMasksChanged}
+                            onPolygonsChanged={onPolysChanged}
                             canvasSize={calculatedCanvasSize}
                             fullScreen={props.fullScreen}
+                            borderColor={'#fafa'}
                         />
                     )}
                 </>

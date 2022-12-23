@@ -40,6 +40,10 @@ import NotificationsLocalConfiguration from './components/Configuration/Notifica
 import CloneConfigurationPage from './pages/CloneConfigurationPage';
 import AddCamera from './components/Configuration/AddCamera';
 import ConfigurationBasics from './components/Configuration/ConfigurationBasics';
+import BlobDetectorParametersConfiguration from './components/Configuration/BlobsConfiguration/BlobDetectorParametersConfiguration';
+import BlobFiltersConfiguration from './components/Configuration/BlobsConfiguration/BlobFiltersConfiguration';
+import BlobContoursFiltersConfiguration from './components/Configuration/BlobsConfiguration/BlobContoursFiltersConfiguration';
+import BlobThresholdParametersConfiguration from './components/Configuration/BlobsConfiguration/BlobThresholdParametersConfiguration';
 
 function App() {
     return (
@@ -134,23 +138,23 @@ function App() {
                                             <Route
                                                 path="detection"
                                                 element={
-                                                    <p>
-                                                        camera blobs detection
-                                                    </p>
+                                                    <BlobDetectorParametersConfiguration />
                                                 }></Route>
                                             <Route
                                                 path="filters"
                                                 element={
-                                                    <p>camera blobs filters</p>
+                                                    <BlobFiltersConfiguration />
                                                 }></Route>
                                             {/* maybe merge those two into blobs-basics */}
                                             <Route
                                                 path="contours-filters"
                                                 element={
-                                                    <p>
-                                                        camera blobs contours
-                                                        filters
-                                                    </p>
+                                                    <BlobContoursFiltersConfiguration />
+                                                }></Route>
+                                            <Route
+                                                path="threshold-parameters"
+                                                element={
+                                                    <BlobThresholdParametersConfiguration />
                                                 }></Route>
                                         </Route>
                                     </Route>

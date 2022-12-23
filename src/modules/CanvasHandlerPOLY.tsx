@@ -1,36 +1,36 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import CanvasHandler from './CanvasHandler';
-import { Point, Rectangle, Size, Mask } from '../Geometry';
+import { Point, Rectangle, Size, Polygon } from '../Geometry';
 import simplify from 'simplify-js';
 import { pointPolygonTest } from '../utils/geometry';
 
-interface CanvasHandlerMaskProps {
+interface CanvasHandlerPolyProps {
     image: string;
-    initialMasks: Mask[];
+    initialPolys: Polygon[];
     enableEditing: boolean;
     canvasSize: Size;
     fullScreen?: boolean;
+    borderColor?: string;
 
-    // Called when a mask was added, takes all the masks as parameter
-    onMasksChanged: (masks: Mask[]) => any;
+    // Called when a polygon was added, takes all the polygons as parameter
+    onPolygonsChanged: (polys: Polygon[]) => any;
 }
 
-export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskProps> {
-    masks: Mask[];
-    currentMask: Mask;
+export default class CanvasHandlerPOLY extends CanvasHandler<CanvasHandlerPolyProps> {
+    polys: Polygon[];
+    currentPoly: Polygon;
     p1: Point;
     p2: Point;
     currentMode: 'add' | 'delete';
 
-    // on mask-removed -> data = removed mask
-    editHistory: { type: 'mask-removed' | 'point-removed'; data: any }[];
+    // on poly-removed -> data = removed poly
+    editHistory: { type: 'poly-removed' | 'point-removed'; data: any }[];
 
-    constructor(props: CanvasHandlerMaskProps) {
+    constructor(props: CanvasHandlerPolyProps) {
         super(props);
 
-        this.masks = props.initialMasks;
-        this.currentMask = [];
+        this.polys = props.initialPolys;
+        this.currentPoly = [];
 
         this.currentMode = 'add';
 
@@ -102,12 +102,12 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
             this.ctx.lineWidth = 5;
             this.ctx.strokeStyle = 'Green';
 
-            if (this.currentMask.length > 1) {
-                var first = this.currentMask[0];
+            if (this.currentPoly.length > 1) {
+                var first = this.currentPoly[0];
                 this.ctx.moveTo(first.x, first.y);
 
-                for (let index = 1; index < this.currentMask.length; index++) {
-                    const element = this.currentMask[index];
+                for (let index = 1; index < this.currentPoly.length; index++) {
+                    const element = this.currentPoly[index];
 
                     this.ctx.lineTo(element.x, element.y);
                 }
@@ -119,12 +119,12 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
 
             fillBlackAlpha();
 
-            //  Draw the current mask points
+            //  Draw the current polygon points
             // ------------------------------
             this.ctx.beginPath();
 
             this.ctx.strokeStyle = 'Red';
-            this.currentMask.forEach(point => {
+            this.currentPoly.forEach(point => {
                 this.ctx.moveTo(point.x, point.y);
                 this.ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
             });
@@ -133,9 +133,9 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
 
             //  Draw the areas saved
             // ----------------------
-            this.masks.forEach(poly => {
+            this.polys.forEach(poly => {
                 this.ctx.beginPath();
-                this.ctx.strokeStyle = '#f55d42';
+                this.ctx.strokeStyle = this.props.borderColor || '#f55d42';
                 var first = poly[0];
                 this.ctx.moveTo(first.x, first.y);
 
@@ -161,16 +161,16 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
 
     move(/*e: any*/) {}
 
-    shouldCloseCurrentMask(minProximity: number) {
-        for (var i = 0; i < this.currentMask.length - 1; i++) {
-            for (var j = i + 1; j < this.currentMask.length; j++) {
-                const p1 = this.currentMask[i];
-                const p2 = this.currentMask[j];
+    shouldCloseCurrentPoly(minProximity: number) {
+        for (var i = 0; i < this.currentPoly.length - 1; i++) {
+            for (var j = i + 1; j < this.currentPoly.length; j++) {
+                const p1 = this.currentPoly[i];
+                const p2 = this.currentPoly[j];
                 if (
                     Math.abs(p1.x - p2.x) < minProximity &&
                     Math.abs(p1.y - p2.y) < minProximity
                 ) {
-                    this.currentMask[j] = this.currentMask[i];
+                    this.currentPoly[j] = this.currentPoly[i];
 
                     return true;
                 }
@@ -190,27 +190,27 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
         const y = e.clientY - this.y;
 
         if (this.currentMode == 'delete') {
-            for (let i = 0; i < this.masks.length; i++) {
-                if (pointPolygonTest(this.masks[i], { x, y }) > 0) {
+            for (let i = 0; i < this.polys.length; i++) {
+                if (pointPolygonTest(this.polys[i], { x, y }) > 0) {
                     this.editHistory.push({
-                        type: 'mask-removed',
-                        data: this.masks.splice(i, 1),
+                        type: 'poly-removed',
+                        data: this.polys.splice(i, 1),
                     });
-                    this.props.onMasksChanged(this.masks);
+                    this.props.onPolygonsChanged(this.polys);
                     break;
                 }
             }
         } else {
-            this.currentMask.push({ x, y });
+            this.currentPoly.push({ x, y });
 
             const epsilon = 5;
 
-            this.currentMask = simplify(this.currentMask, epsilon, false);
+            this.currentPoly = simplify(this.currentPoly, epsilon, false);
 
-            if (this.shouldCloseCurrentMask(4)) {
-                this.masks.push(simplify(this.currentMask, epsilon + 1, false));
-                this.currentMask = [];
-                this.props.onMasksChanged(this.masks);
+            if (this.shouldCloseCurrentPoly(4)) {
+                this.polys.push(simplify(this.currentPoly, epsilon + 1, false));
+                this.currentPoly = [];
+                this.props.onPolygonsChanged(this.polys);
             }
         }
 
@@ -224,17 +224,17 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
 
     undo() {
         // Undo last action
-        if (this.currentMask.length > 0) {
+        if (this.currentPoly.length > 0) {
             this.editHistory.push({
                 type: 'point-removed',
-                data: this.currentMask.pop(),
+                data: this.currentPoly.pop(),
             });
         } else {
             this.editHistory.push({
-                type: 'mask-removed',
-                data: this.masks.pop(),
+                type: 'poly-removed',
+                data: this.polys.pop(),
             });
-            this.props.onMasksChanged(this.masks);
+            this.props.onPolygonsChanged(this.polys);
         }
 
         this.drawAll(() => {});
@@ -246,10 +246,10 @@ export default class CanvasHandlerMask extends CanvasHandler<CanvasHandlerMaskPr
 
         if (last) {
             if (last.type === 'point-removed') {
-                this.currentMask.push(last.data);
-            } else if (last.type === 'mask-removed') {
-                this.masks.push(last.data);
-                this.props.onMasksChanged(this.masks);
+                this.currentPoly.push(last.data);
+            } else if (last.type === 'poly-removed') {
+                this.polys.push(last.data);
+                this.props.onPolygonsChanged(this.polys);
             }
         }
 

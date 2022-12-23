@@ -43,6 +43,7 @@ export default function AreasCameraConfiguration() {
 
     const onMasksExit = () => {
         setShowModalMasks(false);
+        document.exitFullscreen();
     };
 
     return (

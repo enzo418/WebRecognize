@@ -58,14 +58,22 @@ interface IConfigurationFieldState {
     errorMessage: string;
 }
 
-// Higher order component.
-// Wraps an input so we don't need to handle the values and change events
-// for each one.
-// It only needs a data prop with the path of the field in the configuration file,
-// the camera id (if it corresponds) and the update function.
+/**
+ * Higher order component.
+ * Wraps an input so we don't need to handle the values and change events
+ * for each one.
+ * It only needs a data prop with the path of the field in the configuration file,
+ * the camera id (if it corresponds) and the update function.
+ * @param WrappedComponent inner component
+ * @param fixProps removed/add props that `WrappedComponent` can't handle
+ * @param defaultDecayValue if no defaultValue was provided and no there is no cached
+ * value then we will use this value
+ * @returns
+ */
 export default function configurationField(
     WrappedComponent: any,
     fixProps: (p: any) => any,
+    defaultDecayValue: any,
 ) {
     // eslint-disable-next-line react/display-name
     return class extends React.Component<
@@ -88,7 +96,8 @@ export default function configurationField(
                 value:
                     props.data.defaultValue !== undefined
                         ? props.data.defaultValue
-                        : props.data.getInitialValue(this.completePath) || '',
+                        : props.data.getInitialValue(this.completePath) ||
+                          defaultDecayValue,
                 state: 'initial',
                 errorMessage: '',
             };
@@ -235,18 +244,22 @@ export default function configurationField(
     };
 }
 
-export const TextConfigurationField = configurationField(TextField, p =>
-    removeChecked(p),
+export const TextConfigurationField = configurationField(
+    TextField,
+    p => removeChecked(p),
+    '',
 );
 
 export const SelectConfigurationField = configurationField(
     Select,
     fixSelectProps,
+    '',
 );
 
 export const SliderConfigurationField = configurationField(
     Slider,
     fixSliderProps,
+    0,
 );
 
 //export const SwitchConfigurationField = configurationField((p: any) => {
@@ -258,6 +271,7 @@ export const SliderConfigurationField = configurationField(
 export const SwitchConfigurationField = configurationField(
     Switch,
     fixSwitchProps,
+    false,
 );
 
 function fixSliderProps(props: any) {

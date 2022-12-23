@@ -19,10 +19,14 @@ export default class CachedConfiguration {
      * @returns value or undefined
      */
     get(path: string): any {
-        return this.splitPath(path).reduce((a, v, i, arr) => {
+        const value = this.splitPath(path).reduce((a, v, i, arr) => {
             if (v in a) return a[v];
             else arr.splice(1); // stop reducer
         }, this.map);
+
+        console.debug(`Got cached value ${value} for ${path}`);
+
+        return value;
     }
 
     /**

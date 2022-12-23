@@ -15,4 +15,5 @@ export interface Rectangle {
     height: number;
 }
 
-export type Mask = Array<Point>;
+export type Polygon = Array<Point>;
+export type Mask = Polygon;

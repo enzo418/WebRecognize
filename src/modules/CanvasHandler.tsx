@@ -1,21 +1,18 @@
 import React from 'react';
+import { Point, Rectangle, Size } from '../Geometry';
+import { ensure } from '../utils/error';
 
-interface Size {
-    width: number;
-    height: number;
-}
-
-interface ICanvasHandlerState {
+export interface ICanvasHandlerState {
     size: Size;
 }
 
 /**
  * abstract class that adds functionality to a canvas
  */
-export default class CanvasHandler<Props> extends React.Component<
+export default class CanvasHandler<
     Props,
-    ICanvasHandlerState
-> {
+    TState extends ICanvasHandlerState = ICanvasHandlerState,
+> extends React.Component<Props, TState> {
     lastImage: string;
     x: number;
     y: number;
@@ -23,14 +20,7 @@ export default class CanvasHandler<Props> extends React.Component<
     handlers: {};
     headers: null;
     canvas: React.RefObject<HTMLCanvasElement>;
-    ctx: any;
-
-    state = {
-        size: {
-            width: 640,
-            height: 360,
-        },
-    };
+    ctx!: CanvasRenderingContext2D;
 
     constructor(props: Props) {
         super(props);
@@ -64,7 +54,9 @@ export default class CanvasHandler<Props> extends React.Component<
 
     componentDidMount() {
         if (this.canvas.current)
-            this.ctx = this.canvas.current.getContext('2d');
+            this.ctx = ensure<CanvasRenderingContext2D>(
+                this.canvas.current.getContext('2d'),
+            );
         else throw 'Missing canvas element.';
     }
 
@@ -80,10 +72,13 @@ export default class CanvasHandler<Props> extends React.Component<
         });
     }
 
-    repaintCanvas(callbackOnImageLoaded: () => any) {
+    repaintCanvas(
+        callbackOnImageLoaded: (image: HTMLImageElement) => any,
+        imageSrc?: string,
+    ) {
         var image = new Image();
-        image.onload = () => callbackOnImageLoaded();
-        image.src = this.lastImage;
+        image.onload = () => callbackOnImageLoaded(image);
+        image.src = imageSrc ? imageSrc : this.lastImage;
     }
 
     updateCanvasPosition() {
@@ -92,5 +87,110 @@ export default class CanvasHandler<Props> extends React.Component<
         var bounds = this.canvas.current.getBoundingClientRect();
         this.x = bounds.left;
         this.y = bounds.top;
+    }
+
+    /**
+     * Fills a rectangle with lines at 45°
+     * @param rectangle
+     * @param spacingY space between the lines
+     */
+    fillRectangleWithLines(
+        rectangle: Rectangle,
+        spacingY: number,
+        config?: {
+            color?: string;
+            style?: 'grid' | 'dashed-lines' | 'solid-lines';
+            customDashStyle?: number[];
+            lineWidth?: number;
+        },
+    ) {
+        config = Object.assign(
+            {
+                color: 'green',
+                style: 'grid',
+                lineWidth: 2,
+            },
+            config,
+        );
+
+        this.ctx.save();
+
+        const tl = { x: rectangle.x, y: rectangle.y };
+        const br = {
+            x: rectangle.x + rectangle.width,
+            y: rectangle.y + rectangle.height,
+        };
+
+        let i = 1;
+
+        this.ctx.beginPath();
+
+        if (config.customDashStyle) {
+            this.ctx.setLineDash(config.customDashStyle);
+        } else {
+            switch (config.style) {
+                case 'grid':
+                    this.ctx.setLineDash([2, 5]);
+                    break;
+                case 'grid':
+                    this.ctx.setLineDash([5]);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        this.ctx.strokeStyle = config.color as string;
+        this.ctx.lineWidth = config.lineWidth as number;
+        while (i < 200) {
+            let Y = tl.y + spacingY * i; // start drawing from tl
+            let X = tl.x;
+
+            // this line is described by L: y = -m(x - X) + Y
+            // -m because the Y axis is inverted, it's 0 at the top.
+            // A line at 45° means that m = 1 => L: y = -x + X + Y
+
+            let startX = X,
+                startY = Y,
+                toY = 0,
+                toX = 0;
+
+            // 1. find intersection with top line
+            // the top line is described by y = tl.y, if we replace it in L,
+            // tl.y = -x + X + Y => x = - tl.y + X + Y
+            const intersectionXTopLine = -tl.y + X + Y;
+
+            if (Y >= br.y) {
+                // This means that we need to start drawing from the bottom line,
+                // for that we find X. If we consider the bottom line as y = br.y,
+                // and replace it in L we get br.y = -x + X + Y, finding x
+                // => x = - br.y + X + Y
+                startX = -br.y + X + Y;
+                startY = br.y; // we start drawing from the bottom line
+            }
+
+            if (startX > br.x) break;
+
+            if (intersectionXTopLine <= br.x) {
+                // draw a line from (X, Y) to (intersectionXTopLine, tl.y)
+                toX = intersectionXTopLine;
+                toY = tl.y;
+            } else {
+                // find where it intersect in the Y coordinate
+                // with the right bound, x = br.x replacing in L
+                // then y = - br.x + X + Y
+                toY = -br.x + X + Y;
+                toX = br.x;
+            }
+
+            this.ctx.moveTo(startX, startY);
+            this.ctx.lineTo(toX, toY);
+
+            i++;
+        }
+
+        this.ctx.stroke();
+
+        this.ctx.restore();
     }
 }

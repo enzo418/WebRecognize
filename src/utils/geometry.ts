@@ -1,4 +1,4 @@
-import { Mask, Point, Rectangle } from '../Geometry';
+import { Mask, Point, Polygon, Rectangle } from '../Geometry';
 
 export const scaleRectangle = (
     roi: Rectangle,
@@ -16,21 +16,29 @@ export const scaleRectangle = (
     return scaledRoi;
 };
 
-export const scaleMask = (mask: Mask, scaleX: number, scaleY: number) => {
-    return mask.map(point => ({
+export const scalePolygon = (poly: Polygon, scaleX: number, scaleY: number) => {
+    return poly.map(point => ({
         x: point.x * scaleX,
         y: point.y * scaleY,
     }));
 };
 
-export const scaleMasks = (masks: Mask[], scaleX: number, scaleY: number) => {
+export const scalePolygons = (
+    polys: Polygon[],
+    scaleX: number,
+    scaleY: number,
+) => {
     let copy = [];
-    for (let i = 0; i < masks.length; i++) {
-        copy.push(scaleMask(masks[i], scaleX, scaleY));
+    for (let i = 0; i < polys.length; i++) {
+        copy.push(scalePolygon(polys[i], scaleX, scaleY));
     }
 
     return copy;
 };
+
+export const scaleMask = scalePolygon;
+
+export const scaleMasks = scalePolygons;
 
 export function getRectangleDimensions(p1: Point, p2: Point) {
     const lt = {
