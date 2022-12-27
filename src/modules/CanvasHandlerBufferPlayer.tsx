@@ -28,7 +28,7 @@ interface CanvasHandlerBufferPlayerProps {
  */
 export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandlerBufferPlayerProps> {
     private currentFrame: number;
-    private intervalID: number;
+    private intervalID: number | null;
     private showCurrentPositionText: boolean;
 
     constructor(props: CanvasHandlerBufferPlayerProps) {
@@ -44,7 +44,7 @@ export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandl
         };
 
         this.currentFrame = 0;
-        this.intervalID = 0;
+        this.intervalID = null;
         this.showCurrentPositionText = true;
 
         props.cameraFrameStore.subscribeToFetchDone(
@@ -57,6 +57,11 @@ export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandl
     }
 
     public play() {
+        if (this.intervalID !== null) {
+            clearInterval(this.intervalID);
+            this.intervalID = null;
+        }
+
         const id = setInterval(() => {
             let next = this.currentFrame + 1;
             if (next > this.props.cameraFrameStore.getTotalImages() - 1) {
@@ -72,7 +77,10 @@ export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandl
     }
 
     public pause() {
-        clearInterval(this.intervalID);
+        if (this.intervalID !== null) {
+            clearInterval(this.intervalID);
+            this.intervalID = null;
+        }
     }
 
     public previous() {
@@ -283,7 +291,7 @@ export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandl
             const text = this.ctx.measureText('A');
             this.ctx.fillText(
                 `${
-                    this.currentFrame
+                    this.currentFrame + 1
                 }/${this.props.cameraFrameStore.getTotalImages()}`,
                 3,
                 20,
