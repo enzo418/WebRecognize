@@ -9,10 +9,12 @@ const config = {
             notification: '/api/notifications',
             liveViewObserver: '/api/requestObserverStream',
             liveViewCamera: '/api/requestCameraStream',
+            streamBuffer: '/stream/buffer/',
         },
         websocket: {
             notification: `ws://${host}:${port}/notifications`,
             liveView: `ws://${host}:${port}/live/`, // ws:/live/liveID
+            videoBuffer: `ws://${host}:${port}/buffer/`, // ws:/buffer/bufferID
         },
     },
 };

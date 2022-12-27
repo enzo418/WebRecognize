@@ -41,6 +41,10 @@ class MockHttp extends IHttpClient {
     ): Promise<Response> {
         return this.response();
     }
+
+    delete(path: unknown, extra?: unknown): Promise<Response> {
+        return this.response();
+    }
 }
 
 describe('Configuration service tree call', () => {

@@ -52,9 +52,12 @@ const generateNotifications = (n: number, numberCams: number) => {
 
             const g: DTONotification = {
                 id: '' + (lastNID + ti + 1),
-                group: i,
-                cameraID: '' + random(0, numberCams),
-                date: Math.floor(newDate.getTime() / 1000),
+                groupID: i,
+                camera: {
+                    id: '' + random(0, numberCams),
+                    name: 'cam' + String.fromCharCode(random(0, 64)),
+                },
+                datetime: Math.floor(newDate.getTime() / 1000),
                 type: t,
                 content,
             };
@@ -154,7 +157,7 @@ export default class NotificationServiceMock implements INotificationService {
             const found: DTONotification[] = [];
             const unixTimeBefore = dateToUnix(before);
             this.notifications.forEach(not => {
-                if (before instanceof Date && not.date < unixTimeBefore) {
+                if (before instanceof Date && not.datetime < unixTimeBefore) {
                     found.push(not);
                 } else if (typeof before === 'string' && not.id < before) {
                     found.push(not);
@@ -173,7 +176,7 @@ export default class NotificationServiceMock implements INotificationService {
             const found: DTONotification[] = [];
             const unixTimeAfter = dateToUnix(after);
             this.notifications.forEach(not => {
-                if (after instanceof Date && not.date > unixTimeAfter) {
+                if (after instanceof Date && not.datetime > unixTimeAfter) {
                     found.push(not);
                 } else if (typeof after === 'string' && not.id > after) {
                     found.push(not);
@@ -197,8 +200,8 @@ export default class NotificationServiceMock implements INotificationService {
                 if (
                     after instanceof Date &&
                     before instanceof Date &&
-                    not.date >= unixTimeAfter &&
-                    not.date <= unixTimeBefore
+                    not.datetime >= unixTimeAfter &&
+                    not.datetime <= unixTimeBefore
                 ) {
                     found.push(not);
                 } else if (typeof after === 'string' && not.id > after) {

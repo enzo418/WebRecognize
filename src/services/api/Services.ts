@@ -6,6 +6,7 @@ import LiveViewService from './LiveViewService';
 import ConfigurationServiceMock from './mock/ConfigurationServiceMock';
 import NotificationService from './NotificationService';
 import ObserverService from './ObserverService';
+import VideoBufferService from './VideoBufferService';
 
 export const client = new HttpClient(config.server);
 
@@ -21,4 +22,7 @@ export const notificationService = new NotificationService(
     client,
     cameraService,
 );
+
+export const videoBufferService = new VideoBufferService(client);
+
 // export const configurationService = new ConfigurationServiceMock(client);

@@ -10,11 +10,13 @@ describe('Cameras DTO to camera', () => {
         const camDTO: DTOCamera = {
             id: '1',
             name: 'a',
+            url: 'c',
         };
 
         const expectedCamera: Camera = {
             id: '1',
             name: 'a',
+            url: 'c',
         };
 
         //
@@ -30,6 +32,7 @@ describe('Cameras DTO to camera', () => {
             {
                 id: '1',
                 name: 'a',
+                url: 'c',
             },
         ];
 
@@ -37,6 +40,7 @@ describe('Cameras DTO to camera', () => {
             {
                 id: '1',
                 name: 'a',
+                url: 'c',
             },
         ];
 

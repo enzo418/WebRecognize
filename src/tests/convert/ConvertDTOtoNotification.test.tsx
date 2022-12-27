@@ -12,6 +12,8 @@ import {
 } from '../../services/api/convert/ConvertDTOtoNotification';
 import { tryGetEnumValueFromDirtyString } from '../../utils/enum';
 import { dateToUnix, parseDate } from '../../utils/date';
+import TypedPromise from '../../TypedPromise';
+import IProblemJson from '../../services/api/interfaces/IProblemJson';
 
 function ensure<T>(
     argument: T | undefined | null,
@@ -30,8 +32,8 @@ class MockCameraService implements ICameraService {
         this.cameras = pCameras;
     }
 
-    get(id: string): Promise<Camera> {
-        return new Promise((resolve, reject) => {
+    get(id: string): TypedPromise<Camera, IProblemJson> {
+        return new TypedPromise<Camera, IProblemJson>((resolve, reject) => {
             resolve(ensure(this.cameras.find(c => c.id == id)));
         });
     }
@@ -59,14 +61,16 @@ describe('Notification Service', () => {
 
         const not: DTONotification = {
             id: '1',
-            date: dateToUnix(parseDate('24/01/1000 00:00:00')),
-            cameraID: '123456',
-            group: 99,
+            datetime: dateToUnix(parseDate('24/01/1000 00:00:00')),
+            camera: { id: '123456', name: 'test' },
+            groupID: 99,
             type: 'image',
             content: 'aaa',
         };
 
-        const cameras: Array<Camera> = [{ id: '123456', name: 'a' }];
+        const cameras: Array<Camera> = [
+            { id: '123456', name: 'test', url: 't' },
+        ];
 
         const camService: MockCameraService = new MockCameraService(cameras);
 
@@ -79,10 +83,10 @@ describe('Notification Service', () => {
         //
 
         expect(spyGetCam).toHaveBeenCalledTimes(1);
-        expect(spyGetCam).toHaveBeenCalledWith(not.cameraID);
+        expect(spyGetCam).toHaveBeenCalledWith(not.camera.id);
 
         expect(response.id).toBe(not.id);
-        expect(response.group).toBe(not.group);
+        expect(response.group).toBe(not.groupID);
         expect(response.date).toStrictEqual(date);
         expect(response.camera).toMatchObject(cameras[0]);
         expect(response.type).toBe(ENotificationType.IMAGE);
@@ -95,33 +99,33 @@ describe('Notification Service', () => {
         const notResponse: DTONotification[] = [
             {
                 id: '1',
-                date: dateToUnix(parseDate('28/05/2010 23:33:15')),
-                cameraID: '1',
-                group: 99,
+                datetime: dateToUnix(parseDate('28/05/2010 23:33:15')),
+                camera: { id: '1', name: 'c1' },
+                groupID: 99,
                 type: 'text',
                 content: 'hi',
             },
             {
                 id: '2',
-                date: dateToUnix(parseDate('28/05/2010 23:33:15')),
-                cameraID: '2',
-                group: 99,
+                datetime: dateToUnix(parseDate('28/05/2010 23:33:15')),
+                camera: { id: '2', name: 'c2' },
+                groupID: 99,
                 type: 'image',
                 content: 'this_is_a_uri',
             },
             {
                 id: '3',
-                date: dateToUnix(parseDate('28/05/2010 23:33:15')),
-                cameraID: '2',
-                group: 1,
+                datetime: dateToUnix(parseDate('28/05/2010 23:33:15')),
+                camera: { id: '2', name: 'c2' },
+                groupID: 1,
                 type: 'video',
                 content: 'this_is_a_uri2',
             },
         ];
 
         const cameras: Array<Camera> = [
-            { id: '1', name: 'a' },
-            { id: '2', name: 'b' },
+            { id: '1', name: 'a', url: 'u' },
+            { id: '2', name: 'b', url: 'u' },
         ];
 
         const camAt = (id: string) => ensure(cameras.find(c => c.id == id));
@@ -140,11 +144,11 @@ describe('Notification Service', () => {
         //
 
         expect(spyGetCam).toHaveBeenCalledTimes(notResponse.length);
-        notResponse.forEach(({ cameraID }, index) => {
+        notResponse.forEach(({ camera }, index) => {
             // call number starts at 1
-            expect(spyGetCam).toHaveBeenNthCalledWith(index + 1, cameraID);
-            expect(spyGetCam).toHaveBeenNthCalledWith(index + 1, cameraID);
-            expect(spyGetCam).toHaveBeenNthCalledWith(index + 1, cameraID);
+            expect(spyGetCam).toHaveBeenNthCalledWith(index + 1, camera.id);
+            expect(spyGetCam).toHaveBeenNthCalledWith(index + 1, camera.id);
+            expect(spyGetCam).toHaveBeenNthCalledWith(index + 1, camera.id);
         });
 
         const inputVsExpected = response.map((n, i) => [n, notResponse[i]]);
@@ -154,9 +158,9 @@ describe('Notification Service', () => {
             const expected: DTONotification = pExpected as DTONotification;
 
             expect(actual.id).toBe(expected.id);
-            expect(actual.group).toBe(expected.group);
+            expect(actual.group).toBe(expected.groupID);
             expect(actual.date).toStrictEqual(date);
-            expect(actual.camera).toMatchObject(camAt(expected.cameraID));
+            expect(actual.camera).toMatchObject(camAt(expected.camera.id));
             expect(actual.type).toBe(
                 tryGetEnumValueFromDirtyString(
                     ENotificationType,

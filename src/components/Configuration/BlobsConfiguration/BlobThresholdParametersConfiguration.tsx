@@ -1,6 +1,24 @@
-import { Grid, Typography } from '@mui/material';
-import React from 'react';
+import { PlayCircleOutline } from '@mui/icons-material';
+import {
+    Box,
+    Button,
+    Divider,
+    FormControl,
+    Grid,
+    InputLabel,
+    LinearProgress,
+    MenuItem,
+    Select,
+    Stack,
+    Typography,
+} from '@mui/material';
+import { format } from 'date-fns';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { useConfiguration } from '../../../context/configurationContext';
+import DTOVideoBuffer from '../../../services/api/interfaces/DTOVideoBuffer';
+import { videoBufferService } from '../../../services/api/Services';
+import ProcessingRoom from '../../ProcessingRoom';
 import { SliderConfigurationField } from '../configurationField';
 
 export default function BlobThresholdParametersConfiguration() {
@@ -14,20 +32,64 @@ export default function BlobThresholdParametersConfiguration() {
         camera: params?.camera_id,
     };
 
+    const [availableBuffers, setAvailableBuffers] = useState<
+        DTOVideoBuffer[] | null
+    >(null);
+
+    const [videoBufferID, setVideoBufferID] = useState<string>('');
+
+    useEffect(() => {
+        videoBufferService
+            .getAvailable(commonData.camera)
+            .ok(res => setAvailableBuffers(res))
+            .fail(e =>
+                console.error('Could not get available video buffers: ', e),
+            );
+    }, []);
+
+    const createNewBuffer = () => {
+        videoBufferService
+            .createBuffer({
+                camera_id: commonData.camera,
+                delay: 0,
+                duration: 5,
+                resize: {
+                    width: 640,
+                    height: 360,
+                },
+            })
+            .ok((buffer: DTOVideoBuffer) => {
+                setAvailableBuffers([...(availableBuffers || []), buffer]);
+
+                setVideoBufferID(buffer.id);
+            })
+            .fail(e => {
+                toast.error('Could not create the buffer: ' + e.title);
+                console.error('could not create the buffer: ', e);
+            });
+    };
+
+    const onSelectBuffer = (ev: any) => {
+        const id = ev.target.value as string;
+        if (id == 'new') {
+            createNewBuffer();
+        } else {
+            setVideoBufferID(id);
+        }
+    };
+
+    const selected = availableBuffers?.filter(b => b.id == videoBufferID);
+
+    const onDelete = () => {
+        const id = videoBufferID;
+
+        setVideoBufferID('');
+
+        setAvailableBuffers(availableBuffers?.filter(b => b.id != id) || null);
+    };
+
     return (
         <Grid container spacing={4}>
-            <Grid item xs={12}>
-                <Typography
-                    textAlign={'center'}
-                    color={'GrayText'}
-                    sx={{ padding: '10px 0' }}>
-                    <i>
-                        This setting is usually only changed with a live stream
-                        so that you can see what you are doing.
-                    </i>
-                </Typography>
-            </Grid>
-
             <Grid item xs={12}>
                 <Typography>
                     Frames to wait before taking another difference frame
@@ -47,7 +109,7 @@ export default function BlobThresholdParametersConfiguration() {
                     sx={{ margin: '0 5%', width: '90%' }}
                     data={{
                         ...commonData,
-                        path: 'blobDetection/thresholdingParams/FramesBetweenDiffFrames',
+                        path: 'blobDetection/thresholdParams/FramesBetweenDiffFrames',
                     }}
                     marks={[
                         {
@@ -80,7 +142,7 @@ export default function BlobThresholdParametersConfiguration() {
                     sx={{ margin: '0 5%', width: '90%' }}
                     data={{
                         ...commonData,
-                        path: 'blobDetection/thresholdingParams/ContextFrames',
+                        path: 'blobDetection/thresholdParams/ContextFrames',
                     }}
                     marks={[
                         {
@@ -110,7 +172,7 @@ export default function BlobThresholdParametersConfiguration() {
                     sx={{ margin: '0 5%', width: '90%' }}
                     data={{
                         ...commonData,
-                        path: 'blobDetection/thresholdingParams/MedianBlurKernelSize',
+                        path: 'blobDetection/thresholdParams/MedianBlurKernelSize',
                     }}
                     marks={[
                         {
@@ -135,7 +197,7 @@ export default function BlobThresholdParametersConfiguration() {
                     sx={{ margin: '0 5%', width: '90%' }}
                     data={{
                         ...commonData,
-                        path: 'blobDetection/thresholdingParams/GaussianBlurKernelSize',
+                        path: 'blobDetection/thresholdParams/GaussianBlurKernelSize',
                     }}
                     marks={[
                         {
@@ -165,7 +227,7 @@ export default function BlobThresholdParametersConfiguration() {
                     sx={{ margin: '0 5%', width: '90%' }}
                     data={{
                         ...commonData,
-                        path: 'blobDetection/thresholdingParams/DilationSize',
+                        path: 'blobDetection/thresholdParams/DilationSize',
                     }}
                     marks={[
                         {
@@ -194,7 +256,7 @@ export default function BlobThresholdParametersConfiguration() {
                     sx={{ margin: '0 5%', width: '90%' }}
                     data={{
                         ...commonData,
-                        path: 'blobDetection/thresholdingParams/BrightnessAboveThreshold',
+                        path: 'blobDetection/thresholdParams/BrightnessAboveThreshold',
                     }}
                     marks={[
                         {
@@ -211,6 +273,117 @@ export default function BlobThresholdParametersConfiguration() {
                     step={1}
                     valueLabelDisplay="auto"
                 />
+            </Grid>
+
+            <Grid item xs={12}>
+                <Divider />
+                <Typography
+                    variant="overline"
+                    fontSize={'1.15rem'}
+                    className="centered">
+                    Show modifications result in real time
+                </Typography>
+            </Grid>
+
+            <Grid item xs={12}>
+                {/* making request to get camera buffers */}
+                {availableBuffers == null && (
+                    <Box className="centered">
+                        <LinearProgress
+                            sx={{ width: '80%', padding: '3px 5%' }}
+                        />
+                    </Box>
+                )}
+
+                {/* no buffers for this camera  */}
+                {availableBuffers !== null && availableBuffers.length == 0 && (
+                    <Box className="centered">
+                        <Typography>
+                            There are no buffers for this camera
+                        </Typography>
+                        <Button
+                            startIcon={<PlayCircleOutline color="success" />}
+                            onClick={createNewBuffer}>
+                            Record new buffer
+                        </Button>
+                    </Box>
+                )}
+
+                {availableBuffers !== null && availableBuffers.length > 0 && (
+                    <>
+                        <FormControl fullWidth sx={{ pb: '10px' }}>
+                            <InputLabel id="select-buffer">
+                                Select buffer
+                            </InputLabel>
+                            <Select
+                                labelId="select-buffer"
+                                value={videoBufferID}
+                                label="Select buffer"
+                                onChange={onSelectBuffer}>
+                                {availableBuffers.map(b => (
+                                    <MenuItem key={b.id} value={b.id}>
+                                        <Typography
+                                            variant="overline"
+                                            color="GrayText">
+                                            Date
+                                        </Typography>
+                                        <Typography
+                                            variant="overline"
+                                            sx={{ margin: 'auto 5px' }}>
+                                            {format(
+                                                new Date(b.date_unix * 1000),
+                                                'dd MMMM yyyy HH:mm',
+                                            )}
+                                        </Typography>
+                                        <Typography
+                                            variant="overline"
+                                            color="GrayText">
+                                            Duration
+                                        </Typography>
+                                        <Typography
+                                            variant="overline"
+                                            sx={{ margin: 'auto 5px' }}>
+                                            {b.duration} seconds
+                                        </Typography>
+                                    </MenuItem>
+                                ))}
+                                {videoBufferID.length > 0 && (
+                                    <MenuItem value="new">
+                                        <Button
+                                            startIcon={
+                                                <PlayCircleOutline color="success" />
+                                            }
+                                            onClick={createNewBuffer}>
+                                            Record new buffer
+                                        </Button>
+                                    </MenuItem>
+                                )}
+                            </Select>
+                        </FormControl>
+
+                        {videoBufferID.length == 0 && (
+                            <Box className="centered" sx={{ pb: '10px' }}>
+                                <Button
+                                    startIcon={
+                                        <PlayCircleOutline color="success" />
+                                    }
+                                    onClick={createNewBuffer}>
+                                    Record new buffer
+                                </Button>
+                            </Box>
+                        )}
+                    </>
+                )}
+
+                {/* buffer selected */}
+                {availableBuffers !== null &&
+                    videoBufferID.length > 0 &&
+                    selected && (
+                        <ProcessingRoom
+                            bufferID={videoBufferID}
+                            onDelete={onDelete}
+                        />
+                    )}
             </Grid>
         </Grid>
     );

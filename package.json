@@ -30,6 +30,7 @@
     "sass": "^1.49.9",
     "simplify-js": "^1.2.4",
     "underscore": "^1.13.4",
+    "utif": "^3.1.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -61,6 +62,7 @@
   "devDependencies": {
     "@types/json2mq": "^0.2.0",
     "@types/underscore": "^1.11.4",
+    "@types/utif": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^5.46.0",
     "@typescript-eslint/parser": "^5.46.0",
     "cra-build-watch": "^3.4.0",

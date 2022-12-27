@@ -445,6 +445,7 @@ export default function ConfigurationPage() {
                                 borderLeft: belowMD ? '' : '1px solid #e5e6eb',
                                 borderTop: belowMD ? '1px solid #e5e6eb' : '',
                                 width: '99%',
+                                pb: '60px',
                             }}>
                             <Outlet />
                         </Grid>

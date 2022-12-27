@@ -1,19 +1,38 @@
+export {};
+
 interface EventData extends Event {
     /**
      * Returns the data of the message.
      */
-    readonly data: object;
-}
-
-interface IWrapperWebSocket {
-    onError(listener: (ev: Event) => any): void;
-    onClose(listener: (ev: Event) => any): void;
-    onOpen(listener: (ev: Event) => any): void;
-    onMessage(messageID: string, listener: (ev: EventData) => any): void;
+    readonly data: any;
 }
 
 type Callback = (ev: Event) => any;
 type MessageCallback = (ev: EventData) => any;
+
+export interface EventTypeMap {
+    [key: string]: 'int' | 'double' | 'object' | 'boolean' | 'string';
+}
+
+export function intParser(data: string): number {
+    return parseInt(data);
+}
+
+export function floatParser(data: string): number {
+    return parseFloat(data);
+}
+
+export function stringParser(data: string): string {
+    return data;
+}
+
+export function jsonParser(data: string): object {
+    return JSON.parse(data);
+}
+
+export function booleanParser(data: string): boolean {
+    return data == 'true' || data == '1';
+}
 
 /**
  * Wrappers the WebSocket default implementation
@@ -21,7 +40,7 @@ type MessageCallback = (ev: EventData) => any;
  * event (id) sended from our server.
  *
  * Since our server sends the message with the format
- * {key: content}
+ * key: content
  * this wrapper just calls all the subscribers to key.
  *
  * There are two default id that are not treated as
@@ -32,18 +51,21 @@ type MessageCallback = (ev: EventData) => any;
  * and from that function determine the id and call
  * all the subscribers of that id.
  */
-export class WrapperWebSocket implements IWrapperWebSocket {
-    m_socket: WebSocket;
-    m_messageHandlerRegistered: boolean;
-    m_openHandlerRegistered: boolean;
-    m_closeHandlerRegistered: boolean;
-    m_errorHandlerRegistered: boolean;
+export class WrapperWebSocket {
+    protected m_socket: WebSocket;
+    protected m_messageHandlerRegistered: boolean;
+    protected m_openHandlerRegistered: boolean;
+    protected m_closeHandlerRegistered: boolean;
+    protected m_errorHandlerRegistered: boolean;
 
     // internal websocket handlers for open, close and message
-    m_handlers: Record<string, Callback[]>;
+    protected m_handlers: Record<string, Callback[]>;
 
     // handler for each message id
-    m_messageHandlers: Record<string, MessageCallback[]>;
+    protected m_messageHandlers: Record<string, MessageCallback[]>;
+
+    // parser for each message id
+    protected m_messageParsers: Record<string, (data: string) => any>;
 
     constructor(url: string) {
         this.m_socket = new WebSocket(url);
@@ -54,6 +76,7 @@ export class WrapperWebSocket implements IWrapperWebSocket {
 
         this.m_handlers = { open: [], close: [] };
         this.m_messageHandlers = {};
+        this.m_messageParsers = {};
     }
 
     public onError(listener: (ev: Event) => any): void {
@@ -68,32 +91,55 @@ export class WrapperWebSocket implements IWrapperWebSocket {
         this.registerOpenEventHandler(listener);
     }
 
-    public onMessage(id: string, listener: MessageCallback): void {
+    public send(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
+        this.m_socket.send(data);
+    }
+
+    /**
+     * Register a message callback with a function to parse the data received
+     * @param id event id
+     * @param listener callback
+     * @param parser parse the string into some type, parsers are provided by this unit.
+     */
+    public onMessage(
+        id: string,
+        listener: MessageCallback,
+        parser: (data: string) => any,
+    ): void {
+        this.m_messageParsers[id] = parser;
+
         this.registerMessageEventHandler(id, listener);
     }
 
     private onmessage(ev: Event) {
         const evData = (ev as MessageEvent<any>).data;
-        let message;
 
-        try {
-            message = JSON.parse(evData);
-        } catch (error) {
-            throw new Error("Couldn't parse the websocket data event.");
-        }
+        const processStringEventData = (eventData: string) => {
+            const [id, data] = eventData.split(/:(.*)/s);
 
-        const keys = Object.keys(message);
+            if (!id) {
+                throw Error('Invalid server message');
+            }
 
-        if (keys.length === 1) {
-            const id = keys[0];
-            const content = message[id];
-            const res: EventData = { data: content, ...ev };
+            let parsed;
+            try {
+                parsed = this.m_messageParsers[id](data);
+            } catch (e) {
+                throw Error(`Couldn't parse the data, expected got ${data}`);
+            }
+
+            const res: EventData = { data: parsed, ...ev };
 
             // call the handlers
             this.callMessageHandlers(id, res);
+        };
+
+        if (evData instanceof Blob) {
+            evData.text().then(res => {
+                processStringEventData(res);
+            });
         } else {
-            console.warn(`WARNING: couldn\'t handle event,
-            probably wrong format sended from server.`);
+            processStringEventData(evData);
         }
     }
 
@@ -168,7 +214,7 @@ export class WrapperWebSocket implements IWrapperWebSocket {
     }
 
     private callMessageHandlers(id: string, ev: EventData) {
-        for (let i = 0; i < this.m_handlers[id].length; i++) {
+        for (let i = 0; i < this.m_messageHandlers[id].length; i++) {
             this.m_messageHandlers[id][i](ev);
         }
     }

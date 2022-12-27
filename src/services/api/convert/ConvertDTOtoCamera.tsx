@@ -5,6 +5,7 @@ export function parseCameraDTO(dtoCam: DTOCamera): Camera {
     const cam: Camera = {
         id: dtoCam.id,
         name: dtoCam.name,
+        url: dtoCam.url,
     };
 
     return cam;

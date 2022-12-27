@@ -12,6 +12,7 @@
 	"typescript.workspaceSymbols.scope": "currentProject",
 	"editor.formatOnSave": false,
 	"cSpell.words": [
-		"cfgs"
+		"cfgs",
+		"utif"
 	]
 }
