@@ -9,6 +9,7 @@ import Notification from '../../domain/Notification';
 import NotificationBodyDisplay from './NotificationBodyDisplay';
 import NotificationItemBody from './NotificationItemBody';
 import NotificationTypeSelector from './NotificationTypeSelector';
+import NotificationDebugVideo from './NotificationDebugVideo';
 
 interface INotificationItemProps {
     notifications: NotificationGroup[];
@@ -85,6 +86,10 @@ export default function NotificationItem(props: INotificationItemProps) {
                     onChange={handleChangeType}
                     allTypes={types}
                     selectableTypes={selectableTypes}
+                />
+                <NotificationDebugVideo
+                    sx={{ mt: '20px', width: '90%' }}
+                    notification={typedNotification}
                 />
             </Grid>
         </>

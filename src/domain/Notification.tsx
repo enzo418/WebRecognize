@@ -12,6 +12,7 @@ export default interface Notification {
     group: number;
     camera: Camera;
     type: ENotificationType;
+    configurationID: string;
     // eslint-disable-next-line semi
 }
 

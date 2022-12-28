@@ -47,6 +47,7 @@ export async function parseNotification(
                         ENotificationType,
                         pNot.type,
                     ),
+                    configurationID: pNot.configurationID,
                 };
 
                 const absoluteURL = new URL(pNot.content, config.server).href;

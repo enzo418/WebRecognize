@@ -66,6 +66,7 @@ describe('Notification Service', () => {
             groupID: 99,
             type: 'image',
             content: 'aaa',
+            configurationID: '11',
         };
 
         const cameras: Array<Camera> = [
@@ -104,6 +105,7 @@ describe('Notification Service', () => {
                 groupID: 99,
                 type: 'text',
                 content: 'hi',
+                configurationID: '11',
             },
             {
                 id: '2',
@@ -112,6 +114,7 @@ describe('Notification Service', () => {
                 groupID: 99,
                 type: 'image',
                 content: 'this_is_a_uri',
+                configurationID: '11',
             },
             {
                 id: '3',
@@ -120,6 +123,7 @@ describe('Notification Service', () => {
                 groupID: 1,
                 type: 'video',
                 content: 'this_is_a_uri2',
+                configurationID: '13',
             },
         ];
 

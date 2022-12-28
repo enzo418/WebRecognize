@@ -15,5 +15,6 @@ export default interface DTONotification {
     };
     type: string;
     content: string;
+    configurationID: string;
     // eslint-disable-next-line semi
 }

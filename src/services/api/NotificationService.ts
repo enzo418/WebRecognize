@@ -8,6 +8,8 @@ import {
     parseNotifications,
 } from './convert/ConvertDTOtoNotification';
 import DTONotification from './interfaces/DTONotification';
+import processPromise from '../../Http/ProcessPromise';
+import IProblemJson from './interfaces/IProblemJson';
 
 function serialize(date: Date | string | any): string {
     return typeof date == 'string' ? date : date.toISOString();
@@ -124,6 +126,19 @@ export default class NotificationService implements INotificationService {
 
     unsubscribe(callback: NotificationCallback): void {
         this.wsCallbacks = this.wsCallbacks.filter(c => c != callback);
+    }
+
+    getNotificationDebugBuffer(groupID: number) {
+        return processPromise<
+            { reclaimed: boolean; videoBufferID?: string },
+            IProblemJson
+        >(this.http.get(`/api/notifications/${groupID}/buffer/`, {}));
+    }
+
+    tryCreateDebugBuffer(groupID: number) {
+        return processPromise<{ videoBufferID: string }, IProblemJson>(
+            this.http.post(`/api/notifications/${groupID}/buffer/`, {}),
+        );
     }
 
     private async handleNewWsNotification(ev: MessageEvent<any>) {

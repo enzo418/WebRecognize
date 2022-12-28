@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { format } from 'date-fns';
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useConfiguration } from '../../../context/configurationContext';
 import DTOVideoBuffer from '../../../services/api/interfaces/DTOVideoBuffer';
@@ -24,6 +25,8 @@ import { SliderConfigurationField } from '../configurationField';
 export default function BlobThresholdParametersConfiguration() {
     const { params, updateCB, getFieldCB, getInitialValue } =
         useConfiguration();
+
+    const [searchParams, _] = useSearchParams();
 
     const commonData = {
         getFieldCB,
@@ -36,7 +39,9 @@ export default function BlobThresholdParametersConfiguration() {
         DTOVideoBuffer[] | null
     >(null);
 
-    const [videoBufferID, setVideoBufferID] = useState<string>('');
+    const [videoBufferID, setVideoBufferID] = useState<string>(
+        searchParams.get('videoBufferID') || '',
+    );
 
     useEffect(() => {
         videoBufferService

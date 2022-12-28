@@ -20,9 +20,7 @@ import '../styles/Notifications.scss';
 
 import config from '../config';
 
-import Notification, {
-    ENotificationType,
-} from '../domain/Notification';
+import Notification, { ENotificationType } from '../domain/Notification';
 import Camera from '../domain/Camera';
 
 import FilterNotification, {
@@ -34,7 +32,12 @@ import {
     NotificationGroup,
     NotificationGroupTypeMap,
 } from '../domain/NotificationGroup';
-import { FormControlLabel, Switch } from '@mui/material';
+import {
+    CircularProgress,
+    FormControlLabel,
+    LinearProgress,
+    Switch,
+} from '@mui/material';
 import { notificationService } from '../services/api/Services';
 import NotificationItem from '../components/Notification/NotificationItem';
 
@@ -63,7 +66,7 @@ export default class Notifications extends React.Component<
     NotificationsState
 > {
     state: NotificationsState = {
-        loading: false,
+        loading: true,
         notifications: [],
         cameras: [],
         currentNotificationIndex: -1,
@@ -80,8 +83,6 @@ export default class Notifications extends React.Component<
 
     constructor(props: NotificationsProps) {
         super(props);
-
-        this.processNotificationRequest(notificationService.getAll(100));
 
         this.notificationAudioPlayer = React.createRef();
     }
@@ -348,8 +349,10 @@ export default class Notifications extends React.Component<
     };
 
     componentDidMount() {
-        this.notificationAudioPlayer.current.volume = 0.3;
+        this.notificationAudioPlayer.current.volume = 0.1;
         notificationService.subscribe(this.handleNewNotification);
+
+        this.processNotificationRequest(notificationService.getAll(100));
     }
 
     render() {
@@ -400,7 +403,11 @@ export default class Notifications extends React.Component<
                         </Box>
                     )}
 
-                {this.state.loading && <Typography>Loading</Typography>}
+                {this.state.loading && (
+                    <Box className="centered" sx={{ pt: '10%', height: '50%' }}>
+                        <LinearProgress sx={{ width: '80%' }} />
+                    </Box>
+                )}
 
                 {!this.state.loading &&
                     this.state.currentNotificationIndex == -1 && (
