@@ -53,6 +53,9 @@ export default function ToggleRecognizeButton(props: Props) {
                 onSelected={onConfigurationSelected}
                 selectFirstByDefault={true}
                 disabled={props.status.running}
+                forceValue={
+                    props.status.running ? props.status.config_id : undefined
+                }
                 sx={{
                     minWidth: '100px',
                     '& .MuiSelect-select': {

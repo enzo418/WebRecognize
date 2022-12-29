@@ -12,6 +12,8 @@ interface SelectConfigurationProps {
 
     sx?: SxProps<Theme>;
 
+    forceValue?: string;
+
     [x: string | number | symbol]: unknown; // indexer, allows extra properties
 }
 
@@ -69,7 +71,7 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
 
     return (
         <Select
-            value={selectedID}
+            value={props.forceValue ? props.forceValue : selectedID}
             onChange={onChangeConfigurationSelected}
             {...rest}>
             {availableConfigurations.map(config => (
