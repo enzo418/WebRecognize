@@ -243,8 +243,16 @@ export default class TypedPromise<OkType, FailType> {
         action(this.resolve.bind(this), this.reject.bind(this));
     }
 
+    /**
+     *
+     * @param callback callback on success
+     * @param rejected callback on fail. Is preferred to use a following call to catch.
+     * This argument is needed enable await support.
+     * @returns
+     */
     public ok(
         callback: (val: OkType) => OkType | void,
+        rejected?: (error: FailType) => any,
     ): NotCatchableTypedPromise<OkType, FailType> {
         if (this.context.status === 'resolved') {
             try {
@@ -257,6 +265,36 @@ export default class TypedPromise<OkType, FailType> {
         } else {
             this.context.okCallback = callback;
         }
+
+        if (rejected) this.context.failCallback = rejected;
+
+        return new NotCatchableTypedPromise<OkType, FailType>(this.context);
+    }
+
+    /**
+     * Function added to support await
+     * @param callback on success. Await registers its "success" callback here.
+     * @param rejected on error. Await registers its "catch" callback here that
+     * it converts into an error catchable by a try{}catch{}.
+     * @returns
+     */
+    protected then(
+        callback: (val: OkType) => OkType | void,
+        rejected?: (error: FailType) => any,
+    ): NotCatchableTypedPromise<OkType, FailType> {
+        if (this.context.status === 'resolved') {
+            try {
+                this.context.value =
+                    callback(this.context.value) || this.context.value;
+            } catch (error) {
+                this.context.thenError =
+                    this.context.callCatchCallbackOrPropagate(0, error);
+            }
+        } else {
+            this.context.okCallback = callback;
+        }
+
+        if (rejected) this.context.failCallback = rejected;
 
         return new NotCatchableTypedPromise<OkType, FailType>(this.context);
     }
@@ -296,7 +334,9 @@ export default class TypedPromise<OkType, FailType> {
         this.context.status = 'rejected';
         this.context.error = value;
 
-        this.context.failCallback(this.context.error);
+        if (this.context.failCallback) {
+            this.context.failCallback(this.context.error);
+        } else throw this.context.error;
 
         this.context.callAsFinally(this.context.finallyCallback);
     }

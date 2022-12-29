@@ -6,14 +6,14 @@ describe('Typed promise general tests', () => {
         //
         const promise = new TypedPromise<string, number>((ok, fail) => ok('a'));
 
-        const callbackok = jest.fn();
+        const callbackOk = jest.fn();
 
         //
-        promise.ok(callbackok);
+        promise.ok(callbackOk);
 
         //
-        expect(callbackok).toHaveBeenCalledTimes(1);
-        expect(callbackok).toHaveBeenCalledWith('a');
+        expect(callbackOk).toHaveBeenCalledTimes(1);
+        expect(callbackOk).toHaveBeenCalledWith('a');
     });
 
     it('should call ok with timeout', done => {
@@ -40,14 +40,14 @@ describe('Typed promise general tests', () => {
             (ok, fail) => fail({ title: 'invalid name' }),
         );
 
-        const callbackfail = jest.fn();
+        const callbackFail = jest.fn();
 
         //
-        promise.ok(() => {}).fail(callbackfail);
+        promise.ok(() => {}).fail(callbackFail);
 
         //
-        expect(callbackfail).toHaveBeenCalledTimes(1);
-        expect(callbackfail).toHaveBeenCalledWith({ title: 'invalid name' });
+        expect(callbackFail).toHaveBeenCalledTimes(1);
+        expect(callbackFail).toHaveBeenCalledWith({ title: 'invalid name' });
     });
 
     it('should call ok, then chain and catch', done => {
@@ -111,7 +111,7 @@ describe('Typed promise general tests', () => {
             });
     });
 
-    it('should catch an expection at some level and then call finally', done => {
+    it('should catch an exception at some level and then call finally', done => {
         const promise = new TypedPromise<number, any>((ok, fail) =>
             setTimeout(() => ok(418), 500),
         );
@@ -154,5 +154,41 @@ describe('Typed promise general tests', () => {
             .fail(e => {
                 expect(e).toBe(418);
             });
+    });
+
+    it('should work with await/async on ok', async () => {
+        for (let i = 0; i < 10; i++) {
+            const TEST_TIME = 200;
+
+            const promise = new TypedPromise<number, any>((ok, _) =>
+                setTimeout(() => ok(418), TEST_TIME),
+            );
+
+            const startTime = performance.now();
+
+            const v = await promise;
+
+            expect(v).toBe(418);
+
+            const tookMs = performance.now() - startTime;
+
+            // 50 ms of margin
+            expect(tookMs).toBeGreaterThan(TEST_TIME - 50);
+            expect(tookMs).toBeLessThan(TEST_TIME + 50);
+        }
+    });
+
+    it('should work with await/async on fail', async () => {
+        const TEST_TIME = 200;
+
+        const promise = new TypedPromise<any, number>((_, fail) =>
+            setTimeout(() => fail(418), TEST_TIME),
+        );
+
+        try {
+            await promise;
+        } catch (e) {
+            expect(e).toBe(418);
+        }
     });
 });
