@@ -14,6 +14,8 @@ import {
 import { parseDate } from '../../../utils/date';
 
 import config from '../../../config';
+import TypedPromise from '../../../TypedPromise';
+import IProblemJson from '../interfaces/IProblemJson';
 
 // function notificationStringTypeToEnum(type:string) : ENotificationType {
 //    const names = getEnumKeysNames(ENotificationType).map((t:string) => t.toLowerCase());
@@ -88,28 +90,33 @@ export async function parseNotification(
 export function parseNotifications(
     pDTONotifications: Array<DTONotification>,
     cameraService: ICameraService,
-): Promise<Array<Notification>> {
-    return new Promise((resolve, reject) => {
-        const notifications: Array<Notification> = [];
+): TypedPromise<Array<Notification>, IProblemJson> {
+    return new TypedPromise<Array<Notification>, IProblemJson>(
+        (resolve, reject) => {
+            const notifications: Array<Notification> = [];
 
-        // get a promise per notification
-        const promises: Promise<Notification>[] = pDTONotifications.map(
-            DTONot => parseNotification(DTONot, cameraService),
-        );
+            // get a promise per notification
+            const promises: Promise<Notification>[] = pDTONotifications.map(
+                DTONot => parseNotification(DTONot, cameraService),
+            );
 
-        // resolve once all the promises are settled (rejected/fullfiled)
-        Promise.allSettled(promises)
-            .then(results => {
-                results.forEach(result => {
-                    if (result.status === 'rejected') {
-                        reject(result.reason);
-                    } else {
-                        notifications.push(result.value);
-                    }
-                });
+            // resolve once all the promises are settled (rejected/fullfiled)
+            Promise.allSettled(promises)
+                .then(results => {
+                    results.forEach(result => {
+                        if (result.status === 'rejected') {
+                            reject({
+                                title: result.reason,
+                                status: 0,
+                            });
+                        } else {
+                            notifications.push(result.value);
+                        }
+                    });
 
-                resolve(notifications);
-            })
-            .catch(reject);
-    });
+                    resolve(notifications);
+                })
+                .catch(reject);
+        },
+    );
 }

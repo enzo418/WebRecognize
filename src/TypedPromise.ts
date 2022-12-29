@@ -199,10 +199,10 @@ class CatchableTypedPromise<OkType, FailType> extends NotCatchableTypedPromise<
 }
 
 /**
- * This class represents a promise, used mainly to fullfill the need of a
+ * This class represents a promise, used mainly to fullfil the need of a
  * typed reject from the current js Promise implementation.
  *
- * It defeers in Promise in two thing:
+ * It defers in Promise in two thing:
  * - Ok function
  * - Fail function
  *
@@ -215,7 +215,7 @@ class CatchableTypedPromise<OkType, FailType> extends NotCatchableTypedPromise<
  * You can think it as if Ok and Fail gives you access to the response, allowing you
  * to chain functions to modify it.
  *
- * It only allows catch afer `then` calls. And this will catch all the expections
+ * It only allows catch after `then` calls. And this will catch all the exceptions
  * thrown from the callbacks above it.
  *
  * @export
@@ -227,7 +227,7 @@ class CatchableTypedPromise<OkType, FailType> extends NotCatchableTypedPromise<
  */
 export default class TypedPromise<OkType, FailType> {
     // internal members are stored in a separated class to
-    // make it possible to only shows certains function,
+    // make it possible to only shows certain function,
     // following the State pattern
     private context: PromiseContext<OkType, FailType>;
 

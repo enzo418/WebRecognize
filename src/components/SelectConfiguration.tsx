@@ -23,8 +23,13 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
     const [availableConfigurations, setAvailableConfigurations] =
         React.useState<DTOConfigurationDetails[]>([]);
 
-    const { onSelected, selectFirstByDefault, defaultLocalValue, ...rest } =
-        props;
+    const {
+        onSelected,
+        selectFirstByDefault,
+        defaultLocalValue,
+        forceValue,
+        ...rest
+    } = props;
 
     const onChangeConfigurationSelected = useCallback(
         (ev: any) => {

@@ -10,6 +10,7 @@ import {
 import DTONotification from './interfaces/DTONotification';
 import processPromise from '../../Http/ProcessPromise';
 import IProblemJson from './interfaces/IProblemJson';
+import TypedPromise from '../../TypedPromise';
 
 function serialize(date: Date | string | any): string {
     return typeof date == 'string' ? date : date.toISOString();
@@ -45,79 +46,101 @@ export default class NotificationService implements INotificationService {
         );
     }
 
-    get(id: string): Promise<Notification> {
-        return new Promise((resolve, reject) => {
-            this.http
-                .get('/', { id })
-                .then(res => res.json())
-                .then(res => parseNotification(res, this.cameraService))
-                .then(resolve)
-                .catch(reject);
-        });
+    get(id: string): TypedPromise<Notification, IProblemJson> {
+        return new TypedPromise<Notification, IProblemJson>(
+            (resolve, reject) => {
+                this.http
+                    .get('/', { id })
+                    .then(res => res.json())
+                    .then(res => parseNotification(res, this.cameraService))
+                    .then(resolve)
+                    .catch(reject);
+            },
+        );
     }
 
-    getAll(limit = 100): Promise<Array<Notification>> {
-        return new Promise((resolve, reject) => {
-            this.http
-                .get('/api/notifications/', { limit })
-                .then(res => res.json())
-                .then(res => parseNotifications(res, this.cameraService))
-                .then(resolve)
-                .catch(reject);
-        });
+    getAll(limit = 100): TypedPromise<Array<Notification>, IProblemJson> {
+        return new TypedPromise<Array<Notification>, IProblemJson>(
+            (ok, fail) => {
+                return processPromise<Array<DTONotification>, IProblemJson>(
+                    this.http.get('/api/notifications/', { limit }),
+                )
+                    .ok(res =>
+                        parseNotifications(res, this.cameraService)
+                            .ok(parsed => ok(parsed))
+                            .fail(fail),
+                    )
+                    .fail(fail);
+            },
+        );
     }
 
     getBefore(
         before: string | Date,
         limit: number,
-    ): Promise<Array<Notification>> {
-        return new Promise((resolve, reject) => {
-            this.http
-                .get('/', {
-                    before: serialize(before),
-                    limit,
-                })
-                .then(res => res.json())
-                .then(res => parseNotifications(res, this.cameraService))
-                .then(resolve)
-                .catch(reject);
-        });
+    ): TypedPromise<Array<Notification>, IProblemJson> {
+        return new TypedPromise<Array<Notification>, IProblemJson>(
+            (ok, fail) => {
+                return processPromise<Array<DTONotification>, IProblemJson>(
+                    this.http.get('/', {
+                        before: serialize(before),
+                        limit,
+                    }),
+                )
+                    .ok(res =>
+                        parseNotifications(res, this.cameraService)
+                            .ok(parsed => ok(parsed))
+                            .fail(fail),
+                    )
+                    .fail(fail);
+            },
+        );
     }
 
     getAfter(
         after: string | Date,
         limit: number,
-    ): Promise<Array<Notification>> {
-        return new Promise((resolve, reject) => {
-            this.http
-                .get('/', {
-                    after: serialize(after),
-                    limit,
-                })
-                .then(res => res.json())
-                .then(res => parseNotifications(res, this.cameraService))
-                .then(resolve)
-                .catch(reject);
-        });
+    ): TypedPromise<Array<Notification>, IProblemJson> {
+        return new TypedPromise<Array<Notification>, IProblemJson>(
+            (ok, fail) => {
+                return processPromise<Array<DTONotification>, IProblemJson>(
+                    this.http.get('/', {
+                        after: serialize(after),
+                        limit,
+                    }),
+                )
+                    .ok(res =>
+                        parseNotifications(res, this.cameraService)
+                            .ok(parsed => ok(parsed))
+                            .fail(fail),
+                    )
+                    .fail(fail);
+            },
+        );
     }
 
     getBetween<T, U extends T>(
         before: T,
         after: U,
         limit: number,
-    ): Promise<Array<Notification>> {
-        return new Promise((resolve, reject) => {
-            this.http
-                .get('/', {
-                    before: serialize(before),
-                    after: serialize(after),
-                    limit,
-                })
-                .then(res => res.json())
-                .then(res => parseNotifications(res, this.cameraService))
-                .then(resolve)
-                .catch(reject);
-        });
+    ): TypedPromise<Array<Notification>, IProblemJson> {
+        return new TypedPromise<Array<Notification>, IProblemJson>(
+            (ok, fail) => {
+                return processPromise<Array<DTONotification>, IProblemJson>(
+                    this.http.get('/', {
+                        before: serialize(before),
+                        after: serialize(after),
+                        limit,
+                    }),
+                )
+                    .ok(res =>
+                        parseNotifications(res, this.cameraService)
+                            .ok(parsed => ok(parsed))
+                            .fail(fail),
+                    )
+                    .fail(fail);
+            },
+        );
     }
 
     subscribe(callback: NotificationCallback): void {
@@ -153,9 +176,11 @@ export default class NotificationService implements INotificationService {
         const nots: DTONotification[] =
             parsed instanceof Array ? parsed : [parsed];
 
-        this.callWsCallbacks(
-            await parseNotifications(nots, this.cameraService),
-        );
+        parseNotifications(nots, this.cameraService)
+            .ok(nts => {
+                this.callWsCallbacks(nts);
+            })
+            .fail(console.error);
     }
 
     private callWsCallbacks(notifications: Notification[]) {

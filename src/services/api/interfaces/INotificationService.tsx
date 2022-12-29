@@ -1,4 +1,6 @@
-import INotification from '../../../domain/Notification';
+import Notification from '../../../domain/Notification';
+import TypedPromise from '../../../TypedPromise';
+import IProblemJson from './IProblemJson';
 
 /**
  * Notification service interface
@@ -16,16 +18,18 @@ export abstract class INotificationService {
      * @param {string} id
      * @returns {Promise<INotification>}
      */
-    abstract get(id: string): Promise<INotification>;
+    abstract get(id: string): TypedPromise<Notification, IProblemJson>;
 
     /**
      * Get all the notifications
      *
      * @abstract
      * @param {number} limit max number of notifications
-     * @returns {Promise<Array<INotification>>}
+     * @returns {TypedPromise<Array<Notification>, IProblemJson>}
      */
-    abstract getAll(limit: number): Promise<Array<INotification>>;
+    abstract getAll(
+        limit: number,
+    ): TypedPromise<Array<Notification>, IProblemJson>;
 
     /**
      * Get notifications before a notification (id) or
@@ -34,12 +38,12 @@ export abstract class INotificationService {
      * @abstract
      * @param {(string | Date)} before
      * @param {number} limit max number of notifications
-     * @returns {Promise<Array<INotification>>}
+     * @returns {TypedPromise<Array<Notification>, IProblemJson>}
      */
     abstract getBefore(
         before: string | Date,
         limit: number,
-    ): Promise<Array<INotification>>;
+    ): TypedPromise<Array<Notification>, IProblemJson>;
 
     /**
      * Get notifications after a notification (id) or
@@ -48,12 +52,12 @@ export abstract class INotificationService {
      * @abstract
      * @param {(string | Date)} after
      * @param {number} limit max number of notifications
-     * @returns {Promise<Array<INotification>>}
+     * @returns {TypedPromise<Array<Notification>, IProblemJson>}
      */
     abstract getAfter(
         after: string | Date,
         limit: number,
-    ): Promise<Array<INotification>>;
+    ): TypedPromise<Array<Notification>, IProblemJson>;
 
     /**
      * Get notifications between two notifications (id) or
@@ -65,13 +69,13 @@ export abstract class INotificationService {
      * @param {T} before
      * @param {U} after
      * @param {number} limit
-     * @returns {Promise<Array<INotification>>}
+     * @returns {TypedPromise<Array<Notification>, IProblemJson>}
      */
     abstract getBetween<T, U extends T>(
         before: T,
         after: U,
         limit: number,
-    ): Promise<Array<INotification>>;
+    ): TypedPromise<Array<Notification>, IProblemJson>;
 
     /**
      * Subscribe to new notifications.
@@ -79,13 +83,13 @@ export abstract class INotificationService {
      * @abstract
      * @param {*} callback Function to call when a new notification is available.
      */
-    abstract subscribe(callback: (not: INotification[]) => any): void;
+    abstract subscribe(callback: (not: Notification[]) => any): void;
 
     /**
      * Unsubscribe from notifications
      *
      * @abstract
-     * @param {(not: INotification[]) => any} callback
+     * @param {(not: Notification[]) => any} callback
      */
-    abstract unsubscribe(callback: (not: INotification[]) => any): void;
+    abstract unsubscribe(callback: (not: Notification[]) => any): void;
 }

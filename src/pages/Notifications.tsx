@@ -106,24 +106,26 @@ export default class Notifications extends React.Component<
         console.log('filtering: ', filter);
         if (filter.active) {
             if (filter.before && filter.after) {
-                this.processNotificationRequest(
-                    notificationService.getBetween(
-                        filter.before,
-                        filter.after,
-                        100,
-                    ),
-                );
+                notificationService
+                    .getBetween(filter.before, filter.after, 100)
+                    .ok(this.processNotificationRequest)
+                    .fail(console.error);
             } else if (filter.before && !filter.after) {
-                this.processNotificationRequest(
-                    notificationService.getBefore(filter.before, 100),
-                );
+                notificationService
+                    .getBefore(filter.before, 100)
+                    .ok(this.processNotificationRequest)
+                    .fail(console.error);
             } else if (!filter.before && filter.after) {
-                this.processNotificationRequest(
-                    notificationService.getAfter(filter.after, 100),
-                );
+                notificationService
+                    .getAfter(filter.after, 100)
+                    .ok(this.processNotificationRequest)
+                    .fail(console.error);
             }
         } else {
-            this.processNotificationRequest(notificationService.getAll(100));
+            notificationService
+                .getAll(100)
+                .ok(this.processNotificationRequest)
+                .fail(console.error);
         }
 
         // TODO: Add camera filters
@@ -224,21 +226,16 @@ export default class Notifications extends React.Component<
         }));
     };
 
-    processNotificationRequest = (
-        response: Promise<Notification | Notification[]>,
-    ) => {
-        response.then((responseNots: Notification | Notification[]) => {
-            let nots: Array<Notification>;
+    processNotificationRequest = (pNots: Notification | Notification[]) => {
+        let nots: Array<Notification>;
+        if (!Array.isArray(pNots)) {
+            nots = [pNots];
+        } else {
+            nots = pNots;
+        }
 
-            if (!Array.isArray(responseNots)) {
-                nots = [responseNots];
-            } else {
-                nots = responseNots;
-            }
-
-            const grouped = this.groupNotifications(nots);
-            this.processNotifications(grouped);
-        });
+        const grouped = this.groupNotifications(nots);
+        this.processNotifications(grouped);
     };
 
     notificationVerifiesFilter = (
@@ -352,7 +349,10 @@ export default class Notifications extends React.Component<
         this.notificationAudioPlayer.current.volume = 0.1;
         notificationService.subscribe(this.handleNewNotification);
 
-        this.processNotificationRequest(notificationService.getAll(100));
+        notificationService
+            .getAll(100)
+            .ok(this.processNotificationRequest)
+            .fail(console.error);
     }
 
     render() {

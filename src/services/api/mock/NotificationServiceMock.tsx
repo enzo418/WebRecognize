@@ -11,6 +11,8 @@ import { subSeconds, subHours, addSeconds, addHours, format } from 'date-fns';
 import { random } from '../../../utils/random';
 import { getEnumAt, getEnumKeysNames } from '../../../utils/enum';
 import { dateToUnix, parseDate } from '../../../utils/date';
+import IProblemJson from '../interfaces/IProblemJson';
+import TypedPromise from '../../../TypedPromise';
 
 const videos: string[] = [
     'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
@@ -60,6 +62,7 @@ const generateNotifications = (n: number, numberCams: number) => {
                 datetime: Math.floor(newDate.getTime() / 1000),
                 type: t,
                 content,
+                configurationID: '1',
             };
 
             if (random(0, 10) > 3) {
@@ -126,91 +129,114 @@ export default class NotificationServiceMock implements INotificationService {
         );
     }
 
-    get(id: string): Promise<Notification> {
-        return new Promise((resolve, reject) => {
-            const found = ensure(this.notifications.find(not => not.id == id));
+    get(id: string): TypedPromise<Notification, IProblemJson> {
+        return new TypedPromise<Notification, IProblemJson>(
+            async (resolve, reject) => {
+                const found = ensure(
+                    this.notifications.find(not => not.id == id),
+                );
 
-            resolve(parseNotification(found, this.cameraService));
-        });
+                resolve(await parseNotification(found, this.cameraService));
+            },
+        );
     }
 
-    getAll(limit = 100): Promise<Array<Notification>> {
-        return new Promise((resolve, reject) => {
-            const found = [];
-            for (
-                let i = 0;
-                i < Math.min(limit, this.notifications.length);
-                i++
-            ) {
-                found.push(this.notifications[i]);
-            }
+    getAll(limit = 100): TypedPromise<Array<Notification>, IProblemJson> {
+        return new TypedPromise<Array<Notification>, IProblemJson>(
+            (resolve, reject) => {
+                const found = [];
+                for (
+                    let i = 0;
+                    i < Math.min(limit, this.notifications.length);
+                    i++
+                ) {
+                    found.push(this.notifications[i]);
+                }
 
-            resolve(parseNotifications(found, this.cameraService));
-        });
+                parseNotifications(found, this.cameraService)
+                    .ok(resolve)
+                    .fail(reject);
+            },
+        );
     }
 
     getBefore(
         before: string | Date,
         limit: number,
-    ): Promise<Array<Notification>> {
-        return new Promise((resolve, reject) => {
-            const found: DTONotification[] = [];
-            const unixTimeBefore = dateToUnix(before);
-            this.notifications.forEach(not => {
-                if (before instanceof Date && not.datetime < unixTimeBefore) {
-                    found.push(not);
-                } else if (typeof before === 'string' && not.id < before) {
-                    found.push(not);
-                }
-            });
+    ): TypedPromise<Array<Notification>, IProblemJson> {
+        return new TypedPromise<Array<Notification>, IProblemJson>(
+            (resolve, reject) => {
+                const found: DTONotification[] = [];
+                const unixTimeBefore = dateToUnix(before);
+                this.notifications.forEach(not => {
+                    if (
+                        before instanceof Date &&
+                        not.datetime < unixTimeBefore
+                    ) {
+                        found.push(not);
+                    } else if (typeof before === 'string' && not.id < before) {
+                        found.push(not);
+                    }
+                });
 
-            resolve(parseNotifications(found, this.cameraService));
-        });
+                parseNotifications(found, this.cameraService)
+                    .ok(resolve)
+                    .fail(reject);
+            },
+        );
     }
 
     getAfter(
         after: string | Date,
         limit: number,
-    ): Promise<Array<Notification>> {
-        return new Promise((resolve, reject) => {
-            const found: DTONotification[] = [];
-            const unixTimeAfter = dateToUnix(after);
-            this.notifications.forEach(not => {
-                if (after instanceof Date && not.datetime > unixTimeAfter) {
-                    found.push(not);
-                } else if (typeof after === 'string' && not.id > after) {
-                    found.push(not);
-                }
-            });
+    ): TypedPromise<Array<Notification>, IProblemJson> {
+        return new TypedPromise<Array<Notification>, IProblemJson>(
+            (resolve, reject) => {
+                const found: DTONotification[] = [];
+                const unixTimeAfter = dateToUnix(after);
+                this.notifications.forEach(not => {
+                    if (after instanceof Date && not.datetime > unixTimeAfter) {
+                        found.push(not);
+                    } else if (typeof after === 'string' && not.id > after) {
+                        found.push(not);
+                    }
+                });
 
-            resolve(parseNotifications(found, this.cameraService));
-        });
+                parseNotifications(found, this.cameraService)
+                    .ok(resolve)
+                    .fail(reject);
+            },
+        );
     }
 
     getBetween<T, U extends T>(
         before: T,
         after: U,
         limit: number,
-    ): Promise<Array<Notification>> {
-        return new Promise((resolve, reject) => {
-            const found: DTONotification[] = [];
-            const unixTimeAfter = dateToUnix(after);
-            const unixTimeBefore = dateToUnix(before);
-            this.notifications.forEach(not => {
-                if (
-                    after instanceof Date &&
-                    before instanceof Date &&
-                    not.datetime >= unixTimeAfter &&
-                    not.datetime <= unixTimeBefore
-                ) {
-                    found.push(not);
-                } else if (typeof after === 'string' && not.id > after) {
-                    found.push(not);
-                }
-            });
+    ): TypedPromise<Array<Notification>, IProblemJson> {
+        return new TypedPromise<Array<Notification>, IProblemJson>(
+            (resolve, reject) => {
+                const found: DTONotification[] = [];
+                const unixTimeAfter = dateToUnix(after);
+                const unixTimeBefore = dateToUnix(before);
+                this.notifications.forEach(not => {
+                    if (
+                        after instanceof Date &&
+                        before instanceof Date &&
+                        not.datetime >= unixTimeAfter &&
+                        not.datetime <= unixTimeBefore
+                    ) {
+                        found.push(not);
+                    } else if (typeof after === 'string' && not.id > after) {
+                        found.push(not);
+                    }
+                });
 
-            resolve(parseNotifications(found, this.cameraService));
-        });
+                parseNotifications(found, this.cameraService)
+                    .ok(resolve)
+                    .fail(reject);
+            },
+        );
     }
 
     subscribe(callback: CallbackWS): void {
@@ -226,7 +252,7 @@ export default class NotificationServiceMock implements INotificationService {
     }
 
     private async pulseHandler(): Promise<boolean> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise<boolean>(async (resolve, reject) => {
             clearInterval(this.pulseSender);
 
             const not = await parseNotification(
