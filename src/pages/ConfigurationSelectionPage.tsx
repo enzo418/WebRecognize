@@ -3,13 +3,10 @@ import {
     Button,
     FormControl,
     InputLabel,
-    MenuItem,
-    Select,
     Stack,
     Typography,
 } from '@mui/material';
 import React, { useEffect } from 'react';
-import DTOConfigurationDetails from '../services/api/interfaces/DTOConfigurationDetails';
 import { configurationService } from '../services/api/Services';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import SelectConfiguration from '../components/SelectConfiguration';

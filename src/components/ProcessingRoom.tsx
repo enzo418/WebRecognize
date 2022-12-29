@@ -23,6 +23,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import config from '../config';
 import { Size } from '../Geometry';
+import { Key, saveLocal, saveLocalObject } from '../LocalStore';
 import CanvasHandlerBufferPlayer from '../modules/CanvasHandlerBufferPlayer';
 import DTOVideoBuffer from '../services/api/interfaces/DTOVideoBuffer';
 import { videoBufferService } from '../services/api/Services';
@@ -192,6 +193,8 @@ export default function ProcessingRoom(props: ProcessingRoomProps) {
             );
             console.log("buffer still doesn't have the frames");
         }
+
+        if (buffer) saveLocalObject(Key.LAST_DEBUG_BUFFER, buffer);
     }, [buffer?.state, buffer?.id]);
 
     useEffect(() => {

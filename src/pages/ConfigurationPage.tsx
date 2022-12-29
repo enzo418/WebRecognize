@@ -54,6 +54,8 @@ import IProblemJson from '../services/api/interfaces/IProblemJson';
 import CachedConfiguration from '../modules/CachedConfiguration';
 import eventBus from '../EventBus';
 
+import { Key, removeLocal, saveLocal } from '../LocalStore';
+
 interface IConfigurationListElement {
     to: string; // relative path
     primary: string; // primary element text
@@ -189,7 +191,7 @@ export default function ConfigurationPage() {
     };
 
     const theme = responsiveFontSizes(createTheme());
-    const params = ensure<{ id: any }>(useParams() as any);
+    const params = ensure<{ id: any; camera_id?: string }>(useParams() as any);
     let type = ensure<{ params: any }>(useMatch('/configuration/:id/:type/*'))
         .params.type as keyof IConfigurationList; // else how are we here?
     const belowMD = useMediaQuery(theme.breakpoints.down('md'));
@@ -280,15 +282,33 @@ export default function ConfigurationPage() {
                 console.error('Could not get the configuration name: ', e),
             );
 
-        const eventCallback = () => onCamerasUpdated(true);
+        const eventCallback = () => {
+            removeLocal(Key.LAST_CAMERA_CONFIGURATION_ID);
+            onCamerasUpdated(true);
+        };
+
+        const onConfigRemoved = () => removeLocal(Key.LAST_CONFIGURATION_ID);
+
         eventBus.on('removed-camera', eventCallback);
         eventBus.on('added-camera', eventCallback);
+
+        eventBus.on('removed-configuration', onConfigRemoved);
 
         return () => {
             eventBus.remove('removed-camera', eventCallback);
             eventBus.remove('added-camera', eventCallback);
+            eventBus.remove('removed-configuration', onConfigRemoved);
         };
     }, [computedConfiguration.general.elements, getFieldCB, id]);
+
+    useEffect(() => {
+        saveLocal(Key.LAST_CONFIGURATION_ID, id);
+    }, [id]);
+
+    useEffect(() => {
+        if (params.camera_id)
+            saveLocal(Key.LAST_CAMERA_CONFIGURATION_ID, params.camera_id);
+    }, [params?.camera_id]);
 
     eventBus.on('updated-configuration', ({ path, value }) => {
         if (path == '/name' || path == 'name') {

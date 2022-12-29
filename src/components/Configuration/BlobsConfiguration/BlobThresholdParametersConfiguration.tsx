@@ -13,10 +13,11 @@ import {
     Typography,
 } from '@mui/material';
 import { format } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useConfiguration } from '../../../context/configurationContext';
+import { getLocal, getLocalObject, Key, saveLocal } from '../../../LocalStore';
 import DTOVideoBuffer from '../../../services/api/interfaces/DTOVideoBuffer';
 import { videoBufferService } from '../../../services/api/Services';
 import ProcessingRoom from '../../ProcessingRoom';
@@ -39,8 +40,18 @@ export default function BlobThresholdParametersConfiguration() {
         DTOVideoBuffer[] | null
     >(null);
 
+    const lastVideoBufferID = useMemo<string | null>(() => {
+        const lastBuffer = getLocalObject(Key.LAST_DEBUG_BUFFER);
+
+        if (lastBuffer && lastBuffer.camera_id == params?.camera_id) {
+            return lastBuffer.id;
+        }
+
+        return null;
+    }, [params?.id, params?.camera_id]);
+
     const [videoBufferID, setVideoBufferID] = useState<string>(
-        searchParams.get('videoBufferID') || '',
+        searchParams.get('videoBufferID') || lastVideoBufferID || '',
     );
 
     useEffect(() => {

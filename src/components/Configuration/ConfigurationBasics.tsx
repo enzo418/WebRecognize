@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConfiguration } from '../../context/configurationContext';
 import eventBus from '../../EventBus';
+import { Key, removeLocal } from '../../LocalStore';
 import { configurationService } from '../../services/api/Services';
 import { TextConfigurationField } from './configurationField';
 

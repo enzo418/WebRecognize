@@ -335,9 +335,15 @@ export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandl
         const scaleX = w / images[0].image.width;
         const scaleY = h / images[0].image.height;
 
-        let imageIndex = 0;
+        for (let imageIndex = 0; imageIndex < images.length; imageIndex++) {
+            if (!images[imageIndex]) {
+                console.debug('Camera image missing: ', {
+                    images,
+                    image: images[imageIndex],
+                });
+                continue;
+            }
 
-        while (imageIndex < images.length) {
             let startXY: Point = {
                 x: (imageIndex % maxH) * w,
                 y: Math.floor(imageIndex / maxH) * h,
@@ -359,8 +365,6 @@ export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandl
                 w: startXY.x + w,
                 h: startXY.y + h,
             });
-
-            imageIndex++;
         }
     }
 

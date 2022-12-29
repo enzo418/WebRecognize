@@ -1,5 +1,6 @@
 import { MenuItem, Select, SxProps, Theme } from '@mui/material';
 import React, { useCallback, useEffect } from 'react';
+import { getLocal, Key } from '../LocalStore';
 import DTOConfigurationDetails from '../services/api/interfaces/DTOConfigurationDetails';
 import { configurationService } from '../services/api/Services';
 
@@ -28,6 +29,16 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
         },
         [props],
     );
+
+    useEffect(() => {
+        const lastCfgId = getLocal(Key.LAST_CONFIGURATION_ID);
+
+        if (lastCfgId) {
+            // if you delete a configuration it triggers the event bus,
+            // which in some part will delete the local cfg stored
+            setSelectedID(lastCfgId);
+        }
+    }, []);
 
     useEffect(() => {
         configurationService
