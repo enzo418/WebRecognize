@@ -8,6 +8,8 @@ interface SelectConfigurationProps {
     onSelected: (id: string) => any;
     selectFirstByDefault?: boolean;
 
+    defaultLocalValue?: Key;
+
     sx?: SxProps<Theme>;
 
     [x: string | number | symbol]: unknown; // indexer, allows extra properties
@@ -19,7 +21,8 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
     const [availableConfigurations, setAvailableConfigurations] =
         React.useState<DTOConfigurationDetails[]>([]);
 
-    const { onSelected, selectFirstByDefault, ...rest } = props;
+    const { onSelected, selectFirstByDefault, defaultLocalValue, ...rest } =
+        props;
 
     const onChangeConfigurationSelected = useCallback(
         (ev: any) => {
@@ -30,15 +33,14 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
         [props],
     );
 
-    useEffect(() => {
-        const lastCfgId = getLocal(Key.LAST_CONFIGURATION_ID);
+    const getLastCfgUsed = () => {
+        if (!defaultLocalValue) return null;
 
-        if (lastCfgId) {
-            // if you delete a configuration it triggers the event bus,
-            // which in some part will delete the local cfg stored
-            setSelectedID(lastCfgId);
-        }
-    }, []);
+        // if you delete a configuration it triggers the event bus,
+        // which in some part will delete the local cfg stored
+
+        return getLocal(defaultLocalValue);
+    };
 
     useEffect(() => {
         configurationService
@@ -46,10 +48,18 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
             .ok(cfgs => {
                 setAvailableConfigurations(cfgs);
 
-                if (selectFirstByDefault && cfgs.length > 0) {
+                const lastCfg = getLastCfgUsed();
+
+                if (!lastCfg && selectFirstByDefault && cfgs.length > 0) {
                     onChangeConfigurationSelected({
                         target: { value: cfgs[0].id },
                     });
+                } else if (lastCfg && selectFirstByDefault) {
+                    onChangeConfigurationSelected({
+                        target: { value: lastCfg },
+                    });
+                } else if (lastCfg) {
+                    setSelectedID(lastCfg);
                 }
             })
             .fail(error => {

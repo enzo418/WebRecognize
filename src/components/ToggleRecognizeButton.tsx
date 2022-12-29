@@ -1,6 +1,7 @@
 import { PlayArrowRounded, Square } from '@mui/icons-material';
 import { Box, Button, Zoom } from '@mui/material';
 import React, { useState } from 'react';
+import { Key } from '../LocalStore';
 import DTOObserverStatus from '../services/api/interfaces/DTOObserverStatus';
 import SelectConfiguration from './SelectConfiguration';
 
@@ -48,6 +49,7 @@ export default function ToggleRecognizeButton(props: Props) {
             <SelectConfiguration
                 labelId="select-db-configuration"
                 label="Configuration"
+                defaultLocalValue={Key.LAST_CONFIGURATION_EXECUTED_ID}
                 onSelected={onConfigurationSelected}
                 selectFirstByDefault={true}
                 disabled={props.status.running}

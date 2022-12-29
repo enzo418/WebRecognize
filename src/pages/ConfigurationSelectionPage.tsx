@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { configurationService } from '../services/api/Services';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import SelectConfiguration from '../components/SelectConfiguration';
+import { Key } from '../LocalStore';
 
 export default function ConfigurationSelection() {
     const onNewConfiguration = () => {
@@ -40,6 +41,7 @@ export default function ConfigurationSelection() {
                             Select
                         </InputLabel>
                         <SelectConfiguration
+                            defaultLocalValue={Key.LAST_CONFIGURATION_ID}
                             labelId="select-db-configuration"
                             label="Configuration"
                             onSelected={onChangeConfigurationSelected}

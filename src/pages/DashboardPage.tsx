@@ -1,6 +1,7 @@
 import { Grid } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import ToggleRecognizeButton from '../components/ToggleRecognizeButton';
+import { Key, saveLocal } from '../LocalStore';
 import DTOObserverStatus from '../services/api/interfaces/DTOObserverStatus';
 import { observerService } from '../services/api/Services';
 
@@ -24,7 +25,10 @@ export default function DashboardPage() {
     const onClickStart = (config_id: string) => {
         observerService
             .start(config_id)
-            .ok(status => setObserverStatus(status))
+            .ok(status => {
+                saveLocal(Key.LAST_CONFIGURATION_EXECUTED_ID, config_id);
+                setObserverStatus(status);
+            })
             .fail(e => {
                 console.error('could not start observer: ', e);
                 updateObserverStatus();
