@@ -2,6 +2,7 @@ import {
     Box,
     Button,
     FormControl,
+    Grid,
     InputLabel,
     Stack,
     Typography,
@@ -29,49 +30,77 @@ export default function ConfigurationSelection() {
     };
 
     return (
-        <Box sx={{ padding: '10px' }} className="centered">
-            <Box className="centered" sx={{ height: '100vh', gap: '20vh' }}>
-                <Box className="centered">
-                    <Typography variant="h5" gutterBottom>
+        <Grid
+            container
+            sx={{ padding: '10px', height: '100vh' }}
+            className="centered"
+            spacing={{ xs: 0, md: 2 }}>
+            <Grid
+                item
+                sx={{ padding: '10px 10px 30px 10px' }}
+                xs={12}
+                className="centered">
+                <Stack direction="column">
+                    <Typography
+                        variant="h5"
+                        gutterBottom
+                        sx={{ textAlign: 'center' }}>
                         Select a configuration to open
                     </Typography>
                     <FormControl
-                        sx={{ width: 'fit-content', minWidth: '30vw' }}>
+                        className="centered"
+                        sx={{ width: '100%', minWidth: '30vw' }}>
                         <InputLabel id="select-db-configuration">
                             Select
                         </InputLabel>
                         <SelectConfiguration
+                            sx={{ width: '100%' }}
                             defaultLocalValue={Key.LAST_CONFIGURATION_ID}
                             labelId="select-db-configuration"
                             label="Configuration"
                             onSelected={onChangeConfigurationSelected}
                         />
                     </FormControl>
-                </Box>
+                </Stack>
+            </Grid>
 
-                <Box sx={{ padding: '10px' }} className="centered">
-                    <Stack direction="row" spacing={4} alignItems={'center'}>
-                        <Typography variant="subtitle1" color="GrayText">
-                            ADD
-                        </Typography>
-                        <Button
-                            variant="outlined"
-                            component={RouterLink}
-                            to="/configuration_file">
-                            From file
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            component={RouterLink}
-                            to="/configuration-clone">
-                            Clone from existing configuration
-                        </Button>
-                        <Button variant="outlined" onClick={onNewConfiguration}>
-                            New
-                        </Button>
-                    </Stack>
-                </Box>
-            </Box>
-        </Box>
+            <Grid container className="centered" spacing={{ xs: 0, md: 2 }}>
+                <Grid item xs={12} md={1}>
+                    <Typography variant="subtitle1" color="GrayText">
+                        ADD
+                    </Typography>
+                </Grid>
+
+                <Grid item xs={12} md={2}>
+                    <Button
+                        variant="outlined"
+                        component={RouterLink}
+                        fullWidth
+                        to="/configuration_file">
+                        From file
+                    </Button>
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                    <Button
+                        variant="outlined"
+                        component={RouterLink}
+                        sx={{ textAlign: 'center' }}
+                        fullWidth
+                        to="/configuration-clone">
+                        Clone from existing configuration
+                    </Button>
+                </Grid>
+
+                <Grid item xs={12} md={1}>
+                    <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={onNewConfiguration}>
+                        New
+                    </Button>
+                </Grid>
+            </Grid>
+        </Grid>
     );
 }
