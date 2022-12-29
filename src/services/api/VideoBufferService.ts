@@ -39,6 +39,10 @@ export class VideoBufferWebSocket extends WrapperWebSocket {
             jsonParser,
         );
     }
+
+    close() {
+        super.close();
+    }
 }
 
 export default class VideoBufferService extends Service {

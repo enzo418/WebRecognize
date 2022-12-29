@@ -160,6 +160,8 @@ export default function ProcessingRoom(props: ProcessingRoomProps) {
             console.debug('Freeing images');
             cameraImages.freeImages();
             diffImages.freeImages();
+
+            wsBuffer.close();
         };
     }, [props.bufferID]);
 

@@ -95,6 +95,10 @@ export class WrapperWebSocket {
         this.m_socket.send(data);
     }
 
+    public close() {
+        this.m_socket.close();
+    }
+
     /**
      * Register a message callback with a function to parse the data received
      * @param id event id
