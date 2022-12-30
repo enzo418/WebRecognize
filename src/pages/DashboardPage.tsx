@@ -11,19 +11,19 @@ export default function DashboardPage() {
         config_id: '',
     });
 
+    let lastPendingPromise: any;
     const updateObserverStatus = () => {
-        observerService
+        lastPendingPromise = observerService
             .status()
             .ok(status => {
                 setObserverStatus(status);
             })
-            .fail(e => console.error('Could not get observer status', e));
+            .fail(e => console.error('Could not get observer status', e))
+            .cancelled(() => console.debug('canceled update status'));
     };
 
-    useEffect(updateObserverStatus, []);
-
     const onClickStart = (config_id: string) => {
-        observerService
+        lastPendingPromise = observerService
             .start(config_id)
             .ok(status => {
                 saveLocal(Key.LAST_CONFIGURATION_EXECUTED_ID, config_id);
@@ -32,18 +32,28 @@ export default function DashboardPage() {
             .fail(e => {
                 console.error('could not start observer: ', e);
                 updateObserverStatus();
-            });
+            })
+            .cancelled(() => console.debug('canceled start'));
     };
 
     const onClickStop = () => {
-        observerService
+        lastPendingPromise = observerService
             .stop()
             .ok(status => setObserverStatus(status))
             .fail(e => {
                 console.error('could not stop observer: ', e);
                 updateObserverStatus();
-            });
+            })
+            .cancelled(() => console.debug('canceled stop'));
     };
+
+    useEffect(() => {
+        updateObserverStatus();
+
+        return () => {
+            if (lastPendingPromise) lastPendingPromise.cancel();
+        };
+    }, []);
 
     return (
         <Grid sx={{ padding: '20px 6px' }}>

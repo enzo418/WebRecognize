@@ -17,7 +17,7 @@ export default function ConfigurationSelection() {
     const onNewConfiguration = () => {
         configurationService
             .create()
-            .ok(res => navigate(res.id))
+            .ok(res => navigate(`/configuration/${res.id}/general/basics`))
             .fail(e => console.error("Couldn't create the configuration", e));
     };
 

@@ -70,6 +70,8 @@ export default function MasksCanvasInputField(
 
     const canvasHandlerRef = React.createRef<CanvasHandlerPOLY>();
 
+    let lastPendingPromise: any;
+
     const getCameraPreview = () => {
         // wait until it's calculated
         if (calculatedCanvasSize.width * calculatedCanvasSize.height == 0)
@@ -77,20 +79,20 @@ export default function MasksCanvasInputField(
 
         setLoading(true);
 
-        cameraService
+        lastPendingPromise = cameraService
             .getFrame(id)
             .ok(blob => {
                 setImage(URL.createObjectURL(blob));
 
                 // we need to get the field value now
-                props.getFieldCB
+                lastPendingPromise = props.getFieldCB
                     .apply(null, [
                         `cameras/${props.camera_id}/${props.fieldPath}`,
                     ])
                     .ok(storedMasks => {
                         ensure<Mask[]>(storedMasks);
 
-                        cameraService
+                        lastPendingPromise = cameraService
                             .getDefaults(id)
                             .ok(({ size }) => {
                                 // we need the resize it from the real camera size to the canvas size
@@ -110,17 +112,24 @@ export default function MasksCanvasInputField(
                                     'Could not get last resize (processing): ',
                                     e,
                                 ),
+                            )
+                            .cancelled(() =>
+                                console.debug('defaults cancelled'),
                             );
                     })
                     .fail(e => {
                         console.log("couldn't get the field value!", {
                             error: e,
                         });
-                    });
+                    })
+                    .cancelled(() =>
+                        console.debug('field path value cancelled'),
+                    );
             })
             .fail(e => {
                 console.error('Could not get the camera frame: ', e);
-            });
+            })
+            .cancelled(() => console.debug('camera frame cancelled'));
     };
 
     useEffect(() => {
@@ -155,11 +164,13 @@ export default function MasksCanvasInputField(
         };
     }, []);
 
-    useEffect(getCameraPreview, [
-        props.uri,
-        props.camera_id,
-        calculatedCanvasSize,
-    ]);
+    useEffect(() => {
+        getCameraPreview();
+
+        return () => {
+            if (lastPendingPromise) lastPendingPromise.cancel();
+        };
+    }, [props.uri, props.camera_id, calculatedCanvasSize]);
 
     const onMasksChanged = (masks: Mask[]) => {
         // We need to get the resize again because it might have been changed here or by another user

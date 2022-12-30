@@ -65,6 +65,8 @@ export default class Notifications extends React.Component<
     NotificationsProps,
     NotificationsState
 > {
+    pendingPromise: any;
+
     state: NotificationsState = {
         loading: true,
         notifications: [],
@@ -97,10 +99,6 @@ export default class Notifications extends React.Component<
 
         return cams;
     };
-
-    componentWillUnmount() {
-        notificationService.unsubscribe(this.handleNewNotification);
-    }
 
     filterNotifications = (filter: INotificationFilters) => {
         console.log('filtering: ', filter);
@@ -349,10 +347,15 @@ export default class Notifications extends React.Component<
         this.notificationAudioPlayer.current.volume = 0.1;
         notificationService.subscribe(this.handleNewNotification);
 
-        notificationService
+        this.pendingPromise = notificationService
             .getAll(100)
             .ok(this.processNotificationRequest)
             .fail(console.error);
+    }
+
+    componentWillUnmount() {
+        if (this.pendingPromise) this.pendingPromise.cancel();
+        notificationService.unsubscribe(this.handleNewNotification);
     }
 
     render() {

@@ -71,6 +71,7 @@ export default function IgnoredSetsCanvasInputField(
     const buttonHeaderRef = React.createRef<HTMLDivElement>();
     const canvasHandlerRef = React.createRef<CanvasHandlerPOLY>();
 
+    let lastPendingPromise: any;
     const getCameraPreview = () => {
         // wait until it's calculated
         if (calculatedCanvasSize.width * calculatedCanvasSize.height == 0)
@@ -78,20 +79,20 @@ export default function IgnoredSetsCanvasInputField(
 
         setLoading(true);
 
-        cameraService
+        lastPendingPromise = cameraService
             .getFrame(id)
             .ok(blob => {
                 setImage(URL.createObjectURL(blob));
 
                 // we need to get the field value now
-                props.getFieldCB
+                lastPendingPromise = props.getFieldCB
                     .apply(null, [
                         `cameras/${props.camera_id}/${props.fieldPath}`,
                     ])
                     .ok(storedPolygons => {
                         ensure<Polygon[]>(storedPolygons);
 
-                        props.getFieldCB
+                        lastPendingPromise = props.getFieldCB
                             .apply(null, [
                                 `cameras/${props.camera_id}/${props.referenceSizePath}`,
                             ])
@@ -117,17 +118,22 @@ export default function IgnoredSetsCanvasInputField(
                                     'Could not get reference size:',
                                     e,
                                 ),
+                            )
+                            .cancelled(() =>
+                                console.debug('cancelled reference size'),
                             );
                     })
                     .fail(e => {
                         console.log("couldn't get the field value!", {
                             error: e,
                         });
-                    });
+                    })
+                    .cancelled(() => console.debug('cancelled field value'));
             })
             .fail(e => {
                 console.error('Could not get the camera frame: ', e);
-            });
+            })
+            .cancelled(() => console.debug('cancelled camera image'));
     };
 
     useEffect(() => {
@@ -162,11 +168,13 @@ export default function IgnoredSetsCanvasInputField(
         };
     }, []);
 
-    useEffect(getCameraPreview, [
-        props.uri,
-        props.camera_id,
-        calculatedCanvasSize,
-    ]);
+    useEffect(() => {
+        getCameraPreview();
+
+        return () => {
+            if (lastPendingPromise) lastPendingPromise.cancel();
+        };
+    }, [props.uri, props.camera_id, calculatedCanvasSize]);
 
     const onPolysChanged = (polys: Polygon[]) => {
         // We need to get the resize again because it might have been changed here or by another user

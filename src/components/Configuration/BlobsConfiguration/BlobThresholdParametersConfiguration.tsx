@@ -54,17 +54,9 @@ export default function BlobThresholdParametersConfiguration() {
         searchParams.get('videoBufferID') || lastVideoBufferID || '',
     );
 
-    useEffect(() => {
-        videoBufferService
-            .getAvailable(commonData.camera)
-            .ok(res => setAvailableBuffers(res))
-            .fail(e =>
-                console.error('Could not get available video buffers: ', e),
-            );
-    }, []);
-
+    let pendingPromiseCreateBuffer: any;
     const createNewBuffer = () => {
-        videoBufferService
+        pendingPromiseCreateBuffer = videoBufferService
             .createBuffer({
                 camera_id: commonData.camera,
                 delay: 0,
@@ -84,6 +76,20 @@ export default function BlobThresholdParametersConfiguration() {
                 console.error('could not create the buffer: ', e);
             });
     };
+
+    useEffect(() => {
+        const promise = videoBufferService
+            .getAvailable(commonData.camera)
+            .ok(res => setAvailableBuffers(res))
+            .fail(e =>
+                console.error('Could not get available video buffers: ', e),
+            );
+
+        return () => {
+            promise.cancel();
+            if (pendingPromiseCreateBuffer) pendingPromiseCreateBuffer.cancel();
+        };
+    }, []);
 
     const onSelectBuffer = (ev: any) => {
         const id = ev.target.value as string;

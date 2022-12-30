@@ -81,6 +81,7 @@ export default function configurationField(
         IConfigurationFieldState
     > {
         completePath: string;
+        pendingPromise: any;
 
         constructor(props: IConfigurationFieldProps) {
             super(props);
@@ -115,7 +116,7 @@ export default function configurationField(
         getValue() {
             this.completePath = this.calculatePath();
 
-            this.props.data.getFieldCB
+            this.pendingPromise = this.props.data.getFieldCB
                 .apply(null, [this.completePath])
                 .ok(r => {
                     const formatted = this.props.data.beforeSetValue
@@ -141,6 +142,12 @@ export default function configurationField(
             this.getValue();
         }
 
+        componentWillUnmount(): void {
+            if (this.pendingPromise) {
+                this.pendingPromise.cancel();
+            }
+        }
+
         componentDidUpdate(prevProps: IConfigurationFieldProps) {
             // Typical usage (don't forget to compare props):
             if (this.props.data.camera !== prevProps.data.camera) {
@@ -153,7 +160,7 @@ export default function configurationField(
                 ? this.props.data.beforeSendValue(value)
                 : value;
 
-            this.props.data.updateCB
+            this.pendingPromise = this.props.data.updateCB
                 .apply(null, [this.completePath, formatted])
                 .ok(_ => {
                     this.setState({ state: 'updated' });

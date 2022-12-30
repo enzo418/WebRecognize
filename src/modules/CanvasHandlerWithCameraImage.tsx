@@ -20,6 +20,8 @@ interface State extends ICanvasHandlerState {
 export default abstract class CanvasHandlerWithCameraImage<
     P extends CanvasHandlerWithCameraImageProps,
 > extends CanvasHandler<P, State> {
+    pendingPromise: any;
+
     constructor(props: P) {
         super(props);
     }
@@ -28,12 +30,13 @@ export default abstract class CanvasHandlerWithCameraImage<
         super.componentDidMount();
 
         if (this.props.autoGetImage) {
-            cameraService
+            this.pendingPromise = cameraService
                 .getFrame(this.props.autoGetImage.id)
                 .ok(blob => {
                     this.setState({ image: URL.createObjectURL(blob) });
                 })
-                .fail(e => console.error('could not get camera frame', e));
+                .fail(e => console.error('could not get camera frame', e))
+                .cancelled(() => console.debug('canvas image cancelled'));
         } else if (!this.props.image)
             throw Error('No image provided and no auto get is set');
 
@@ -44,6 +47,8 @@ export default abstract class CanvasHandlerWithCameraImage<
 
     componentWillUnmount(): void {
         if (super.componentWillUnmount) super.componentWillUnmount();
+
+        if (this.pendingPromise) this.pendingPromise.cancel();
 
         if (this.props.autoGetImage) {
             URL.revokeObjectURL(this.state?.image as string);

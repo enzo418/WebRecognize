@@ -1,5 +1,6 @@
 import { Grid, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { promises } from 'stream';
 import { useConfiguration } from '../../../context/configurationContext';
 import { Size } from '../../../Geometry';
 import CanvasDisplayBlobDistanceThreshold from '../../../modules/CanvasDisplayBlobDistanceThreshold';
@@ -33,13 +34,18 @@ export default function BlobDetectorParametersConfiguration() {
     useEffect(() => {
         setLoading(true);
 
-        cameraService
+        const promise = cameraService
             .getDefaults(id)
             .ok(v => {
                 setCameraDefaults(v);
                 setLoading(false);
             })
-            .fail(e => console.error('could not get camera defaults', e));
+            .fail(e => console.error('could not get camera defaults', e))
+            .cancelled(() => console.debug('cancelled params defaults'));
+
+        return () => {
+            promise.cancel();
+        };
     }, []);
 
     const marks = [

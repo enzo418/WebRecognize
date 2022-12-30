@@ -89,9 +89,16 @@ export default function DetectionCameraConfiguration() {
     };
 
     useEffect(() => {
-        getFieldCB(`cameras/${commonData.camera}/resizeTo`)
+        const promise = getFieldCB(`cameras/${commonData.camera}/resizeTo`)
             .ok((res: Size) => setCameraResize(res))
-            .fail(e => console.error("Couldn't get camera resize to: ", e));
+            .fail(e => console.error("Couldn't get camera resize to: ", e))
+            .cancelled(() =>
+                console.debug('cancelled camera image at detection'),
+            );
+
+        return () => {
+            promise.cancel();
+        };
     }, [commonData.camera, getFieldCB]);
 
     const refModalRoi = React.createRef<HTMLDivElement>();

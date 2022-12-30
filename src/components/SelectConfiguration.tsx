@@ -50,7 +50,7 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
     };
 
     useEffect(() => {
-        configurationService
+        const promise = configurationService
             .getAvailable()
             .ok(cfgs => {
                 setAvailableConfigurations(cfgs);
@@ -71,7 +71,12 @@ export default function SelectConfiguration(props: SelectConfigurationProps) {
             })
             .fail(error => {
                 console.error(error);
-            });
+            })
+            .cancelled(() => console.debug('cancelled get configurations'));
+
+        return () => {
+            promise.cancel();
+        };
     }, []);
 
     return (

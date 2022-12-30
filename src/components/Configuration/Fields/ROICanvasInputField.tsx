@@ -41,16 +41,17 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
         [props.camera_id, props.uri],
     );
 
+    let lastPendingPromise: any;
     const getCameraPreview = () => {
         setLoading(true);
 
-        cameraService
+        lastPendingPromise = cameraService
             .getFrame(id)
             .ok(blob => {
                 setImage(URL.createObjectURL(blob));
 
                 // we need to get the field value now
-                props.getFieldCB
+                lastPendingPromise = props.getFieldCB
                     .apply(null, [
                         `cameras/${props.camera_id}/${props.fieldPath}`,
                     ])
@@ -58,7 +59,7 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
                         ensure<Rectangle>(storedRoi);
 
                         // The roi is selected relative to the camera resolution
-                        cameraService
+                        lastPendingPromise = cameraService
                             .getDefaults(id)
                             .ok(({ size }) => {
                                 const scaleX =
@@ -76,20 +77,31 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
                                     'Could not get last resize (processing): ',
                                     e,
                                 ),
+                            )
+                            .cancelled(() =>
+                                console.debug('cancelled last resize'),
                             );
                     })
                     .fail(e => {
                         console.log("couldn't get the field value!", {
                             error: e,
                         });
-                    });
+                    })
+                    .cancelled(() => console.debug('cancelled field value'));
             })
             .fail(e => {
                 console.error('Could not get the camera frame: ', e);
-            });
+            })
+            .cancelled(() => console.debug('cancelled camera image'));
     };
 
-    useEffect(getCameraPreview, [
+    useEffect(() => {
+        getCameraPreview();
+
+        return () => {
+            if (lastPendingPromise) lastPendingPromise.cancel();
+        };
+    }, [
         props.uri,
         props.camera_id,
         id,

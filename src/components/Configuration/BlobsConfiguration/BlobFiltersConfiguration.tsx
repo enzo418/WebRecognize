@@ -33,13 +33,18 @@ export default function BlobFiltersConfiguration() {
     useEffect(() => {
         setLoading(true);
 
-        cameraService
+        const promise = cameraService
             .getDefaults(id)
             .ok(v => {
                 setCameraDefaults(v);
                 setLoading(false);
             })
-            .fail(e => console.error('could not get camera defaults', e));
+            .fail(e => console.error('could not get camera defaults', e))
+            .cancelled(() => console.debug('cancelled filters defaults'));
+
+        return () => {
+            promise.cancel();
+        };
     }, []);
 
     const marks = [
