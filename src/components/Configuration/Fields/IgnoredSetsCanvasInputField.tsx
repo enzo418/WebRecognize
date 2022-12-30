@@ -29,8 +29,7 @@ import { scalePolygons } from '../../../utils/geometry';
 import { toast } from 'react-toastify';
 
 interface IgnoredSetsCanvasProps {
-    uri?: string;
-    camera_id?: string;
+    camera_id: string;
 
     fieldPath: string;
     referenceSizePath: string;
@@ -66,7 +65,7 @@ export default function IgnoredSetsCanvasInputField(
     });
     const [mode, setMode] = useState<Mode>(Mode.ADD);
 
-    const id = props.uri ? { uri: props.uri } : { camera_id: props.camera_id };
+    const id = props.camera_id;
 
     const buttonHeaderRef = React.createRef<HTMLDivElement>();
     const canvasHandlerRef = React.createRef<CanvasHandlerPOLY>();
@@ -174,7 +173,7 @@ export default function IgnoredSetsCanvasInputField(
         return () => {
             if (lastPendingPromise) lastPendingPromise.cancel();
         };
-    }, [props.uri, props.camera_id, calculatedCanvasSize]);
+    }, [props.camera_id, calculatedCanvasSize]);
 
     const onPolysChanged = (polys: Polygon[]) => {
         // We need to get the resize again because it might have been changed here or by another user

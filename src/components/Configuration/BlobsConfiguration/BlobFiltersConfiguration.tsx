@@ -28,7 +28,7 @@ export default function BlobFiltersConfiguration() {
         },
     });
 
-    const id = { camera_id: params?.camera_id };
+    const id = params?.camera_id;
 
     useEffect(() => {
         setLoading(true);

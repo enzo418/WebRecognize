@@ -9,7 +9,7 @@ export interface CanvasHandlerWithCameraImageProps {
 
     // fetch a camera frame on mount
     autoGetImage?: {
-        id: { uri: string } | { camera_id: string };
+        camera_id: string;
     };
 }
 
@@ -31,7 +31,7 @@ export default abstract class CanvasHandlerWithCameraImage<
 
         if (this.props.autoGetImage) {
             this.pendingPromise = cameraService
-                .getFrame(this.props.autoGetImage.id)
+                .getFrame(this.props.autoGetImage.camera_id)
                 .ok(blob => {
                     this.setState({ image: URL.createObjectURL(blob) });
                 })

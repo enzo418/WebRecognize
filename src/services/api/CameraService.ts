@@ -11,34 +11,31 @@ import Service from './Service';
 
 export default class CameraService extends Service implements ICameraService {
     constructor(httpClient: IHttpClient) {
-        super(httpClient, '/api/');
+        super(httpClient, '/api/camera/');
     }
 
     public get(id: string) {
         return processPromise<DTOCamera, IProblemJson>(
-            this.client.get(this.baseUrl + 'camera/' + id, {}),
+            this.client.get(this.baseUrl + id, {}),
         );
     }
 
-    public getDefaults(id: { uri?: string; camera_id?: string }) {
+    public getDefaults(camera_id: string) {
         return processPromise<DTOCameraDefaults, IProblemJson>(
-            this.client.get(this.baseUrl + 'getCameraDefaults', id),
+            this.client.get(this.baseUrl + camera_id + '/info', {}),
         );
     }
 
     /**
      * Resolves correctly to a image/jpeg by default
-     * @param id camera id/uri
+     * @param camera_id camera id
      * @returns a blob
      */
-    public getFrame(
-        id: { uri?: string; camera_id?: string },
-        format: string = 'image/jpeg',
-    ) {
+    public getFrame(camera_id: string, format: string = 'image/jpeg') {
         // rnd is used to avoid browser cache
         return new TypedPromise<Blob, IProblemJson>((ok, fail) => {
             processPromiseAsArrayBuffer(
-                this.client.get(this.baseUrl + 'getCameraFrame', id),
+                this.client.get(this.baseUrl + camera_id + '/frame', {}),
             )
                 .ok(bufferImage => {
                     const blob = new Blob([bufferImage], {

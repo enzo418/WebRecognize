@@ -122,7 +122,7 @@ export default function BlobContoursFiltersConfiguration() {
                         <CanvasDisplaySampleArea
                             area={minArea}
                             canvasSize={canvasAreaSize}
-                            autoGetImage={{ id: id }}
+                            autoGetImage={id}
                         />
                     </Grid>
                     <Grid item xs md>

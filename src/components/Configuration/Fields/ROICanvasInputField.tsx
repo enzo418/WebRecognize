@@ -12,8 +12,7 @@ import { ensure } from '../../../utils/error';
 import { scaleRectangle } from '../../../utils/geometry';
 
 interface ROICanvasInputFieldProps {
-    uri?: string;
-    camera_id?: string;
+    camera_id: string;
     fieldPath: string;
     enableEditing: boolean;
     fullScreen?: boolean;
@@ -36,10 +35,7 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
         height: 0,
     });
 
-    const id = useMemo(
-        () => (props.uri ? { uri: props.uri } : { camera_id: props.camera_id }),
-        [props.camera_id, props.uri],
-    );
+    const id = props.camera_id;
 
     let lastPendingPromise: any;
     const getCameraPreview = () => {
@@ -102,7 +98,6 @@ export default function ROICanvasInputField(props: ROICanvasInputFieldProps) {
             if (lastPendingPromise) lastPendingPromise.cancel();
         };
     }, [
-        props.uri,
         props.camera_id,
         id,
         props.getFieldCB,

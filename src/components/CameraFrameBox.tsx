@@ -7,8 +7,7 @@ import IProblemJson from '../services/api/interfaces/IProblemJson';
 import { cameraService, client } from '../services/api/Services';
 
 interface CameraFrameBoxProps {
-    uri?: string;
-    camera_id?: string;
+    camera_id: string;
     componentOnError?: (error: string) => any;
     keepSkeletonOnError?: boolean;
     style?: object;
@@ -33,18 +32,11 @@ export default class CameraFrameBox extends React.Component<
         super(props);
 
         this.image = React.createRef();
-
-        if (!props.camera_id && !props.uri)
-            throw 'At least one was expected: camera_id or uri';
     }
 
     updateLiveFeed() {
-        const id = this.props.uri
-            ? { uri: this.props.uri }
-            : { camera_id: this.props.camera_id };
-
         cameraService
-            .getFrame(id)
+            .getFrame(this.props.camera_id)
             .ok(blob => {
                 if (this.image.current) {
                     this.image.current.src = URL.createObjectURL(blob);
@@ -70,11 +62,7 @@ export default class CameraFrameBox extends React.Component<
     }
 
     componentDidUpdate(prevProps: CameraFrameBoxProps) {
-        // Typical usage (don't forget to compare props):
-        if (
-            this.props.uri !== prevProps.uri ||
-            this.props.camera_id !== prevProps.camera_id
-        ) {
+        if (this.props.camera_id !== prevProps.camera_id) {
             this.updateLiveFeed();
         }
     }

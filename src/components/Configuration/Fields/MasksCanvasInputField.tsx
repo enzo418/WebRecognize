@@ -30,8 +30,7 @@ import {
 import { HelpPopover } from '../../IconPopover';
 
 interface MasksCanvasInputFieldProps {
-    uri?: string;
-    camera_id?: string;
+    camera_id: string;
     fieldPath: string;
     enableEditing: boolean;
     fullScreen?: boolean;
@@ -64,7 +63,7 @@ export default function MasksCanvasInputField(
     });
     const [mode, setMode] = useState<Mode>(Mode.ADD);
 
-    const id = props.uri ? { uri: props.uri } : { camera_id: props.camera_id };
+    const id = props.camera_id;
 
     const buttonHeaderRef = React.createRef<HTMLDivElement>();
 
@@ -170,7 +169,7 @@ export default function MasksCanvasInputField(
         return () => {
             if (lastPendingPromise) lastPendingPromise.cancel();
         };
-    }, [props.uri, props.camera_id, calculatedCanvasSize]);
+    }, [props.camera_id, calculatedCanvasSize]);
 
     const onMasksChanged = (masks: Mask[]) => {
         // We need to get the resize again because it might have been changed here or by another user

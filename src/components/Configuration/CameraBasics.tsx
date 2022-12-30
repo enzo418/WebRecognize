@@ -91,7 +91,7 @@ export default function CameraBasics() {
     useEffect(() => {
         if (url.length > 0) {
             cameraService
-                .getDefaults({ uri: url })
+                .getDefaults(commonData.camera)
                 .ok(defaults => {
                     setCameraDefaults(defaults);
                 })
