@@ -3,6 +3,7 @@ import React from 'react';
 import config from '../config';
 import LiveView from '../modules/LiveView';
 import { liveViewService } from '../services/api/Services';
+import TypedPromise from '../TypedPromise';
 
 interface LiveViewPageProps {}
 

@@ -1,8 +1,3 @@
-interface CatchCallback {
-    upToIndex: number;
-    callback: Function;
-}
-
 /**
  * Shared context between promises.
  *
@@ -12,15 +7,14 @@ interface CatchCallback {
  * @template FailType
  */
 class PromiseContext<OkType, FailType> {
-    public status: string = 'pending';
-
-    public thenCallbacks: Function[] = [];
+    public status: 'pending' | 'resolved' | 'rejected' | 'cancelled' =
+        'pending';
 
     // value returned from each call to `then`, but initially is the same as `value`
     // if resolved, else undefined.
     public thenValue: any;
 
-    public catchCallback: CatchCallback[] = [];
+    public catchCallback: Function | null = null;
 
     // value returned from each call to `catch`, initially after resolve/reject is undefined
     // its initialized in the first `catch` call.
@@ -33,6 +27,10 @@ class PromiseContext<OkType, FailType> {
     public error!: FailType;
 
     public finallyCallback: Function = () => {};
+
+    public cancelledCallback: Function | null = null;
+
+    public isAwaited: boolean = false;
 
     /**
      * Calls the function passed with all the parameters
@@ -48,52 +46,108 @@ class PromiseContext<OkType, FailType> {
     };
 
     /**
-     * Register a catch callback for all the `then` registered.
+     * Call the catch callback, throws if not found, else returns the
+     * value returned from the catch
      *
-     * @param {Function} callback
-     */
-    public registerCatch = (callback: Function) => {
-        /** it works since we only allow calls to catch
-         * after a call to then, making each call to
-         * this function to have a different this.thenCallbacks.length
-         **/
-        this.catchCallback.push({
-            upToIndex: this.thenCallbacks.length - 1,
-            callback,
-        });
-    };
-
-    /**
-     * Call the catch callback for a given `then` index.
-     * Return the returned value from the call.
-     *
-     * @param {number} thenIndex
      * @param {*} error
      * @return {any}
      */
-    public callCatchCallbackOrPropagate = (
-        thenIndex: number,
-        error: any,
-    ): any => {
-        if (this.catchCallback.length === 0) {
+    public callCatchCallbackOrPropagate = (error: any): any => {
+        if (!this.catchCallback) {
             throw error;
         }
 
-        const i = thenIndex;
-        const found = this.catchCallback.reduce((a, b) => {
-            if (a.upToIndex <= i && b.upToIndex > i) return a;
-            else return b;
-        });
-
-        if (found.upToIndex > i) {
-            throw error;
-        } else {
-            return found.callback(error);
-        }
+        return this.catchCallback(error);
     };
 }
 
-class NotCatchableTypedPromise<OkType, FailType> {
+interface TPHasOk<OkType, FailType> {
+    /**
+     *
+     * @param callback callback on success
+     * @param rejected callback on fail. Is preferred to use a following call to catch.
+     * This argument is needed enable await support.
+     */
+    ok(
+        callback: (val: OkType) => OkType | void,
+        rejected?: (error: FailType) => any,
+    ): any;
+}
+
+interface TPHasCancel {
+    /**
+     * Sets the promise as cancelled, when it resolves cancelled will be called
+     */
+    cancel(): any;
+}
+
+interface TPHasFail<FailType> {
+    /**
+     * Fail is called only when the promise is rejected.
+     * This method isn't called if `ok` or `finally` throws.
+     *
+     * @param {(v: FailType) => any} callback
+     */
+    fail(callback: (v: FailType) => any): any;
+}
+
+interface TPHasFinally {
+    /**
+     * If succeed, finally is called after the last catch/then, ok if there are no then registered.
+     * If failed it's called after fail.
+     *
+     * Callback it's expected to have 2 parameters.
+     *
+     * - The first is the same as `ok` if the promise was resolved, if there are `then` callbacks
+     *   it would be the same as the last value returned from those calls. Else if the promise was
+     *   rejected it's undefined.
+     *
+     * - The second parameter is the error returned by the last catch call to `catch` if the promise
+     *   was resolved and a throw happened, else if the promise was rejected, is the same as the
+     *   value passed to `fail`.
+     *
+     * @public
+     * @param {(lastOkResult: any, lastError: any) => any} callback
+     */
+    finally(callback: (lastOkResult: any, lastError: any) => any): any;
+}
+
+interface TPHasCancelled {
+    /**
+     * Sets a listener to cancelled
+     * @param callback
+     */
+    cancelled(callback: () => any): any;
+}
+
+interface TPHasCatch {
+    /**
+     * Catch will be called if `then` or `ok` throws.
+     *
+     * @public
+     * @param {Function} callback
+     */
+    catch(callback: Function): any;
+}
+
+type TPHasAll<OkType, FailType> = TPHasOk<OkType, FailType> &
+    TPHasCancel &
+    TPHasFail<FailType> &
+    TPHasFinally &
+    TPHasCancelled &
+    TPHasCatch;
+
+// Constructs a type with a set of function properties that eliminate themselves if called
+type RecursiveReduce<T> = {
+    [P in keyof T]: T[P] extends (...args: infer A) => any
+        ? (...args: A) => RecursiveReduce<Omit<T, P>>
+        : never;
+}; // pg: https://www.typescriptlang.org/play?#code/JYOwLgpgTgZghgYwgAgBJwM4FkJgBYD2AJgILIDeAUMjQPQBU91N9yCBAthxOMgSGkw58xEgDo4zZPVrM4ACgCUALmQA3AsCIBuSgF9KlUJFiIU6bLkJEAQhSkMmNaW07de-QZZG2xAIykZZj95NTgAG1UQAFcOP2gVdU0dfUNjaHgkL2FrAGF7OkZA1y4eMD4BCxziXLEEQNkaBCVVDS1dA0owAE8AB3NMEht8gF5sq1FkADJxnzsZqomiXN0jcAyzZABpAB4AJQA+AuQFRIB5DmAwfYAaZAByOHuD1ZoQ88vrvbv7v2fXtgtZAXK63B4If6pSi0WjsEAYcpgZQABTgUDg3BMGB2uxicWgBwA2o97gBdF6GLp9FAAFWROxpRzGVBohORyFAyAA1hBugQYMgaaTVDS2aTkBAAB6QEBEDDIeRiJVogDmGFUoBg0GQJEUyBGRzgIG6yAA-AqlRIoGrVLr9Uc6TsQdcaXdkQcjlEIGpoB1DAhwph5QANHYASRAV2AESOLOQjmK7FKHgEwYkDTkQMdzvDkbA0fCPyeHuONCguGiUAE+GA8swyGiIC5IAIAHcBPXs59c1GIkXnhSaJ1Ck4WCV3OVPGmAs4gm9QhEorF4lBEl3QRHe4WHn8S3GyxWq8ga3X5Y3m22O-L19dN-m+zuB7oh4YR4m3GUKsg0-VZ41AWu9I5neBY-BCe5SMg5ZgJW1Z4LWJxnk2LbtohgpAd2IEPvc4GDsgBidHCCLIJK+rICAECtt+OwWEMuQHEoqyShISj+EohgwiRLGKIYPT9Dq4ThGRiw+GQCxCEs8yzHkqxUvxJCCQAMhAGAYKMwLdgp248nyAoiXkFJySgWnKapZBjDmWl3Dp-LSaIhlrCYmS0hK0o8HKAnhKZGBkFQUJEYiyg0mRVAIKoMCNgg+b8ECbREPY+BQG25GUcgACiUBJVA8gAEQAGKRdFAgtuUwAcL04QQBOEBEGIOWKB0NyUH44WFcAMWJHFCV4ElVEUVRGVZblBUgFF7XFQQpXlZV1W1fVfp6EAA
+
+class BaseTypedPromise<OkType, FailType, InitialCallable> {
+    // internal members are stored in a separated class to
+    // make it possible to only shows certain function,
+    // following the State pattern
     protected context: PromiseContext<OkType, FailType>;
 
     constructor(context: PromiseContext<OkType, FailType>) {
@@ -101,39 +155,88 @@ class NotCatchableTypedPromise<OkType, FailType> {
     }
 
     /**
-     * Fail is called only when the requests to the server responded with an error
-     * status code.
-     * This method isn't called if a `then` call throws.
-     *
-     * After fail is registered, no more `ok` or `then` are allowed.
+     * Function to call on resolved
+     * @param callback callback on success
+     * @param rejected callback on fail. Is preferred to use a following call to catch.
+     * This argument is needed enable await support.
+     */
+    ok(
+        callback: (val: OkType) => OkType | void,
+    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasOk<OkType, FailType>>> {
+        if (this.context.status === 'resolved') {
+            try {
+                this.context.value =
+                    callback(this.context.value) || this.context.value;
+            } catch (error) {
+                this.context.thenError =
+                    this.context.callCatchCallbackOrPropagate(error);
+            }
+        } else {
+            this.context.okCallback = callback;
+        }
+
+        return this as RecursiveReduce<
+            Omit<InitialCallable, keyof TPHasOk<OkType, FailType>>
+        >;
+    }
+
+    /**
+     * Fail is called only when the promise is rejected.
+     * This method isn't called if `ok` or `finally` throws.
      *
      * @public
-     * @param {Function} callback
+     * @param {(v: FailType) => any} callback
      */
-    public fail(callback: (v: FailType) => any): void {
+    fail(
+        callback: (v: FailType) => any,
+    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasFail<FailType>>> {
         if (this.context.status === 'rejected') {
             callback(this.context.error);
         } else {
             this.context.failCallback = callback;
         }
+
+        return this as RecursiveReduce<
+            Omit<InitialCallable, keyof TPHasFail<FailType>>
+        >;
     }
 
     /**
-     * Then is called only after the return of ok.
-     * If this throws, the registered `catch` function will catch it.
+     * Catch will be called if `then` or `ok` throws.
      *
      * @public
      * @param {Function} callback
-     * @return {CatchableTypedPromise<OkType, FailType>}
      */
-    public then(callback: Function): CatchableTypedPromise<OkType, FailType> {
-        if (this.context.status === 'resolved') {
-            this.context.thenValue = callback(this.context.thenValue);
+    catch(
+        callback: Function,
+    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasCatch>> {
+        if (this.context.status === 'rejected') {
+            callback(this.context.error);
         } else {
-            this.context.thenCallbacks.push(callback);
+            this.context.catchCallback = callback;
         }
 
-        return new CatchableTypedPromise<OkType, FailType>(this.context);
+        return this as RecursiveReduce<Omit<InitialCallable, keyof TPHasCatch>>;
+    }
+
+    /**
+     * Sets a listener to cancelled
+     *
+     * @public
+     * @param callback
+     */
+    cancelled(
+        callback: () => any,
+    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasCancelled>> {
+        if (this.context.status === 'cancelled') {
+            callback();
+        } else {
+            this.context.cancelledCallback = callback;
+        }
+
+        return this as RecursiveReduce<
+            Omit<InitialCallable, keyof TPHasCancelled>
+        >;
     }
 
     /**
@@ -151,12 +254,11 @@ class NotCatchableTypedPromise<OkType, FailType> {
      *   value passed to `fail`.
      *
      * @public
-     * @param {Function} callback
-     * @return {NotCatchableTypedPromise<OkType, FailType>}
+     * @param {(lastOkResult: any, lastError: any) => any} callback
      */
-    public finally(
+    finally(
         callback: (lastOkResult: any, lastError: any) => any,
-    ): NotCatchableTypedPromise<OkType, FailType> {
+    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasFinally>> {
         if (
             this.context.status === 'resolved' ||
             this.context.status === 'rejected'
@@ -165,36 +267,16 @@ class NotCatchableTypedPromise<OkType, FailType> {
         } else {
             this.context.finallyCallback = callback;
         }
-
-        return this;
-    }
-}
-
-class CatchableTypedPromise<OkType, FailType> extends NotCatchableTypedPromise<
-    OkType,
-    FailType
-> {
-    constructor(context: PromiseContext<OkType, FailType>) {
-        super(context);
+        return this as RecursiveReduce<
+            Omit<InitialCallable, keyof TPHasFinally>
+        >;
     }
 
     /**
-     * Catch is called only when `then` or `ok` throws.
-     *
-     * @public
-     * @param {Function} callback
-     * @return {NotCatchableTypedPromise<OkType, FailType>}
+     * Sets the promise as cancelled, when it resolves cancelled will be called
      */
-    public catch(
-        callback: Function,
-    ): NotCatchableTypedPromise<OkType, FailType> {
-        if (this.context.status === 'rejected') {
-            callback(this.context.error);
-        } else {
-            this.context.registerCatch(callback);
-        }
-
-        return new NotCatchableTypedPromise<OkType, FailType>(this.context);
+    cancel() {
+        this.context.status = 'cancelled';
     }
 }
 
@@ -205,6 +287,7 @@ class CatchableTypedPromise<OkType, FailType> extends NotCatchableTypedPromise<
  * It defers in Promise in two thing:
  * - Ok function
  * - Fail function
+ * - Doesn't allow chained then/catch, it breaks the types.
  *
  * Ok function is the equivalent to the first `then` in a normal Promise. The type
  * of the callback argument is `OkType`.
@@ -212,63 +295,33 @@ class CatchableTypedPromise<OkType, FailType> extends NotCatchableTypedPromise<
  * Fail function is the equivalent to the first catch in a normal Promise. The callback
  * expects an argument of type `FailType`.
  *
- * You can think it as if Ok and Fail gives you access to the response, allowing you
- * to chain functions to modify it.
+ * An additional catch function is provided to catch exceptions thrown in the `ok` listener.
  *
- * It only allows catch after `then` calls. And this will catch all the exceptions
- * thrown from the callbacks above it.
+ * If the promise is cancelled it doesn't care if it was resolved or rejected, it will call
+ * to `cancelled` once it was resolved/rejected. But, if it's used with await it will throw
+ * {cancelled: true} so you can catch it in a try{}catch{}, there is an example in the tests.
  *
  * @export
  * @class ServiceRequestPromise
  * @typedef {TypedPromise}
  * @template OkType
  * @template FailType
- * @implements {ISubscribableServiceRequest}
  */
-export default class TypedPromise<OkType, FailType> {
-    // internal members are stored in a separated class to
-    // make it possible to only shows certain function,
-    // following the State pattern
-    private context: PromiseContext<OkType, FailType>;
-
+export default class TypedPromise<OkType, FailType> extends BaseTypedPromise<
+    OkType,
+    FailType,
+    TPHasAll<OkType, FailType>
+> {
     constructor(
         action: (
             okCallback: (val: OkType) => OkType | void,
             failCallback: (val: FailType) => any,
         ) => void,
     ) {
-        this.context = new PromiseContext<OkType, FailType>();
+        super(new PromiseContext<OkType, FailType>());
 
         // if action throws it will propagate
         action(this.resolve.bind(this), this.reject.bind(this));
-    }
-
-    /**
-     *
-     * @param callback callback on success
-     * @param rejected callback on fail. Is preferred to use a following call to catch.
-     * This argument is needed enable await support.
-     * @returns
-     */
-    public ok(
-        callback: (val: OkType) => OkType | void,
-        rejected?: (error: FailType) => any,
-    ): NotCatchableTypedPromise<OkType, FailType> {
-        if (this.context.status === 'resolved') {
-            try {
-                this.context.value =
-                    callback(this.context.value) || this.context.value;
-            } catch (error) {
-                this.context.thenError =
-                    this.context.callCatchCallbackOrPropagate(0, error);
-            }
-        } else {
-            this.context.okCallback = callback;
-        }
-
-        if (rejected) this.context.failCallback = rejected;
-
-        return new NotCatchableTypedPromise<OkType, FailType>(this.context);
     }
 
     /**
@@ -281,56 +334,64 @@ export default class TypedPromise<OkType, FailType> {
     protected then(
         callback: (val: OkType) => OkType | void,
         rejected?: (error: FailType) => any,
-    ): NotCatchableTypedPromise<OkType, FailType> {
+    ): void {
+        this.context.isAwaited = true;
+
         if (this.context.status === 'resolved') {
             try {
                 this.context.value =
                     callback(this.context.value) || this.context.value;
             } catch (error) {
                 this.context.thenError =
-                    this.context.callCatchCallbackOrPropagate(0, error);
+                    this.context.callCatchCallbackOrPropagate(error);
             }
         } else {
             this.context.okCallback = callback;
         }
 
         if (rejected) this.context.failCallback = rejected;
-
-        return new NotCatchableTypedPromise<OkType, FailType>(this.context);
     }
 
     private resolve(value: OkType) {
+        // if it was cancelled
+        if (this.context.status === 'cancelled') {
+            if (this.context.cancelledCallback)
+                this.context.cancelledCallback();
+
+            // await subscribed to fail through then(ok, fail)
+            if (this.context.isAwaited)
+                this.context.failCallback({ cancelled: true });
+            return;
+        }
+
         this.context.status = 'resolved';
         this.context.value = value;
         this.context.thenValue = value;
 
         // call ok
         try {
-            this.context.thenValue = this.context.okCallback(
-                this.context.value,
-            );
+            this.context.thenValue =
+                this.context.okCallback(this.context.value) || value;
         } catch (error) {
-            this.context.thenError = this.context.callCatchCallbackOrPropagate(
-                0,
-                error,
-            );
-            return; // skip then
+            this.context.thenError =
+                this.context.callCatchCallbackOrPropagate(error);
         }
-
-        // call all the "then"
-        this.context.thenCallbacks.forEach((thenCallback, index) => {
-            try {
-                this.context.thenValue = thenCallback(this.context.thenValue);
-            } catch (error) {
-                this.context.thenError =
-                    this.context.callCatchCallbackOrPropagate(index, error);
-            }
-        });
 
         this.context.callAsFinally(this.context.finallyCallback);
     }
 
     private reject(value: FailType) {
+        // if it was cancelled
+        if (this.context.status === 'cancelled') {
+            if (this.context.cancelledCallback)
+                this.context.cancelledCallback();
+
+            // await subscribed to fail through then(ok, fail)
+            if (this.context.isAwaited)
+                this.context.failCallback({ cancelled: true });
+            return;
+        }
+
         this.context.status = 'rejected';
         this.context.error = value;
 

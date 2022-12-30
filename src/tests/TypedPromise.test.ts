@@ -50,7 +50,7 @@ describe('Typed promise general tests', () => {
         expect(callbackFail).toHaveBeenCalledWith({ title: 'invalid name' });
     });
 
-    it('should call ok, then chain and catch', done => {
+    it('should call ok then catch', done => {
         //
         const N = 100;
         const numbers: number[] = Array.from(new Array(N), (_, i) => i); // 0 - N
@@ -59,28 +59,6 @@ describe('Typed promise general tests', () => {
             setTimeout(() => ok(numbers), 500),
         );
 
-        // return pair numbers
-        const callbackOk = (okNumbers: number[]) => {
-            expect(okNumbers).toHaveLength(N);
-
-            return okNumbers.filter(v => v % 2 == 0);
-        };
-
-        // leave only a 2
-        const callbackThen1 = (pairs: number[]) => {
-            expect(pairs).toHaveLength(N / 2);
-
-            return pairs.filter(v => v == 2)[0];
-        };
-
-        // throw
-        const callbackThen2 = (two: number) => {
-            expect(two).toBe(2);
-
-            // eslint-disable-next-line no-throw-literal
-            throw 33;
-        };
-
         const callbackCatch = jest.fn(e => {
             expect(e).toBe(33);
             done();
@@ -88,41 +66,19 @@ describe('Typed promise general tests', () => {
 
         // action
         promise
-            .ok(callbackOk)
-            .then(callbackThen1)
-            .then(callbackThen2)
+            .ok(() => {
+                throw 33;
+            })
             .catch(callbackCatch);
     });
 
-    it('should call first catch if ok fails', done => {
-        const promise = new TypedPromise<number, any>((ok, fail) =>
-            setTimeout(() => ok(1), 500),
-        );
-
-        promise
-            .ok(v => {
-                throw 44;
-            })
-            .then((v: any) => v)
-            .catch((e: any) => {
-                expect(e).toBe(44);
-
-                done();
-            });
-    });
-
-    it('should catch an exception at some level and then call finally', done => {
+    it('should catch an exception and then call finally', done => {
         const promise = new TypedPromise<number, any>((ok, fail) =>
             setTimeout(() => ok(418), 500),
         );
 
         promise
-            .ok(v => v)
-            .then((v: any) => v)
-            .catch((e: any) => expect(1).toBe(0)) // never
-            .then((v: any) => {
-                expect(v).toBe(418);
-
+            .ok(() => {
                 throw 'test';
             })
             .catch((e: any) => {
@@ -139,7 +95,7 @@ describe('Typed promise general tests', () => {
     });
 
     it('should call finally with the rejected value', done => {
-        const promise = new TypedPromise<any, number>((ok, fail) =>
+        const promise = new TypedPromise<number, number>((ok, fail) =>
             setTimeout(() => fail(418), 500),
         );
 
@@ -156,6 +112,32 @@ describe('Typed promise general tests', () => {
             });
     });
 
+    it('should cancel the promise', done => {
+        const promise = new TypedPromise<any, number>((_, fail) =>
+            setTimeout(() => fail(418), 550),
+        );
+
+        promise
+            .ok(() => {
+                throw new Error('it should not get to ok');
+            })
+            .fail(() => {
+                throw new Error('it should not get to fail');
+            })
+            .cancelled(() => {
+                done();
+            })
+            .catch(() => {
+                throw new Error('it should not get to catch');
+            })
+            .finally(() => {
+                throw new Error('it should not get to finally');
+            })
+            .cancel();
+    });
+});
+
+describe('Typed promise async/await', () => {
     it('should work with await/async on ok', async () => {
         for (let i = 0; i < 10; i++) {
             const TEST_TIME = 200;
@@ -189,6 +171,27 @@ describe('Typed promise general tests', () => {
             await promise;
         } catch (e) {
             expect(e).toBe(418);
+        }
+    });
+
+    it('should cancel the promise in await/async', async () => {
+        const promise = new TypedPromise<any, number>((_, fail) =>
+            setTimeout(() => fail(418), 550),
+        );
+
+        promise.cancel();
+
+        try {
+            const v = await promise;
+            throw Error('it should have thrown');
+        } catch (e) {
+            const error = e as {};
+
+            if ('cancelled' in error) {
+                expect(error.cancelled).toBe(true);
+            } else {
+                throw Error("Was expecting 'cancelled' property");
+            }
         }
     });
 });

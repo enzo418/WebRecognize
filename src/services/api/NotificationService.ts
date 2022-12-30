@@ -65,11 +65,11 @@ export default class NotificationService implements INotificationService {
                 return processPromise<Array<DTONotification>, IProblemJson>(
                     this.http.get('/api/notifications/', { limit }),
                 )
-                    .ok(res =>
+                    .ok(res => {
                         parseNotifications(res, this.cameraService)
                             .ok(parsed => ok(parsed))
-                            .fail(fail),
-                    )
+                            .fail(fail);
+                    })
                     .fail(fail);
             },
         );
@@ -87,11 +87,11 @@ export default class NotificationService implements INotificationService {
                         limit,
                     }),
                 )
-                    .ok(res =>
+                    .ok(res => {
                         parseNotifications(res, this.cameraService)
                             .ok(parsed => ok(parsed))
-                            .fail(fail),
-                    )
+                            .fail(fail);
+                    })
                     .fail(fail);
             },
         );
@@ -109,11 +109,11 @@ export default class NotificationService implements INotificationService {
                         limit,
                     }),
                 )
-                    .ok(res =>
+                    .ok(res => {
                         parseNotifications(res, this.cameraService)
                             .ok(parsed => ok(parsed))
-                            .fail(fail),
-                    )
+                            .fail(fail);
+                    })
                     .fail(fail);
             },
         );
@@ -133,11 +133,11 @@ export default class NotificationService implements INotificationService {
                         limit,
                     }),
                 )
-                    .ok(res =>
+                    .ok(res => {
                         parseNotifications(res, this.cameraService)
                             .ok(parsed => ok(parsed))
-                            .fail(fail),
-                    )
+                            .fail(fail);
+                    })
                     .fail(fail);
             },
         );
