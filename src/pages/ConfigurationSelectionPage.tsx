@@ -55,7 +55,6 @@ export default function ConfigurationSelection() {
                         </InputLabel>
                         <SelectConfiguration
                             sx={{ width: '100%' }}
-                            defaultLocalValue={Key.LAST_CONFIGURATION_ID}
                             labelId="select-db-configuration"
                             label="Configuration"
                             onSelected={onChangeConfigurationSelected}
