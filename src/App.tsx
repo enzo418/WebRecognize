@@ -44,6 +44,7 @@ import BlobDetectorParametersConfiguration from './components/Configuration/Blob
 import BlobFiltersConfiguration from './components/Configuration/BlobsConfiguration/BlobFiltersConfiguration';
 import BlobContoursFiltersConfiguration from './components/Configuration/BlobsConfiguration/BlobContoursFiltersConfiguration';
 import BlobThresholdParametersConfiguration from './components/Configuration/BlobsConfiguration/BlobThresholdParametersConfiguration';
+import ApplicationConfiguration from './components/ApplicationConfiguration';
 
 function App() {
     return (
@@ -62,6 +63,9 @@ function App() {
                             <Route
                                 path="/dashboard"
                                 element={<DashboardPage />}></Route>
+                            <Route
+                                path="/application/configuration"
+                                element={<ApplicationConfiguration />}></Route>
                             <Route
                                 path="/configuration"
                                 element={<ConfigurationSelection />}></Route>

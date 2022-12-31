@@ -1,5 +1,7 @@
-import { Grid } from '@mui/material';
+import { SettingsApplicationsOutlined } from '@mui/icons-material';
+import { Button, Grid, Stack } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import ToggleRecognizeButton from '../components/ToggleRecognizeButton';
 import { Key, saveLocal } from '../LocalStore';
 import DTOObserverStatus from '../services/api/interfaces/DTOObserverStatus';
@@ -10,6 +12,8 @@ export default function DashboardPage() {
         running: false,
         config_id: '',
     });
+
+    const navigate = useNavigate();
 
     let lastPendingPromise: any;
     const updateObserverStatus = () => {
@@ -55,14 +59,28 @@ export default function DashboardPage() {
         };
     }, []);
 
+    const onNavigateToApplicationConfiguration = () => {
+        navigate('/application/configuration');
+    };
+
     return (
         <Grid sx={{ padding: '20px 6px' }}>
-            <Grid item xs={12} sm={12} md={6}>
-                <ToggleRecognizeButton
-                    status={observerStatus}
-                    onClickStart={onClickStart}
-                    onClickStop={onClickStop}
-                />
+            <Grid item xs={12} sm={12} md={12}>
+                <Stack direction={'row'} justifyContent={'space-between'}>
+                    <ToggleRecognizeButton
+                        status={observerStatus}
+                        onClickStart={onClickStart}
+                        onClickStop={onClickStop}
+                    />
+
+                    <Button
+                        variant="contained"
+                        color="inherit"
+                        startIcon={<SettingsApplicationsOutlined />}
+                        onClick={onNavigateToApplicationConfiguration}>
+                        Application settings
+                    </Button>
+                </Stack>
             </Grid>
         </Grid>
     );
