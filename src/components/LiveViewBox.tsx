@@ -5,7 +5,7 @@ import LiveView from '../modules/LiveView';
 import { liveViewService } from '../services/api/Services';
 
 interface LiveViewBoxProps {
-    uri: string;
+    camera_id: string;
     componentOnError?: (error: string) => any;
     keepSkeletonOnError?: boolean;
     style?: object;
@@ -21,6 +21,8 @@ export default class LiveViewBox extends React.Component<
     LiveViewBoxProps,
     LiveViewBoxState
 > {
+    lastPendingPromise: any;
+
     state: LiveViewBoxState = {
         feedID: '',
         loading: true,
@@ -32,10 +34,10 @@ export default class LiveViewBox extends React.Component<
     }
 
     updateLiveFeed() {
-        if (!this.props.uri || this.props.uri.length == 0) return;
+        if (!this.props.camera_id || this.props.camera_id.length == 0) return;
 
-        liveViewService
-            .getCameraView(this.props.uri)
+        this.lastPendingPromise = liveViewService
+            .getCameraView(this.props.camera_id)
             .ok(data => {
                 this.setState({
                     feedID: data.ws_feed_id,
@@ -58,8 +60,14 @@ export default class LiveViewBox extends React.Component<
 
     componentDidUpdate(prevProps: LiveViewBoxProps) {
         // Typical usage (don't forget to compare props):
-        if (this.props.uri !== prevProps.uri) {
+        if (this.props.camera_id !== prevProps.camera_id) {
             this.updateLiveFeed();
+        }
+    }
+
+    componentWillUnmount(): void {
+        if (this.lastPendingPromise) {
+            this.lastPendingPromise.cancel();
         }
     }
 

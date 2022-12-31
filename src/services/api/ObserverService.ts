@@ -6,7 +6,7 @@ import Service from './Service';
 
 export default class ObserverService extends Service {
     constructor(httpClient: IHttpClient) {
-        super(httpClient, '/api');
+        super(httpClient, '/api/observer');
     }
 
     public start(config_id: string) {
@@ -23,7 +23,7 @@ export default class ObserverService extends Service {
 
     public status() {
         return processPromise<DTOObserverStatus, IProblemJson>(
-            this.client.get(this.baseUrl + '/observerStatus', {}),
+            this.client.get(this.baseUrl + '/status', {}),
         );
     }
 }

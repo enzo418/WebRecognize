@@ -8,15 +8,15 @@ export default class LiveViewService extends Service {
         super(httpClient, '/api');
     }
 
-    public getCameraView(uri: string) {
+    public getCameraView(camera_id: string) {
         return processPromise<{ ws_feed_id: string }, IProblemJson>(
-            this.client.get(this.baseUrl + '/requestCameraStream', { uri }),
+            this.client.get(this.baseUrl + "/camera/" + camera_id + '/stream', {}),
         );
     }
 
     public getAllCamerasView() {
         return processPromise<{ ws_feed_id: string }, IProblemJson>(
-            this.client.get(this.baseUrl + '/requestObserverStream', {
+            this.client.get(this.baseUrl + '/observer/stream', {
                 rnd: Math.random(),
             }),
         );

@@ -19,7 +19,7 @@ import {
     Typography,
 } from '@mui/material';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import config from '../../config';
 import { useConfiguration } from '../../context/configurationContext';
@@ -85,6 +85,8 @@ export default function CameraBasics() {
         size: { width: 0, height: 0 },
     });
 
+    const liveViewContainerRef = React.createRef<HTMLDivElement>();
+
     const navigate = useNavigate();
 
     // Update camera defaults on url change
@@ -116,6 +118,16 @@ export default function CameraBasics() {
             })
             .fail(e => console.error("Couldn't delete the camera: ", e));
     };
+
+    const [calculatedWidth, setCalculatedWidth] = useState<string>('640px');
+
+    useEffect(() => {
+        if (liveViewContainerRef.current) {
+            const parentW =
+                liveViewContainerRef.current.getBoundingClientRect().width;
+            setCalculatedWidth(Math.min(640, parentW) + 'px');
+        }
+    }, []);
 
     return (
         <Grid container spacing={{ xs: 2, md: 2 }}>
@@ -239,10 +251,11 @@ export default function CameraBasics() {
                 </Stack>
             </Grid>
 
-            <Grid item xs={12} sm={12} md={8}>
+            <Grid item xs={12} sm={12} md={8} ref={liveViewContainerRef}>
                 <LiveViewBox
-                    style={{ width: '640px' }}
-                    uri={url}
+                    key={url} // update if url changed
+                    style={{ width: calculatedWidth }}
+                    camera_id={commonData.camera}
                     keepSkeletonOnError={true}
                 />
             </Grid>
