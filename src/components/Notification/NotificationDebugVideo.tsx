@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Notification from '../../domain/Notification';
 import { notificationService } from '../../services/api/Services';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface NotificationDebugVideoProps {
     notification: Notification;
@@ -59,6 +60,8 @@ export default function NotificationDebugVideo(
                     console.debug(e);
 
                     if (e.status == 404 || e.status == 400) {
+                        if (e.title) toast.error(e.title);
+
                         setIsNotAvailable(true);
                     }
                 });
