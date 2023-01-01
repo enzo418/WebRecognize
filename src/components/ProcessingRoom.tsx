@@ -23,7 +23,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import config from '../config';
 import { Size } from '../Geometry';
-import { Key, saveLocal, saveLocalObject } from '../LocalStore';
+import { Key, removeLocal, saveLocal, saveLocalObject } from '../LocalStore';
 import CanvasHandlerBufferPlayer from '../modules/CanvasHandlerBufferPlayer';
 import DTOVideoBuffer from '../services/api/interfaces/DTOVideoBuffer';
 import { videoBufferService } from '../services/api/Services';
@@ -214,6 +214,7 @@ export default function ProcessingRoom(props: ProcessingRoomProps) {
             .ok(() => {
                 toast.info('Deleted', { autoClose: 500 });
                 props.onDelete();
+                removeLocal(Key.LAST_DEBUG_BUFFER);
             })
             .fail(() => {
                 toast.error('Could not delete it, try again', {
