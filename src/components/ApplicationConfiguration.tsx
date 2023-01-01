@@ -11,7 +11,10 @@ import { UpdateFieldCallback } from '../context/configurationContext';
 import IProblemJson from '../services/api/interfaces/IProblemJson';
 import { serverConfigurationService } from '../services/api/Services';
 import TypedPromise from '../TypedPromise';
-import { SwitchConfigurationField } from './Configuration/configurationField';
+import {
+    SwitchConfigurationField,
+    TextConfigurationField,
+} from './Configuration/configurationField';
 
 export default function ApplicationConfiguration() {
     const updateCB: UpdateFieldCallback = (path: string, value: any) => {
@@ -55,8 +58,8 @@ export default function ApplicationConfiguration() {
                 </Typography>
                 <Divider sx={{ mb: '20px' }} />
 
-                <Grid container>
-                    <Grid item xs={12}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
                         <FormControlLabel
                             control={
                                 <SwitchConfigurationField
@@ -72,12 +75,72 @@ export default function ApplicationConfiguration() {
                         <Typography
                             variant="body2"
                             color={'GrayText'}
-                            gutterBottom
-                            sx={{ ml: '5px' }}>
+                            gutterBottom>
                             If enabled, a separate video will be saved with the
                             camera's original resolution that you can use to
                             modify and test the detection parameters for
                             improvement.
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <Typography gutterBottom>Media folder path</Typography>
+                        <TextConfigurationField
+                            fullWidth
+                            data={{
+                                ...commonData,
+                                path: 'mediaFolder',
+                                beforeSendValue(value: string) {
+                                    return !value.endsWith('/')
+                                        ? value + '/'
+                                        : value;
+                                },
+                            }}
+                            sx={{ mb: '5px' }}
+                        />
+                        <Typography variant="body2" color={'GrayText'}>
+                            Folder where the images/videos will be stored. It
+                            can be relative (e.g. "media/all") or absolute (e.g.
+                            "/mnt/ssd/server_media")
+                        </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                        <Typography gutterBottom>
+                            Delete notifications older than
+                        </Typography>
+                        <TextConfigurationField
+                            fullWidth
+                            type="number"
+                            data={{
+                                ...commonData,
+                                path: 'notificationCleanupFilter/deleteIfOlderThanDays',
+                                defaultValue: 1,
+                            }}
+                            helperText="in days"
+                            sx={{ mb: '5px' }}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                        <Typography gutterBottom>
+                            maximum size in megabytes in total of DEBUG VIDEOS
+                        </Typography>
+                        <TextConfigurationField
+                            fullWidth
+                            data={{
+                                ...commonData,
+                                path: 'notificationDebugVideoFilter/keepTotalNotReclaimedBelowMB',
+                                defaultValue: 0,
+                            }}
+                            type="number"
+                            sx={{ mb: '5px' }}
+                        />
+                        <Typography variant="body2" color={'GrayText'}>
+                            Only unclaimed videos will be deleted, i.e. those in
+                            which you have not clicked on "debug notification".
+                            Assuming that each one can be between 30 and 100 MB
+                            depending on the length you can calculate how many
+                            you want to leave.
                         </Typography>
                     </Grid>
                 </Grid>
