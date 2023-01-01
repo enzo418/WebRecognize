@@ -29,7 +29,7 @@ export default function processPromise<T, Problem extends IProblemJson>(
             }))
             .then(r => {
                 if (!r.ok) {
-                    let rejectedJSON: any = { status: -1 };
+                    let rejectedJSON: any = { status: r.status || -1 };
 
                     if (
                         r.headers.has('Content-Type') &&
@@ -50,6 +50,8 @@ export default function processPromise<T, Problem extends IProblemJson>(
                                 "didn't respond with a problem+json",
                         );
                     }
+
+                    if (!rejectedJSON.status) rejectedJSON.status = r.status;
 
                     fail(rejectedJSON);
                 } else {
