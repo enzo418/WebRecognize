@@ -76,7 +76,7 @@ function App() {
     return (
         <ThemeProvider theme={darkTheme}>
             <Router>
-                <Paper elevation={0}>
+                <Paper elevation={0} sx={{ borderRadius: 0 }}>
                     <Stack direction="row">
                         <NavBar sx={{ maxWidth: '60px' }} />
                         <Box sx={{ width: 'calc(99% - 60px)', padding: '0px' }}>

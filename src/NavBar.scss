@@ -40,3 +40,10 @@
     background-color: transparent;
     width: 0.2em;
 }
+
+.navbar-list {
+    li {
+        border-left: 0;
+        border-right: 0;
+    }
+}

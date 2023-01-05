@@ -20,32 +20,19 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import {
     Link as RouterLink,
     LinkProps as RouterLinkProps,
-    // MemoryRouter,
-    // useLocation,
+    useLocation,
 } from 'react-router-dom';
-
-// import {StaticRouter} from 'react-router-dom/server';
 
 import './NavBar.scss';
 import { Dashboard } from '@mui/icons-material';
-
-// function Router(props: { children?: React.ReactNode }) {
-//     const {children} = props;
-//     if (typeof window === 'undefined') {
-//         return <StaticRouter location="/drafts">{children}</StaticRouter>;
-//     }
-
-//     return (
-//         <MemoryRouter initialEntries={['/drafts']} initialIndex={0}>
-//             {children}
-//         </MemoryRouter>
-//     );
-// }
+import { useState } from 'react';
 
 interface ListItemLinkProps {
     icon?: React.ReactElement;
     primary: string;
     to: string;
+
+    [x: string]: any;
 }
 
 function ListItemLink(props: ListItemLinkProps) {
@@ -95,30 +82,35 @@ function ListItemLink(props: ListItemLinkProps) {
     return (
         <li>
             <ThemeProvider theme={ListItemTheme}>
-                <ListItem button component={renderLink}>
+                <ListItem button component={renderLink} {...rest}>
                     {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-                    {/* <ListItemText primary={primary} sx={{ minWidth: '0' }} /> */}
                 </ListItem>
             </ThemeProvider>
         </li>
     );
 }
 
-// function Content() {
-//     const location = useLocation();
-//     return (
-//         <Typography variant="body2" sx={{pb: 2}} color="text.secondary">
-//       Current route: {location.pathname}
-//         </Typography>
-//     );
-// }
-
 interface NavBarProps {
     sx: object;
 }
 
+const items = [
+    {
+        to: '/configuration/',
+        icon: <SettingsIcon />,
+    },
+    { to: '/notifications', icon: <NotificationsNoneIcon /> },
+    {
+        to: '/liveView',
+        icon: <SettingsInputAntennaIcon />,
+    },
+    { to: '/dashboard', icon: <Dashboard /> },
+];
+
 export default function NavBar(props: NavBarProps) {
     const { sx, ...rest } = props;
+
+    let location = useLocation();
 
     const finalSx = {
         ...{
@@ -126,29 +118,31 @@ export default function NavBar(props: NavBarProps) {
             overflowX: 'hidden',
             borderRight: '1px solid #000',
             borderColor: (theme: Theme) => theme.palette.divider,
-        } /* TODO: add e5e6eb to vars*/,
+        },
         ...(sx || {}),
     };
 
     return (
         <Box className="simple-bar" sx={finalSx} {...rest}>
-            <List sx={{ height: '100%' }}>
-                <ListItemLink
-                    to="/configuration/"
-                    primary=""
-                    icon={<SettingsIcon />}
-                />
-                <ListItemLink
-                    to="/notifications"
-                    primary=""
-                    icon={<NotificationsNoneIcon />}
-                />
-                <ListItemLink
-                    to="/liveView"
-                    primary=""
-                    icon={<SettingsInputAntennaIcon />}
-                />
-                <ListItemLink to="/dashboard" primary="" icon={<Dashboard />} />
+            <List sx={{ height: '100%' }} className="navbar-list">
+                {items.map(item => (
+                    <ListItemLink
+                        key={item.to}
+                        to={item.to}
+                        primary=""
+                        icon={item.icon}
+                        sx={{
+                            border:
+                                location.pathname === item.to
+                                    ? '1px solid #000'
+                                    : '0',
+                            borderLeft: '0',
+                            borderRight: '0',
+                            borderColor: (theme: Theme) =>
+                                theme.palette.divider,
+                        }}
+                    />
+                ))}
             </List>
         </Box>
     );
