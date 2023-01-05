@@ -3,7 +3,7 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import Grid from '@mui/material/Grid';
 import Item from '@mui/material/Grid';
@@ -53,10 +53,12 @@ import BlobThresholdParametersConfiguration from './components/Configuration/Blo
 import ApplicationConfiguration from './components/ApplicationConfiguration';
 import { getLocalDefault, Key } from './LocalStore';
 import eventBus from './EventBus';
+import { notificationService } from './services/api/Services';
 
 function App() {
-    //const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+    const notificationAudioPlayer = React.createRef<HTMLAudioElement>();
 
+    //const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
     const [themeMode, setThemeMode] = useState<'dark' | 'light'>(
         getLocalDefault(Key.THEME_MODE, 'dark') as any,
     );
@@ -70,6 +72,21 @@ function App() {
             }),
         [themeMode],
     );
+
+    useEffect(() => {
+        const playNotificationSound = () => {
+            if (notificationAudioPlayer.current)
+                notificationAudioPlayer.current.play();
+        };
+
+        notificationService.subscribe(playNotificationSound);
+        eventBus.on('notification-sound-play', playNotificationSound);
+
+        return () => {
+            notificationService.unsubscribe(playNotificationSound);
+            eventBus.remove('notification-sound-play', playNotificationSound);
+        };
+    });
 
     eventBus.on('theme-mode-changed', mode => setThemeMode(mode));
 
@@ -214,10 +231,42 @@ function App() {
                             />
                         </Box>
                     </Stack>
+                    <NotificationAudio ref={notificationAudioPlayer} />
                 </Paper>
             </Router>
         </ThemeProvider>
     );
 }
+
+const NotificationAudio = React.forwardRef<HTMLAudioElement, any>(
+    (props, ref) => {
+        useEffect(() => {
+            const onVolumeChanged = (v: number) => {
+                const rr =
+                    ref as React.MutableRefObject<HTMLAudioElement | null>;
+                if (rr && rr.current) rr.current.volume = v;
+            };
+
+            onVolumeChanged(
+                parseFloat('' + getLocalDefault(Key.NOTIFICATION_VOLUME, 0.3)),
+            );
+
+            eventBus.on('notification-sound-volume-changed', onVolumeChanged);
+
+            return () => {
+                eventBus.remove(
+                    'notification-sound-volume-changed',
+                    onVolumeChanged,
+                );
+            };
+        });
+
+        return (
+            <audio ref={ref}>
+                <source src="/tone1.wav" type="audio/x-wav" />
+            </audio>
+        );
+    },
+);
 
 export default App;

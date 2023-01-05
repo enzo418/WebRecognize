@@ -330,8 +330,6 @@ class Notifications extends React.Component<
 
             this.processNotifications(this.state.notifications, addedANewGroup);
 
-            this.notificationAudioPlayer.current.play();
-
             resolve(true);
         });
     };
@@ -354,7 +352,6 @@ class Notifications extends React.Component<
     };
 
     componentDidMount() {
-        this.notificationAudioPlayer.current.volume = 0.1;
         notificationService.subscribe(this.handleNewNotification);
 
         this.pendingPromise = notificationService
@@ -451,10 +448,6 @@ class Notifications extends React.Component<
                             There are no notifications
                         </Typography>
                     )}
-
-                <audio ref={this.notificationAudioPlayer}>
-                    <source src="/tone1.wav" type="audio/x-wav" />
-                </audio>
             </>
         );
     }

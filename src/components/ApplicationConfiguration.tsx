@@ -1,9 +1,17 @@
-import { DarkMode, LightMode } from '@mui/icons-material';
+import {
+    DarkMode,
+    LightMode,
+    VolumeDown,
+    VolumeOff,
+    VolumeUp,
+} from '@mui/icons-material';
 import {
     Box,
+    Button,
     Divider,
     FormControlLabel,
     Grid,
+    Slider,
     ToggleButton,
     ToggleButtonGroup,
     Typography,
@@ -50,10 +58,20 @@ export default function ApplicationConfiguration() {
         getLocalDefault(Key.THEME_MODE, 'dark'),
     );
 
+    const [notificationVolume, setNotificationVolume] = useState<number>(
+        parseFloat('' + getLocalDefault(Key.NOTIFICATION_VOLUME, 0.3)),
+    );
+
     const onThemeModeChange = (_: any, mode: string) => {
         setThemeMode(mode);
         eventBus.dispatch('theme-mode-changed', mode as any);
         saveLocal(Key.THEME_MODE, mode);
+    };
+
+    const onNotificationVolumeChange = (_: any, v: number | number[]) => {
+        setNotificationVolume(v as number);
+        eventBus.dispatch('notification-sound-volume-changed', v as number);
+        saveLocal(Key.NOTIFICATION_VOLUME, '' + (v as number));
     };
 
     return (
@@ -64,8 +82,8 @@ export default function ApplicationConfiguration() {
                 </Typography>
                 <Divider sx={{ mb: '20px' }} />
 
-                <Grid container>
-                    <Grid item xs={6} md={4}>
+                <Grid container spacing={{ xs: 1, md: 2 }}>
+                    <Grid item xs={12} md={6}>
                         <Typography variant="overline" color="GrayText">
                             Theme
                         </Typography>
@@ -75,6 +93,7 @@ export default function ApplicationConfiguration() {
                         <ToggleButtonGroup
                             value={themeMode}
                             exclusive
+                            fullWidth
                             onChange={onThemeModeChange}>
                             <ToggleButton
                                 value={'light'}
@@ -85,6 +104,44 @@ export default function ApplicationConfiguration() {
                                 <DarkMode />
                             </ToggleButton>
                         </ToggleButtonGroup>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <Typography variant="overline" color="GrayText">
+                            Notification sound volume
+                        </Typography>
+
+                        <br></br>
+
+                        <Stack
+                            spacing={2}
+                            direction="row"
+                            sx={{ mb: 1 }}
+                            alignItems="center">
+                            {notificationVolume > 0 && <VolumeDown />}
+                            {notificationVolume == 0 && <VolumeOff />}
+
+                            <Slider
+                                aria-label="Volume"
+                                value={notificationVolume}
+                                onChange={onNotificationVolumeChange}
+                                min={0}
+                                max={1}
+                                step={0.05}
+                            />
+                            <VolumeUp />
+
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() =>
+                                    eventBus.dispatch(
+                                        'notification-sound-play',
+                                        null,
+                                    )
+                                }>
+                                Test
+                            </Button>
+                        </Stack>
                     </Grid>
                 </Grid>
             </Box>

@@ -11,6 +11,7 @@ import DTONotification from './interfaces/DTONotification';
 import processPromise from '../../Http/ProcessPromise';
 import IProblemJson from './interfaces/IProblemJson';
 import TypedPromise from '../../TypedPromise';
+import eventBus from '../../EventBus';
 
 function serialize(date: Date | string | any): string {
     return typeof date == 'string' ? date : date.toISOString();
@@ -27,6 +28,11 @@ notificationWS.addEventListener('open', ev => {
 
 notificationWS.addEventListener('close', ev => {
     console.debug('Notification ws disconnected');
+
+    // bring the user attention
+    eventBus.dispatch('notification-sound-play', null);
+
+    // block execution, maximum alert
     alert('WARNING: Lost connection to the server');
 });
 

@@ -8,6 +8,8 @@ interface EventTypes {
     'updated-configuration': { path: string; value: any };
     'theme-mode-changed': 'dark' | 'light';
     'camera-name-changed': EventBusData & { name: string };
+    'notification-sound-volume-changed': number;
+    'notification-sound-play': any;
 }
 
 // CustomEvent and dispatching events
@@ -21,7 +23,7 @@ const eventBus = {
         document.addEventListener(
             event,
             (e: CustomEventInit<EventTypes[K]>) => {
-                if (!e.detail) {
+                if (!('detail' in e)) {
                     throw Error(
                         "Event bus misuse, event must have a 'detail' member",
                     );
