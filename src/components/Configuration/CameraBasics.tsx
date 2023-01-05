@@ -181,13 +181,16 @@ export default function CameraBasics() {
                     />
 
                     <Box>
-                        <Typography id="video-scale-slider" gutterBottom>
+                        <Typography id="video-scale-slider">
                             Video scale
-                            <HelpPopover
-                                text="Scales the images received from the camera to this size.
-                                    <br>You can see the effect in the output video"
-                            />
                             <WarningPopover text="This will also affect the resulting notification images/videos" />
+                        </Typography>
+                        <Typography
+                            variant="body2"
+                            color={'GrayText'}
+                            sx={{ mb: '10px' }}>
+                            Scales the images received from the camera to this
+                            size. You can see the effect in the output video
                         </Typography>
 
                         <Stack direction="row" spacing={{ xs: 1, md: 2 }}>
@@ -215,39 +218,6 @@ export default function CameraBasics() {
                             {`W ${cameraDefault.size.width} x H ${cameraDefault.size.height}`}
                         </Typography>
                     </Box>
-
-                    <Box>
-                        <Typography gutterBottom>
-                            Video Validator Buffer Size
-                            <HelpPopover
-                                text="How much frames to use to validate the change.
-                                    <br>For example, if you want to validate an event in the 3 seconds
-                                    <br>before and after the change, you need to set it to fps * 3 * 2,
-                                    <br>multiply by 2 because half will be used for pre and half for post change."
-                            />
-                            <WarningPopover
-                                text='Longer video validator buffer might improve the detection result
-                                                <br>but also will take longer and more memory. The memory problem 
-                                                <br>can be "solved" by reducing the "video scale".'
-                            />
-                        </Typography>
-                        <Stack direction="row">
-                            <TextConfigurationField
-                                label=""
-                                variant="standard"
-                                type="number"
-                                fullWidth
-                                data={{
-                                    ...commonData,
-                                    path: 'videoValidatorBufferSize',
-                                }}
-                            />
-                        </Stack>
-                        <Typography variant="overline" color="GrayText">
-                            Camera frames per second (fps) is{' '}
-                            {`${cameraDefault.fps}`}
-                        </Typography>
-                    </Box>
                 </Stack>
             </Grid>
 
@@ -259,6 +229,56 @@ export default function CameraBasics() {
                     keepSkeletonOnError={true}
                 />
             </Grid>
+
+            <Grid item xs={12} sm={12} md={8}>
+                <Typography gutterBottom>
+                    Video Validator Buffer Size
+                    <WarningPopover
+                        text='Longer video validator buffer might improve the detection result
+                                                <br>but also will take longer and more memory. The memory problem 
+                                                <br>can be "solved" by reducing the "video scale".'
+                    />
+                    <Typography
+                        variant="body2"
+                        color={'GrayText'}
+                        sx={{ mb: '10px' }}>
+                        How much frames to use to validate the change. For
+                        example, if you want to validate an event 1 second
+                        before and after the change, you need to set it to{' '}
+                        <span className="equation">
+                            1s: fps * 1 * 2 = {cameraDefault.fps} * 1 * 2 ={' '}
+                            {cameraDefault.fps * 1 * 2}
+                        </span>
+                        , multiply by 2 because half will be used for pre and
+                        half for post change. Precalculated for you{' '}
+                        <span className="equation">
+                            3s: {cameraDefault.fps * 1 * 2} * 3 ={' '}
+                            {cameraDefault.fps * 3 * 2}
+                        </span>{' '}
+                        and{' '}
+                        <span className="equation">
+                            5s: {cameraDefault.fps * 1 * 2} * 5 ={' '}
+                            {cameraDefault.fps * 5 * 2}
+                        </span>
+                    </Typography>
+                </Typography>
+                <Stack direction="row">
+                    <TextConfigurationField
+                        label=""
+                        variant="standard"
+                        type="number"
+                        fullWidth
+                        data={{
+                            ...commonData,
+                            path: 'videoValidatorBufferSize',
+                        }}
+                    />
+                </Stack>
+                <Typography variant="overline" color="GrayText">
+                    Camera frames per second (fps) is {`${cameraDefault.fps}`}
+                </Typography>
+            </Grid>
+
             <Grid item xs={12} sm={12} md={8}>
                 <Button
                     variant="contained"

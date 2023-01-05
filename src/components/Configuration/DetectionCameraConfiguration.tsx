@@ -155,56 +155,64 @@ export default function DetectionCameraConfiguration() {
     return (
         <Grid container spacing={{ xs: 2, md: 2 }}>
             <Grid item xs={12} sm={12} md={6}>
-                <Stack direction="row">
-                    <TextConfigurationField
-                        label="Initial Minimum Change Threshold"
-                        variant="standard"
-                        type="number"
-                        fullWidth
-                        data={{ ...commonData, path: 'minimumChangeThreshold' }}
-                    />
+                <Typography
+                    variant="body2"
+                    color={'GrayText'}
+                    sx={{ mb: '10px' }}>
+                    Minimum amount of pixel that changed to trigger a validator
+                    Used only as the initial value so you can set it to a big
+                    number and it will average in some time.
+                </Typography>
 
-                    <HelpPopover
-                        text="minimum amount of pixel that changed to trigger a validator
-                            <br>Used only as the initial value so you can set it to a big number
-                            <br>and it will average in some time."
-                    />
-                </Stack>
+                <TextConfigurationField
+                    label="Initial Minimum Change Threshold"
+                    variant="standard"
+                    type="number"
+                    fullWidth
+                    data={{ ...commonData, path: 'minimumChangeThreshold' }}
+                />
             </Grid>
 
             <Grid item xs={12} sm={12} md={6}>
-                <Stack direction="row">
-                    <TextConfigurationField
-                        label="Increase Threshold Factor"
-                        variant="standard"
-                        type="number"
-                        fullWidth
-                        data={{
-                            ...commonData,
-                            path: 'increaseThresholdFactor',
-                        }}
-                    />
+                <Typography
+                    variant="body2"
+                    color={'GrayText'}
+                    sx={{ mb: '10px' }}>
+                    When a new mean is calculated, the threshold is increased to
+                    leave a margin between normal and non-normal pixel
+                    difference.
+                </Typography>
 
-                    <HelpPopover
-                        text="When a new mean is calculated, the threshold is increased
-                            <br>to leave a margin between normal and non-normal pixel difference."
-                    />
-                </Stack>
+                <TextConfigurationField
+                    label="Increase Threshold Factor"
+                    variant="standard"
+                    type="number"
+                    fullWidth
+                    data={{
+                        ...commonData,
+                        path: 'increaseThresholdFactor',
+                    }}
+                />
             </Grid>
 
             <Grid item xs={12} sm={12} md={4}>
                 <Box>
                     <Typography gutterBottom>
                         Video scale at processing stage
-                        <HelpPopover
-                            text="This can help reduce CPU overhead because all transformation algorithms
-                                <br>will be applied to a frame resized to this size. This does not affect 
-                                <br>notifications or output."
-                        />
                         <WarningPopover
                             text="This resize will be applied after the last resize in the basics configuration.
                                     <br>So you can leave as it is by setting the same values or downscale it even more."
                         />
+                    </Typography>
+
+                    <Typography
+                        variant="body2"
+                        color={'GrayText'}
+                        sx={{ mb: '10px' }}>
+                        This can help reduce CPU overhead because all
+                        transformation algorithms will be applied to a frame
+                        resized to this size. This does not affect notifications
+                        or output.
                     </Typography>
 
                     <Stack direction="row" spacing={{ xs: 1, md: 2 }}>
@@ -236,15 +244,17 @@ export default function DetectionCameraConfiguration() {
                     </Typography>
                 </Box>
 
-                <Box>
-                    <Typography gutterBottom>
-                        Noise Threshold
-                        <HelpPopover
-                            text="This field helps to improve detection accuracy. 
-                                <br>A large value (> 50) may cause the system to miss 
-                                <br>some events, and too small a value (< 30) may cause
-                                <br>it to analyze false positives, resulting in wasted CPU time."
-                        />
+                <Box sx={{ mt: '20px' }}>
+                    <Typography gutterBottom>Noise Threshold</Typography>
+
+                    <Typography
+                        variant="body2"
+                        color={'GrayText'}
+                        sx={{ mb: '10px' }}>
+                        This field helps to improve detection accuracy. A large
+                        value ({'>'} 50) may cause the system to miss some
+                        events, and too small a value ({'<'} 30) may cause it to
+                        analyze false positives, resulting in wasted CPU time.
                     </Typography>
 
                     <Stack direction="row" spacing={{ xs: 1, md: 2 }}>
@@ -281,6 +291,13 @@ export default function DetectionCameraConfiguration() {
                             Drag in the image to edit it
                         </Typography>
                     )}
+                </Typography>
+                <Typography
+                    variant="body2"
+                    color={'GrayText'}
+                    sx={{ mb: '10px' }}>
+                    Only movements/changes within this area will trigger us to
+                    check whether something relevant has moved or not.
                 </Typography>
                 <ROICanvasInputField
                     key={roiForceUpdate}

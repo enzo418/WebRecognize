@@ -3,6 +3,7 @@ import { Box, Button, Dialog, Stack, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useConfiguration } from '../../context/configurationContext';
 import { HelpPopover } from '../IconPopover';
+import InfoCard from '../InfoCard';
 import MasksCanvasInputField from './Fields/MasksCanvasInputField';
 
 export default function AreasCameraConfiguration() {
@@ -53,17 +54,24 @@ export default function AreasCameraConfiguration() {
             <Stack direction="column">
                 <Typography>
                     Camera masks
-                    <HelpPopover
-                        text="This allows you to select which parts of the camera you want to
-                <br>ignore so that it doesn't trigger notifications, it could be a
-                <br>tree, a rope, or anything that moves repeatedly and you don't
-                <br>mind receiving notifications about it."
-                    />
-                    <Typography variant="body2">
-                        Note: You will be able to add new ones by placing points
-                        on the image forming a polygon and joining its ends,
-                        once you do this it will be saved automatically.
+                    <Typography
+                        variant="body2"
+                        color={'GrayText'}
+                        sx={{ mb: '10px' }}>
+                        This allows you to select which parts of the camera you
+                        want to ignore so that it doesn't trigger notifications,
+                        it could be a tree, a rope, or anything that moves
+                        repeatedly and you don't mind receiving notifications
+                        about it.
                     </Typography>
+                    <InfoCard>
+                        <Typography variant="body2">
+                            Note: You will be able to add new ones by placing
+                            points on the image forming a polygon and joining
+                            its ends, once you do this it will be saved
+                            automatically.
+                        </Typography>
+                    </InfoCard>
                     <Button onClick={() => setShowModalMasks(true)}>
                         Edit{' '}
                     </Button>
