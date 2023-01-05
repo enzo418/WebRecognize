@@ -8,6 +8,7 @@ interface INotificationTypeSelectorProps {
     onChange: (t: string) => void;
     allTypes: string[];
     selectableTypes: string[];
+    isSmallScreen: boolean;
 }
 
 export default function NotificationTypeSelector(
@@ -26,7 +27,7 @@ export default function NotificationTypeSelector(
         <>
             <Typography className="grey-title">Show</Typography>
             <ToggleButtonGroup
-                orientation="vertical"
+                orientation={props.isSmallScreen ? 'horizontal' : 'vertical'}
                 value={type}
                 exclusive
                 onChange={handleChange}
@@ -36,7 +37,8 @@ export default function NotificationTypeSelector(
                         key={t}
                         value={t}
                         aria-label={t}
-                        disabled={selectableTypes.indexOf(t) == -1}>
+                        disabled={selectableTypes.indexOf(t) == -1}
+                        sx={{ width: '100%' }}>
                         <Typography>{t}</Typography>
                     </ToggleButton>
                 ))}

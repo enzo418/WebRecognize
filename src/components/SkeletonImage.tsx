@@ -4,27 +4,32 @@ import { useState } from 'react';
 
 interface SkeletonImageProps {
     src: string;
+    hide: boolean;
 }
 
-export default function SkeletonImage(props: SkeletonImageProps) {
-    const [loaded, setLoaded] = useState<boolean>(false);
+export const SkeletonImage = React.forwardRef<any, SkeletonImageProps>(
+    (props, ref) => {
+        const [loaded, setLoaded] = useState<boolean>(false);
 
-    return (
-        <>
-            {!loaded ? (
-                <Skeleton variant="rectangular" width="auto" height={360} />
-            ) : (
-                <></>
-            )}
-            <img
-                style={{
-                    display: loaded ? 'block' : 'none',
-                }}
-                src={props.src}
-                onLoad={() => {
-                    setLoaded(true);
-                }}
-            />
-        </>
-    );
-}
+        return (
+            <>
+                {!props.hide && !loaded ? (
+                    <Skeleton variant="rectangular" width="auto" height={360} />
+                ) : (
+                    <></>
+                )}
+                <img
+                    style={{
+                        display: loaded && !props.hide ? 'block' : 'none',
+                        width: '100%',
+                    }}
+                    src={props.src}
+                    ref={ref}
+                    onLoad={() => {
+                        setLoaded(true);
+                    }}
+                />
+            </>
+        );
+    },
+);

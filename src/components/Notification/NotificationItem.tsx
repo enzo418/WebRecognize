@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 import React, { useState } from 'react';
 import { ENotificationType } from '../../domain/Notification';
 import { NotificationGroup } from '../../domain/NotificationGroup';
@@ -14,12 +14,14 @@ import NotificationDebugVideo from './NotificationDebugVideo';
 interface INotificationItemProps {
     notifications: NotificationGroup[];
     currentNotificationIndex: number;
+    leftPanelWidth: number;
+    isSmallScreen: boolean;
+
+    onShowTimeline: () => any;
 }
 
 export default function NotificationItem(props: INotificationItemProps) {
     const { notifications, currentNotificationIndex } = props;
-
-    console.log('item: ', { notifications, currentNotificationIndex });
 
     // notification is the group notification
     const notification = notifications[currentNotificationIndex];
@@ -30,9 +32,9 @@ export default function NotificationItem(props: INotificationItemProps) {
         types,
     );
 
-    const defaulttype = selectableTypes[0];
+    const defaultType = selectableTypes[0];
 
-    const [type, setType] = useState<string>(defaulttype);
+    const [type, setType] = useState<string>(defaultType);
 
     // typed notification is a notification with an image/video or text
     const [typedNotification, setTypedNotification] = useState<Notification>(
@@ -56,8 +58,8 @@ export default function NotificationItem(props: INotificationItemProps) {
         let t = type;
 
         if (!notification.hasOwnProperty(type)) {
-            setType(defaulttype);
-            t = defaulttype;
+            setType(defaultType);
+            t = defaultType;
         }
 
         setTypedNotification(ensure(Object(notification)[t]));
@@ -71,7 +73,7 @@ export default function NotificationItem(props: INotificationItemProps) {
 
     return (
         <>
-            <Grid item xs={8}>
+            <Grid item xs={props.isSmallScreen ? 12 : 8}>
                 <NotificationBodyDisplay notification={typedNotification} />
 
                 <NotificationItemBody
@@ -80,17 +82,27 @@ export default function NotificationItem(props: INotificationItemProps) {
                     sx={{ paddingTop: '15px' }}
                 />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={props.isSmallScreen ? 12 : 2}>
                 <NotificationTypeSelector
                     type={type}
                     onChange={handleChangeType}
                     allTypes={types}
                     selectableTypes={selectableTypes}
+                    isSmallScreen={props.isSmallScreen}
                 />
                 <NotificationDebugVideo
                     sx={{ mt: '20px', width: '90%' }}
                     notification={typedNotification}
                 />
+                {props.isSmallScreen && (
+                    <Button
+                        sx={{ display: 'block', mt: '20px', width: '90%' }}
+                        onClick={props.onShowTimeline}
+                        variant="outlined"
+                        color="inherit">
+                        Show timeline
+                    </Button>
+                )}
             </Grid>
         </>
     );

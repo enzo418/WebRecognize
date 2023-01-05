@@ -8,7 +8,7 @@ import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 
 import { useVirtual } from 'react-virtual';
-import { Box } from '@mui/material';
+import { Box, Theme } from '@mui/material';
 
 export interface ITimelineItemBase {
     readonly isSeparator: boolean;
@@ -120,6 +120,7 @@ function TimeLineGenerateElement(props: any) {
 
     return (
         <TimelineItem
+            className={element.mark ? 'selected' : ''}
             style={{
                 position: 'absolute',
                 top: 0,
@@ -144,13 +145,20 @@ function TimeLineGenerateElement(props: any) {
                     </TimelineContent>
                 </Grid>
 
-                <Grid item xs={2}>
+                <Grid item xs={2} sx={{ display: 'flex' }}>
                     <TimelineSeparator>
                         <TimelineDot
                             sx={{
-                                backgroundColor: element.knobColor,
                                 cursor: 'pointer',
                                 border: element.mark ? '2px solid black' : '',
+                                backgroundColor: (theme: Theme) =>
+                                    element.mark
+                                        ? theme.palette.primary.main
+                                        : element.knobColor,
+                                boxShadow: (theme: Theme) =>
+                                    element.mark
+                                        ? `0px 0px 4px 3px ${theme.palette.primary.main}`
+                                        : '',
                             }}
                         />
                         <TimelineConnector />
@@ -189,7 +197,7 @@ export default function TimeLineAlternate(props: ITimeLineAlternateProps) {
                 sx={{ bgcolor: 'background.paper', overflowX: 'hidden' }}
                 ref={parentRef}
                 style={{
-                    height: `90vh`,
+                    height: `97vh`,
                     overflowX: 'hidden',
                     overflowY: 'scroll',
                     padding: 0,

@@ -34,14 +34,19 @@ import {
 } from '../domain/NotificationGroup';
 import {
     CircularProgress,
+    Drawer,
     FormControlLabel,
     LinearProgress,
+    Paper,
     Switch,
+    useMediaQuery,
 } from '@mui/material';
 import { notificationService } from '../services/api/Services';
 import NotificationItem from '../components/Notification/NotificationItem';
 
-type NotificationsProps = {};
+type NotificationsProps = {
+    isSmallScreen: boolean;
+};
 
 type NotificationsState = {
     loading: boolean;
@@ -59,9 +64,11 @@ type NotificationsState = {
     jumpToNewNotification: boolean;
 
     currentFilter: INotificationFilters;
+
+    showTimeline: boolean;
 };
 
-export default class Notifications extends React.Component<
+class Notifications extends React.Component<
     NotificationsProps,
     NotificationsState
 > {
@@ -79,6 +86,7 @@ export default class Notifications extends React.Component<
             before: null,
             fromCameras: [],
         },
+        showTimeline: false,
     };
 
     notificationAudioPlayer: React.RefObject<any>;
@@ -87,6 +95,8 @@ export default class Notifications extends React.Component<
         super(props);
 
         this.notificationAudioPlayer = React.createRef();
+
+        this.toggleTimeline = this.toggleTimeline.bind(this);
     }
 
     getCamerasFromNotifications = (nots: NotificationGroup[]) => {
@@ -358,7 +368,35 @@ export default class Notifications extends React.Component<
         notificationService.unsubscribe(this.handleNewNotification);
     }
 
+    toggleTimeline() {
+        this.setState(prev => ({
+            ...prev,
+            showTimeline: !prev.showTimeline,
+        }));
+    }
+
     render() {
+        const LeftPanel = (
+            <>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={this.state.jumpToNewNotification}
+                            onChange={this.onChangeJumpToNewNotification}
+                        />
+                    }
+                    label="Automatically Jump to new notification"
+                />
+                <NavNotificationsTimeline
+                    notifications={this.state.notifications}
+                    currentIndex={this.state.currentNotificationIndex}
+                    cameras={this.state.cameras}
+                    onChangeNotification={
+                        this.onChangeNotification
+                    }></NavNotificationsTimeline>
+            </>
+        );
+
         return (
             <>
                 <FilterNotification
@@ -369,38 +407,33 @@ export default class Notifications extends React.Component<
                     this.state.currentNotificationIndex != -1 && (
                         <Box sx={{ flexGrow: 1, pt: '15px', pl: '15px' }}>
                             <Grid container spacing={2}>
-                                <Grid item xs={2}>
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={
-                                                    this.state
-                                                        .jumpToNewNotification
-                                                }
-                                                onChange={
-                                                    this
-                                                        .onChangeJumpToNewNotification
-                                                }
-                                            />
-                                        }
-                                        label="Automatically Jump to new notification"
-                                    />
-
-                                    <NavNotificationsTimeline
-                                        notifications={this.state.notifications}
-                                        currentIndex={
-                                            this.state.currentNotificationIndex
-                                        }
-                                        cameras={this.state.cameras}
-                                        onChangeNotification={
-                                            this.onChangeNotification
-                                        }></NavNotificationsTimeline>
-                                </Grid>
+                                {!this.props.isSmallScreen && (
+                                    <Grid item xs={2}>
+                                        {LeftPanel}
+                                    </Grid>
+                                )}
+                                {this.props.isSmallScreen && (
+                                    <Drawer
+                                        open={this.state.showTimeline}
+                                        onClose={this.toggleTimeline}
+                                        ModalProps={{
+                                            keepMounted: true,
+                                        }}>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{ padding: '10px' }}>
+                                            {LeftPanel}
+                                        </Paper>
+                                    </Drawer>
+                                )}
                                 <NotificationItem
                                     notifications={this.state.notifications}
                                     currentNotificationIndex={
                                         this.state.currentNotificationIndex
                                     }
+                                    leftPanelWidth={2}
+                                    isSmallScreen={this.props.isSmallScreen}
+                                    onShowTimeline={this.toggleTimeline}
                                 />
                             </Grid>
                         </Box>
@@ -414,7 +447,9 @@ export default class Notifications extends React.Component<
 
                 {!this.state.loading &&
                     this.state.currentNotificationIndex == -1 && (
-                        <Typography>There are no notifications</Typography>
+                        <Typography padding={'10px'}>
+                            There are no notifications
+                        </Typography>
                     )}
 
                 <audio ref={this.notificationAudioPlayer}>
@@ -424,3 +459,13 @@ export default class Notifications extends React.Component<
         );
     }
 }
+
+const withSmallScreen = (Component: any) => {
+    return (props: any) => {
+        const isSmallScreen = useMediaQuery('(max-width:980px)');
+
+        return <Component isSmallScreen={isSmallScreen} {...props} />;
+    };
+};
+
+export default withSmallScreen(Notifications);

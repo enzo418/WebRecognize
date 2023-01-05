@@ -1,5 +1,6 @@
-import { Stack } from '@mui/material';
+import { Box, Grow, Stack, Zoom } from '@mui/material';
 import React from 'react';
+import { SwitchTransition, CSSTransition } from 'react-transition-group';
 
 import Notification, {
     ENotificationType,
@@ -21,40 +22,22 @@ export default function NotificationBodyDisplay(
 ) {
     const { notification } = props;
 
-    let element = null;
-
-    switch (notification.type) {
-        case ENotificationType.IMAGE:
-            element = (
-                <NotificationBodyDisplayImage
-                    mediaURI={(notification as MediaNotification).mediaURI}
-                />
-            );
-            break;
-        case ENotificationType.VIDEO:
-            element = (
-                <NotificationBodyDisplayVideo
-                    mediaURI={(notification as MediaNotification).mediaURI}
-                />
-            );
-            break;
-        case ENotificationType.TEXT:
-            element = (
-                <NotificationBodyDisplayText
-                    text={(notification as TextNotification).text}
-                />
-            );
-            break;
-    }
-
-    console.log(element);
-
     return (
-        <Stack spacing={1}>
-            {/* <Skeleton variant="text" />*/}
-            {/* <Skeleton variant="rectangular" width={600} height={360} />*/}
+        <Box sx={{ minHeight: '150px' }}>
+            <NotificationBodyDisplayImage
+                hide={notification.type !== ENotificationType.IMAGE}
+                mediaURI={(notification as MediaNotification).mediaURI}
+            />
 
-            {element}
-        </Stack>
+            <NotificationBodyDisplayVideo
+                hide={notification.type !== ENotificationType.VIDEO}
+                mediaURI={(notification as MediaNotification).mediaURI}
+            />
+
+            <NotificationBodyDisplayText
+                hide={notification.type !== ENotificationType.TEXT}
+                text={(notification as TextNotification).text}
+            />
+        </Box>
     );
 }

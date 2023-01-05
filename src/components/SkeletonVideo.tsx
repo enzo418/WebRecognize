@@ -4,28 +4,33 @@ import { useState } from 'react';
 
 interface SkeletonVideoProps {
     src: string;
+    hide: boolean;
 }
 
-export default function SkeletonVideo(props: SkeletonVideoProps) {
-    const [loaded, setLoaded] = useState<boolean>(false);
+export const SkeletonVideo = React.forwardRef<any, SkeletonVideoProps>(
+    (props, ref) => {
+        const [loaded, setLoaded] = useState<boolean>(false);
 
-    return (
-        <>
-            {!loaded ? (
-                <Skeleton variant="rectangular" width="auto" height={360} />
-            ) : (
-                <></>
-            )}
-            <video
-                controls
-                crossOrigin="anonymous"
-                style={{
-                    display: loaded ? 'block' : 'none',
-                }}
-                src={props.src}
-                onLoadedMetadata={() => {
-                    setLoaded(true);
-                }}></video>
-        </>
-    );
-}
+        return (
+            <>
+                {!props.hide && !loaded ? (
+                    <Skeleton variant="rectangular" width="auto" height={360} />
+                ) : (
+                    <></>
+                )}
+                <video
+                    controls
+                    crossOrigin="anonymous"
+                    style={{
+                        display: loaded && !props.hide ? 'block' : 'none',
+                        width: '100%',
+                    }}
+                    ref={ref}
+                    src={props.src}
+                    onLoadedMetadata={() => {
+                        setLoaded(true);
+                    }}></video>
+            </>
+        );
+    },
+);
