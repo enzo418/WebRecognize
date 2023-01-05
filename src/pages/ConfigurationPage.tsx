@@ -6,6 +6,7 @@ import {
     List,
     responsiveFontSizes,
     Stack,
+    Theme,
     ThemeProvider,
     Typography,
     useMediaQuery,
@@ -55,6 +56,7 @@ import CachedConfiguration from '../modules/CachedConfiguration';
 import eventBus from '../EventBus';
 
 import { Key, removeLocal, saveLocal } from '../LocalStore';
+import { useTheme } from '@emotion/react';
 
 interface IConfigurationListElement {
     to: string; // relative path
@@ -190,7 +192,8 @@ export default function ConfigurationPage() {
         }
     };
 
-    const theme = responsiveFontSizes(createTheme());
+    const currentTheme = useTheme();
+    const theme = responsiveFontSizes(currentTheme as any);
     const params = ensure<{ id: any; camera_id?: string }>(useParams() as any);
     let type = ensure<{ params: any }>(useMatch('/configuration/:id/:type/*'))
         .params.type as keyof IConfigurationList; // else how are we here?
@@ -351,7 +354,9 @@ export default function ConfigurationPage() {
                 }
                 key={element.primary + i}
                 icon={element.icon}
-                sx={{ pl: padding }}
+                sx={{
+                    pl: padding,
+                }}
                 primary={element.primary}
                 {...props}>
                 {
@@ -446,7 +451,6 @@ export default function ConfigurationPage() {
                                 sx={{
                                     width: '100%',
                                     maxWidth: 360,
-                                    bgcolor: 'background.paper',
                                 }}
                                 component="nav"
                                 className="list-configurations">

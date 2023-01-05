@@ -6,6 +6,7 @@ interface EventTypes {
     'added-configuration': EventBusData;
     'removed-configuration': EventBusData;
     'updated-configuration': { path: string; value: any };
+    'theme-mode-changed': 'dark' | 'light';
 }
 
 // CustomEvent and dispatching events

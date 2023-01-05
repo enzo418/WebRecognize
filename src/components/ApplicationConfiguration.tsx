@@ -1,13 +1,18 @@
+import { DarkMode, LightMode } from '@mui/icons-material';
 import {
     Box,
     Divider,
     FormControlLabel,
     Grid,
+    ToggleButton,
+    ToggleButtonGroup,
     Typography,
 } from '@mui/material';
 import { Stack } from '@mui/system';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { UpdateFieldCallback } from '../context/configurationContext';
+import eventBus from '../EventBus';
+import { getLocalDefault, Key, saveLocal } from '../LocalStore';
 import IProblemJson from '../services/api/interfaces/IProblemJson';
 import { serverConfigurationService } from '../services/api/Services';
 import TypedPromise from '../TypedPromise';
@@ -41,6 +46,16 @@ export default function ApplicationConfiguration() {
         getInitialValue: () => undefined,
     };
 
+    const [themeMode, setThemeMode] = useState<string>(
+        getLocalDefault(Key.THEME_MODE, 'dark'),
+    );
+
+    const onThemeModeChange = (_: any, mode: string) => {
+        setThemeMode(mode);
+        eventBus.dispatch('theme-mode-changed', mode as any);
+        saveLocal(Key.THEME_MODE, mode);
+    };
+
     return (
         <Stack direction={'column'} sx={{ padding: '20px 6px' }} spacing={2}>
             <Box>
@@ -49,7 +64,29 @@ export default function ApplicationConfiguration() {
                 </Typography>
                 <Divider sx={{ mb: '20px' }} />
 
-                <Grid container></Grid>
+                <Grid container>
+                    <Grid item xs={6} md={4}>
+                        <Typography variant="overline" color="GrayText">
+                            Theme
+                        </Typography>
+
+                        <br></br>
+
+                        <ToggleButtonGroup
+                            value={themeMode}
+                            exclusive
+                            onChange={onThemeModeChange}>
+                            <ToggleButton
+                                value={'light'}
+                                aria-label="light mode">
+                                <LightMode />
+                            </ToggleButton>
+                            <ToggleButton value={'dark'} aria-label="dark mode">
+                                <DarkMode />
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    </Grid>
+                </Grid>
             </Box>
 
             <Box>
@@ -123,7 +160,7 @@ export default function ApplicationConfiguration() {
 
                     <Grid item xs={12} md={6}>
                         <Typography gutterBottom>
-                            maximum size in megabytes in total of DEBUG VIDEOS
+                            Maximum size in megabytes in total of DEBUG VIDEOS
                         </Typography>
                         <TextConfigurationField
                             fullWidth

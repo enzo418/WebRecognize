@@ -1,5 +1,5 @@
 import { PlayArrowRounded, Square } from '@mui/icons-material';
-import { Box, Button, Zoom } from '@mui/material';
+import { Box, Button, Theme, Zoom } from '@mui/material';
 import React, { useState } from 'react';
 import { Key } from '../LocalStore';
 import DTOObserverStatus from '../services/api/interfaces/DTOObserverStatus';
@@ -27,7 +27,9 @@ export default function ToggleRecognizeButton(props: Props) {
             {!props.status.running && (
                 <Zoom in={!props.status.running}>
                     <Button
-                        sx={{ color: 'CaptionText' }}
+                        sx={{
+                            color: (theme: Theme) => theme.palette.text.primary,
+                        }}
                         startIcon={<PlayArrowRounded color="success" />}
                         onClick={() => props.onClickStart(selected)}>
                         Start with
@@ -38,7 +40,9 @@ export default function ToggleRecognizeButton(props: Props) {
             {props.status.running && (
                 <Zoom in={props.status.running}>
                     <Button
-                        sx={{ color: 'CaptionText' }}
+                        sx={{
+                            color: (theme: Theme) => theme.palette.text.primary,
+                        }}
                         startIcon={<Square color="error" />}
                         onClick={() => props.onClickStop()}>
                         Stop

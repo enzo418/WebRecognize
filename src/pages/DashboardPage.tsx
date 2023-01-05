@@ -1,5 +1,5 @@
 import { SettingsApplicationsOutlined } from '@mui/icons-material';
-import { Button, Grid, Stack } from '@mui/material';
+import { Button, Grid, Stack, Theme } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ToggleRecognizeButton from '../components/ToggleRecognizeButton';
@@ -75,9 +75,14 @@ export default function DashboardPage() {
 
                     <Button
                         variant="contained"
-                        color="inherit"
                         startIcon={<SettingsApplicationsOutlined />}
-                        onClick={onNavigateToApplicationConfiguration}>
+                        onClick={onNavigateToApplicationConfiguration}
+                        sx={{
+                            bgcolor: (theme: Theme) =>
+                                theme.palette.mode == 'light'
+                                    ? theme.palette.grey[800]
+                                    : theme.palette.grey[100],
+                        }}>
                         Application settings
                     </Button>
                 </Stack>

@@ -7,7 +7,12 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import {
+    ThemeProvider,
+    createTheme,
+    useTheme,
+    Theme,
+} from '@mui/material/styles';
 
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -43,28 +48,6 @@ interface ListItemLinkProps {
     to: string;
 }
 
-const ListItemTheme = createTheme({
-    components: {
-        MuiListItem: {
-            styleOverrides: {
-                root: {
-                    margin: '0px 0px 1rem',
-                    transition:
-                        'background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
-                    justifyContent: 'center',
-                },
-            },
-        },
-        MuiListItemIcon: {
-            styleOverrides: {
-                root: {
-                    minWidth: '0',
-                },
-            },
-        },
-    },
-});
-
 function ListItemLink(props: ListItemLinkProps) {
     const { icon, to, ...rest } = props;
 
@@ -84,6 +67,30 @@ function ListItemLink(props: ListItemLinkProps) {
             ),
         [to],
     );
+
+    const currentTheme = useTheme();
+
+    const ListItemTheme = createTheme(currentTheme, {
+        components: {
+            MuiListItem: {
+                styleOverrides: {
+                    root: {
+                        margin: '0px 0px 1rem',
+                        transition:
+                            'background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+                        justifyContent: 'center',
+                    },
+                },
+            },
+            MuiListItemIcon: {
+                styleOverrides: {
+                    root: {
+                        minWidth: '0',
+                    },
+                },
+            },
+        },
+    });
 
     return (
         <li>
@@ -117,7 +124,8 @@ export default function NavBar(props: NavBarProps) {
         ...{
             bgcolor: 'background.paper',
             overflowX: 'hidden',
-            borderRight: '1px solid #e5e6eb',
+            borderRight: '1px solid #000',
+            borderColor: (theme: Theme) => theme.palette.divider,
         } /* TODO: add e5e6eb to vars*/,
         ...(sx || {}),
     };
