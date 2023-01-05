@@ -27,6 +27,7 @@ notificationWS.addEventListener('open', ev => {
 
 notificationWS.addEventListener('close', ev => {
     console.debug('Notification ws disconnected');
+    alert('WARNING: Lost connection to the server');
 });
 
 type NotificationCallback = (notification: Notification[]) => any;
