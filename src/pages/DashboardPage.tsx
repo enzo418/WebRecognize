@@ -80,8 +80,8 @@ export default function DashboardPage() {
                         sx={{
                             bgcolor: (theme: Theme) =>
                                 theme.palette.mode == 'light'
-                                    ? theme.palette.grey[800]
-                                    : theme.palette.grey[100],
+                                    ? theme.palette.grey[700]
+                                    : theme.palette.grey[300],
                         }}>
                         Application settings
                     </Button>

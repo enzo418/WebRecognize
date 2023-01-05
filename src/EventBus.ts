@@ -7,6 +7,7 @@ interface EventTypes {
     'removed-configuration': EventBusData;
     'updated-configuration': { path: string; value: any };
     'theme-mode-changed': 'dark' | 'light';
+    'camera-name-changed': EventBusData & { name: string };
 }
 
 // CustomEvent and dispatching events

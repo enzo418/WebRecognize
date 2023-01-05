@@ -139,6 +139,11 @@ export default function CameraBasics() {
                     data={{
                         ...commonData,
                         path: 'name',
+                        onValueChanged: v =>
+                            eventBus.dispatch('camera-name-changed', {
+                                id: commonData.camera,
+                                name: v,
+                            }),
                     }}
                 />
             </Grid>

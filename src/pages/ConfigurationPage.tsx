@@ -295,6 +295,8 @@ export default function ConfigurationPage() {
         eventBus.on('removed-camera', eventCallback);
         eventBus.on('added-camera', eventCallback);
 
+        eventBus.on('camera-name-changed', () => onCamerasUpdated(true));
+
         eventBus.on('removed-configuration', onConfigRemoved);
 
         return () => {
