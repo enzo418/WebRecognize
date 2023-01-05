@@ -25,12 +25,15 @@ import {
 
 import './NavBar.scss';
 import { Dashboard } from '@mui/icons-material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Badge } from '@mui/material';
+import { notificationService } from './services/api/Services';
 
 interface ListItemLinkProps {
     icon?: React.ReactElement;
     primary: string;
     to: string;
+    badgeContent?: number;
 
     [x: string]: any;
 }
@@ -83,7 +86,11 @@ function ListItemLink(props: ListItemLinkProps) {
         <li>
             <ThemeProvider theme={ListItemTheme}>
                 <ListItem button component={renderLink} {...rest}>
-                    {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+                    <Badge
+                        badgeContent={props.badgeContent || 0}
+                        color="warning">
+                        {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+                    </Badge>
                 </ListItem>
             </ThemeProvider>
         </li>
@@ -122,6 +129,23 @@ export default function NavBar(props: NavBarProps) {
         ...(sx || {}),
     };
 
+    const [notificationBadgeContent, setNotificationBadgeContent] =
+        useState<number>(0);
+
+    useEffect(() => {
+        const onNotification = () =>
+            setNotificationBadgeContent(notificationBadgeContent + 1);
+
+        notificationService.subscribe(onNotification);
+
+        return () => notificationService.unsubscribe(onNotification);
+    }, []);
+
+    useEffect(() => {
+        if (location.pathname == '/notifications')
+            setNotificationBadgeContent(0);
+    }, [location]);
+
     return (
         <Box className="simple-bar" sx={finalSx} {...rest}>
             <List sx={{ height: '100%' }} className="navbar-list">
@@ -131,6 +155,11 @@ export default function NavBar(props: NavBarProps) {
                         to={item.to}
                         primary=""
                         icon={item.icon}
+                        badgeContent={
+                            item.to === '/notifications'
+                                ? notificationBadgeContent
+                                : 0
+                        }
                         sx={{
                             border:
                                 location.pathname === item.to
