@@ -25,8 +25,9 @@ export default function NotificationDebugVideo(
             .getNotificationDebugBuffer(props.notification.group)
             .ok(res => {
                 setFetching(false);
+                setIsNotAvailable(false);
                 setReclaimed(res.reclaimed);
-                if (res.reclaimed && res.videoBufferID)
+                if (res.reclaimed && typeof res.videoBufferID === 'string')
                     setDebugBufferID(res.videoBufferID);
             })
             .fail(e => {
