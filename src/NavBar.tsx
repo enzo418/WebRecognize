@@ -133,8 +133,10 @@ export default function NavBar(props: NavBarProps) {
         useState<number>(0);
 
     useEffect(() => {
-        const onNotification = () =>
-            setNotificationBadgeContent(notificationBadgeContent + 1);
+        const onNotification = () => {
+            if (location.pathname !== '/notifications')
+                setNotificationBadgeContent(notificationBadgeContent + 1);
+        };
 
         notificationService.subscribe(onNotification);
 
