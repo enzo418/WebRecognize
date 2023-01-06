@@ -134,8 +134,10 @@ export default function NavBar(props: NavBarProps) {
 
     useEffect(() => {
         const onNotification = () => {
-            if (location.pathname !== '/notifications')
+            // location.pathname didn't update yet
+            if (window.location.pathname !== '/notifications') {
                 setNotificationBadgeContent(notificationBadgeContent + 1);
+            }
         };
 
         notificationService.subscribe(onNotification);
