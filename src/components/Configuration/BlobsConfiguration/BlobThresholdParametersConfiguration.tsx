@@ -80,7 +80,9 @@ export default function BlobThresholdParametersConfiguration() {
     useEffect(() => {
         const promise = videoBufferService
             .getAvailable(commonData.camera)
-            .ok(res => setAvailableBuffers(res))
+            .ok(res => {
+                setAvailableBuffers(res);
+            })
             .fail(e =>
                 console.error('Could not get available video buffers: ', e),
             );

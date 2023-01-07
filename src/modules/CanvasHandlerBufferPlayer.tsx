@@ -2,13 +2,13 @@ import React from 'react';
 import CanvasHandler, { ICanvasHandlerState } from './CanvasHandler';
 import { Point, Polygon, Rectangle, Size } from '../Geometry';
 import { DTOBlob } from '../services/api/interfaces/DTOVideoBuffer';
-import { ImageBitmapStore } from '../utils/TiffImage';
+import { IMultiImageProvider } from '../services/images/IMultiImageProvider';
 
 interface CanvasHandlerBufferPlayerProps {
     canvasSize: Size;
 
-    cameraFrameStore: ImageBitmapStore;
-    diffFrameStore: ImageBitmapStore;
+    cameraFrameStore: IMultiImageProvider;
+    diffFrameStore: IMultiImageProvider;
     contours?: Array<Polygon[]>; // one poly array per frame
     blobs?: DTOBlob[];
 
@@ -287,8 +287,20 @@ export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandl
 
         if (this.showCurrentPositionText) {
             this.ctx.font = '20px system-ui';
-            this.ctx.fillStyle = 'green';
             const text = this.ctx.measureText('A');
+            const totalFrames = this.props.cameraFrameStore.getTotalImages();
+            // draw text background
+            this.ctx.fillStyle = 'black';
+            this.ctx.fillRect(
+                0,
+                0,
+                text.width * totalFrames.toString().length * 2.15,
+                text.width * 2,
+            );
+
+            // draw text
+            this.ctx.fillStyle = 'green';
+
             this.ctx.fillText(
                 `${
                     this.currentFrame + 1
@@ -328,7 +340,7 @@ export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandl
         }[],
         maxH: number,
     ) {
-        if (images.length == 0) return;
+        if (images.length == 0 || !images[0].image) return;
 
         const w = this.props.canvasSize.width / maxH;
         const h = images.length == 1 ? this.props.canvasSize.height : w / 1.77;
@@ -336,7 +348,10 @@ export default class CanvasHandlerBufferPlayer extends CanvasHandler<CanvasHandl
         const scaleY = h / images[0].image.height;
 
         for (let imageIndex = 0; imageIndex < images.length; imageIndex++) {
-            if (!images[imageIndex]) {
+            if (
+                images[imageIndex] === undefined ||
+                images[imageIndex].image === undefined
+            ) {
                 console.debug('Camera image missing: ', {
                     images,
                     image: images[imageIndex],

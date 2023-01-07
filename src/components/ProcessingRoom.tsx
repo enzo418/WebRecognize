@@ -29,7 +29,7 @@ import DTOVideoBuffer from '../services/api/interfaces/DTOVideoBuffer';
 import { videoBufferService } from '../services/api/Services';
 import { VideoBufferWebSocket } from '../services/api/VideoBufferService';
 import { ensure } from '../utils/error';
-import TiffImageFetcher from '../utils/TiffImage';
+import MultiTiffImageProvider from '../services/images/MultiImageProvider';
 
 enum RoomView {
     NONE = 0,
@@ -77,8 +77,8 @@ export default function ProcessingRoom(props: ProcessingRoomProps) {
     const [canvasSize, setCanvasSize] = useState<Size>({ width: 0, height: 0 });
     const [runningDetection, setRunningDetection] = useState<boolean>(false);
 
-    const cameraImages = useMemo(() => new TiffImageFetcher(), []);
-    const diffImages = useMemo(() => new TiffImageFetcher(), []);
+    const cameraImages = useMemo(() => new MultiTiffImageProvider(), []);
+    const diffImages = useMemo(() => new MultiTiffImageProvider(), []);
 
     const wsBuffer = useMemo(
         () => new VideoBufferWebSocket(props.bufferID),
@@ -96,8 +96,10 @@ export default function ProcessingRoom(props: ProcessingRoomProps) {
     };
 
     const getCameraFrames = () => {
-        const url =
-            config.server + config.endpoints.api.streamBuffer + props.bufferID;
+        const url = videoBufferService.getStreamBufferUrl(
+            props.bufferID,
+            'raw',
+        );
 
         if (cameraImages.getLastSuccessfulFetchUrl() == url) return;
 
@@ -105,7 +107,7 @@ export default function ProcessingRoom(props: ProcessingRoomProps) {
             cameraImages.freeImages();
         }
 
-        cameraImages.fetchImagesAsImageData(url, 'raw');
+        cameraImages.fetchImagesAsImageData(url);
     };
 
     const getDiffFrames = () => {
@@ -114,8 +116,7 @@ export default function ProcessingRoom(props: ProcessingRoomProps) {
         }
 
         diffImages.fetchImagesAsImageData(
-            config.server + config.endpoints.api.streamBuffer + props.bufferID,
-            'diff',
+            videoBufferService.getStreamBufferUrl(props.bufferID, 'diff'),
         );
     };
 

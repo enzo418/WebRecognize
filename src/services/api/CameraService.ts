@@ -37,8 +37,8 @@ export default class CameraService extends Service implements ICameraService {
             processPromiseAsArrayBuffer(
                 this.client.get(this.baseUrl + camera_id + '/frame', {}),
             )
-                .ok(bufferImage => {
-                    const blob = new Blob([bufferImage], {
+                .ok(response => {
+                    const blob = new Blob([response.buffer], {
                         type: format,
                     });
 

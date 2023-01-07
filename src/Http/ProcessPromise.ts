@@ -82,8 +82,11 @@ export default function processPromise<T, Problem extends IProblemJson>(
 
 export function processPromiseAsArrayBuffer<Problem extends IProblemJson>(
     promise: Promise<Response>,
-): TypedPromise<ArrayBuffer, Problem> {
-    return new TypedPromise<ArrayBuffer, Problem>((ok, fail) => {
+): TypedPromise<{ buffer: ArrayBuffer; contentType: string }, Problem> {
+    return new TypedPromise<
+        { buffer: ArrayBuffer; contentType: string },
+        Problem
+    >((ok, fail) => {
         promise
             .then(async r => ({
                 status: r.status,
@@ -121,7 +124,10 @@ export function processPromiseAsArrayBuffer<Problem extends IProblemJson>(
 
                     fail(rejectedJSON);
                 } else {
-                    return ok(r.body);
+                    return ok({
+                        buffer: r.body,
+                        contentType: r.headers.get('Content-Type') || '',
+                    });
                 }
             });
     });
