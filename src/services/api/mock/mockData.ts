@@ -114,19 +114,138 @@ const generateNotifications = (n: number, numberCams: number) => {
     return generated;
 };
 
-export const extraNotifications: DTONotification[] = [];
+export const extraNotifications: DTONotification[] = [
+    {
+        camera: { id: '3508530276647043968', name: 'Woods' },
+        configurationID: '3508530237822468224',
+        content: '/mock/videos/3508532183818052992.mp4',
+        datetime: 1672955315,
+        groupID: 38,
+        id: '3508532183818052992',
+        type: 'video',
+    },
+    {
+        camera: { id: '3508530276647043968', name: 'Woods' },
+        configurationID: '3508530237822468224',
+        content: '',
+        datetime: 1672955313,
+        groupID: 38,
+        id: '3508532179260941184',
+        type: 'text',
+    },
+    {
+        camera: { id: '3508530276647043968', name: 'Woods' },
+        configurationID: '3508530237822468224',
+        content: '/mock/images/3508532179416130688.jpg',
+        datetime: 1672955313,
+        groupID: 38,
+        id: '3508532179416130688',
+        type: 'image',
+    },
+    {
+        camera: { id: '3508530276647043968', name: 'Woods' },
+        configurationID: '3508530237822468224',
+        content: '/mock/videos/3508539548099414784.mp4',
+        datetime: 1672958827,
+        groupID: 68,
+        id: '3508539548099414784',
+        type: 'video',
+    },
+    {
+        camera: { id: '3508530276647043968', name: 'Woods' },
+        configurationID: '3508530237822468224',
+        content: '',
+        datetime: 1672958826,
+        groupID: 68,
+        id: '3508539544924326144',
+        type: 'text',
+    },
+    {
+        camera: { id: '3508530276647043968', name: 'Woods' },
+        configurationID: '3508530237822468224',
+        content: '/mock/images/3508539544980949504.jpg',
+        datetime: 1672958826,
+        groupID: 68,
+        id: '3508539544980949504',
+        type: 'image',
+    },
+    {
+        camera: { id: '3508530276647043968', name: 'Woods' },
+        configurationID: '3508530237822468224',
+        content: '/mock/videos/3508540201555202944.mp4',
+        datetime: 1672959139,
+        groupID: 71,
+        id: '3508540201555202944',
+        type: 'video',
+    },
+    {
+        camera: { id: '3508530276647043968', name: 'Woods' },
+        configurationID: '3508530237822468224',
+        content: '',
+        datetime: 1672959129,
+        groupID: 71,
+        id: '3508540180579488128',
+        type: 'text',
+    },
+    {
+        camera: { id: '3508530276647043968', name: 'Woods' },
+        configurationID: '3508530237822468224',
+        content: '/mock/images/3508540180768232064.jpg',
+        datetime: 1672959129,
+        groupID: 71,
+        id: '3508540180768232064',
+        type: 'image',
+    },
+];
 
-export const mapGroupToBuffer = {};
+export const mapGroupToBuffer = {
+    38: '3508532210502215296',
+    48: '3508532703236475904',
+    63: '3508535866488258816',
+    64: '3508535813914755200',
+    65: '3508538787164588032',
+    68: '3508539953634087040',
+    71: '3508540763283657856',
+};
 
 export const notificationsMock: DTONotification[] = [
     ...extraNotifications,
-    ...generateNotifications(1000, 450),
+    //...generateNotifications(1000, 450),
 ];
 
 /* -------------------- VIDEO BUFFER -------------------- */
-export const mapVBIDtoFile = {};
+export const mapVBIDtoFile = {
+    '3508532210502215296': {
+        raw: '/mock/videos/38_buffer.gif',
+        diff: null,
+    },
+    '3508532703236475904': {
+        raw: '/mock/videos/48_buffer.gif',
+        diff: '/mock/videos/3508532703236475904_buffer_diff.tiff',
+    },
+    '3508535866488258816': {
+        raw: '/mock/videos/63_buffer.gif',
+        diff: '/mock/videos/3508535866488258816_buffer_diff.tiff',
+    },
+    '3508535813914755200': {
+        raw: '/mock/videos/64_buffer.gif',
+        diff: null,
+    },
+    '3508538787164588032': {
+        raw: '/mock/videos/65_buffer.gif',
+        diff: '/mock/videos/3508538787164588032_buffer_diff.tiff',
+    },
+    '3508539953634087040': {
+        raw: '/mock/videos/68_buffer.gif',
+        diff: '/mock/videos/3508539953634087040_buffer_diff.tiff',
+    },
+    '3508540763283657856': {
+        raw: '/mock/videos/71_buffer.gif',
+        diff: '/mock/videos/3508540763283657856_buffer_diff.tiff',
+    },
+};
 
-export const videoBufferDTOs = 'url_to_file';
+export const videoBufferDTOs = '/mock/videoBufferWoods.json';
 
 /* ----------------- MOCK CONFIGURATION ----------------- */
 export const configurations = [

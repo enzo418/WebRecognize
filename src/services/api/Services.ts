@@ -21,7 +21,7 @@ export const serverConfigurationService = new ServerConfigurationService(
     client,
 );
 
-//* */
+/*
 export const cameraService = new CameraService(client);
 export const configurationService = new ConfigurationService(client);
 export const defaultCachedConfig = {};
@@ -33,13 +33,13 @@ export const notificationService = new NotificationService(
 export const liveViewService = new LiveViewService(client);
 
 export const videoBufferService = new VideoBufferService(client);
-//* */
+*/
 
-/* MOCK
+// MOCK
 
 // NOTE:
 // -----
-// MOCK notifications will only work after you change the port 
+// MOCK notifications will only work after you change the port
 // to window.location.port in the config.ts
 
 export const configurationService = new ConfigurationServiceMock(client);
@@ -51,4 +51,3 @@ export const notificationService = new NotificationServiceMock(cameraService);
 export const liveViewService = new LiveViewServiceMock(client);
 
 export const videoBufferService = new VideoBufferServiceMock(client);
-*/
