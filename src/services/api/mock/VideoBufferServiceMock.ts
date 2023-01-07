@@ -52,9 +52,9 @@ export default class VideoBufferServiceMock
 
                         if (typeof buffers === 'string') {
                             console.warn('bad video buffer url');
-                        }
 
-                        buffers = [];
+                            buffers = [];
+                        }
                     } else {
                         buffers = videoBufferDTOs;
                     }
