@@ -132,7 +132,7 @@ export class WrapperWebSocket {
                 throw Error(`Couldn't parse the data, expected got ${data}`);
             }
 
-            const res: EventData = { data: parsed, ...ev };
+            const res: EventData = { ...ev, data: parsed };
 
             // call the handlers
             this.callMessageHandlers(id, res);
