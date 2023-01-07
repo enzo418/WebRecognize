@@ -13,101 +13,19 @@ import { getEnumAt, getEnumKeysNames } from '../../../utils/enum';
 import { dateToUnix, parseDate } from '../../../utils/date';
 import IProblemJson from '../interfaces/IProblemJson';
 import TypedPromise from '../../../TypedPromise';
-
-const videos: string[] = [
-    'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
-    'https://samplelib.com/lib/preview/mp4/sample-10s.mp4',
-    'https://samplelib.com/lib/preview/mp4/sample-15s.mp4',
-    'https://samplelib.com/lib/preview/mp4/sample-20s.mp4',
-    'https://samplelib.com/lib/preview/mp4/sample-30s.mp4',
-];
-
-const generateNotifications = (n: number, numberCams: number) => {
-    const generated: DTONotification[] = [];
-    // let lastID:number = -1;
-    let lastDate: Date = new Date();
-
-    const types = getEnumKeysNames(ENotificationType);
-
-    let lastNID = -1;
-    for (let i = 0; i < n; i++) {
-        types.forEach((t, ti) => {
-            let content: string = '';
-
-            switch (getEnumAt(ENotificationType, t)) {
-                case ENotificationType.IMAGE:
-                    content = `https://picsum.photos/640/360?random=1&cache=${random(
-                        i,
-                        100000,
-                    )}`;
-                    break;
-                case ENotificationType.VIDEO:
-                    content = videos[random(0, videos.length - 1)];
-                    break;
-                case ENotificationType.TEXT:
-                    content =
-                        'random text with lucky number: ' + random(0, 999);
-                    break;
-            }
-
-            const newDate = addSeconds(lastDate, random(0, 15 * 60));
-
-            const g: DTONotification = {
-                id: '' + (lastNID + ti + 1),
-                groupID: i,
-                camera: {
-                    id: '' + random(0, numberCams),
-                    name: 'cam' + String.fromCharCode(random(0, 64)),
-                },
-                datetime: Math.floor(newDate.getTime() / 1000),
-                type: t,
-                content,
-                configurationID: '1',
-            };
-
-            if (random(0, 10) > 3) {
-                generated.push(g);
-                lastNID = parseInt(g.id);
-            }
-
-            lastDate = addHours(newDate, random(1, 1));
-        });
-    }
-
-    return generated;
-};
-
-const notificationsMock: DTONotification[] = generateNotifications(1000, 450);
-
-// const baseDate = new Date();
-// const notificationsMock: DTONotification[] = [{
-//    id: '1',
-//    group: 1,
-//    cameraID: '1',
-//    date: addMinutes(subDays(baseDate, 9), 5),
-// }, {
-//    id: '2',
-//    group: 2,
-//    cameraID: '1',
-//    date: addMinutes(subDays(baseDate, 8), 10),
-// }, {
-//    id: '3',
-//    group: 1,
-//    cameraID: '1',
-//    date: addMinutes(subDays(baseDate, 7), 15),
-// }, {
-//    id: '4',
-//    group: 3,
-//    cameraID: '3',
-//    date: addMinutes(subDays(baseDate, 6), 20),
-// }];
+import {
+    getRandomImage,
+    getRandomVideo,
+    mapGroupToBuffer,
+    notificationsMock,
+} from './mockData';
 
 type CallbackWS = (n: Notification[]) => Promise<boolean>;
 
 export default class NotificationServiceMock implements INotificationService {
     private cameraService: ICameraService;
     private notifications: DTONotification[];
-    private pulseSender: NodeJS.Timer;
+    private pulseSender!: NodeJS.Timer;
     private pulseCallers: CallbackWS[];
     private lastNotifSended: number;
     private pulseInterval: number;
@@ -123,10 +41,10 @@ export default class NotificationServiceMock implements INotificationService {
 
         this.pulseInterval = 2 * 1000;
 
-        this.pulseSender = setInterval(
-            this.pulseHandler.bind(this),
-            this.pulseInterval,
-        );
+        //this.pulseSender = setInterval(
+        //    this.pulseHandler.bind(this),
+        //    this.pulseInterval,
+        //);
     }
 
     get(id: string): TypedPromise<Notification, IProblemJson> {
@@ -249,6 +167,39 @@ export default class NotificationServiceMock implements INotificationService {
 
     unsubscribe(callback: CallbackWS): void {
         this.pulseCallers = this.pulseCallers.filter(c => c != callback);
+    }
+
+    getNotificationDebugBuffer(groupID: number) {
+        return new TypedPromise<
+            { reclaimed: boolean; videoBufferID?: string },
+            IProblemJson
+        >((ok, f) => {
+            ok({
+                reclaimed: Object.keys(mapGroupToBuffer).includes(
+                    groupID.toString(),
+                ),
+                videoBufferID: (mapGroupToBuffer as any)[groupID],
+            });
+        });
+    }
+
+    tryCreateDebugBuffer(groupID: number) {
+        const hasVideo = Object.keys(mapGroupToBuffer).includes(
+            groupID.toString(),
+        );
+
+        return new TypedPromise<{ videoBufferID: string }, IProblemJson>(
+            (ok, fail) => {
+                if (hasVideo) {
+                    ok({ videoBufferID: (mapGroupToBuffer as any)[groupID] });
+                } else {
+                    fail({
+                        status: 400,
+                        title: 'missing debug video',
+                    });
+                }
+            },
+        );
     }
 
     private async pulseHandler(): Promise<boolean> {

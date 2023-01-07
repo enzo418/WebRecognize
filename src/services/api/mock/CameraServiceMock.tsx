@@ -1,47 +1,49 @@
 import ICameraService from '../interfaces/ICameraService';
 import Camera from '../../../domain/Camera';
-import DTOCamera from '../interfaces/DTOCamera';
+import DTOCamera, { DTOCameraDefaults } from '../interfaces/DTOCamera';
 import { ensure } from '../../../utils/error';
 import TypedPromise from '../../../TypedPromise';
 import IProblemJson from '../interfaces/IProblemJson';
-
-const generateCameras = (n: number) => {
-    const generated: DTOCamera[] = [];
-
-    for (let i = 0; i < n; i++) {
-        generated.push({
-            id: '' + i,
-            name: 'cam' + i,
-            url: '' + i,
-        });
-    }
-
-    return generated;
-};
-
-const camerasMock: DTOCamera[] = generateCameras(500);
-
-// const camerasMock = [{
-//    id: '1',
-//    name: 'cam1',
-// }, {
-//    id: '2',
-//    name: 'cam2',
-// }, {
-//    id: '3',
-//    name: 'cam3',
-// }];
+import processPromise, {
+    processPromiseAsArrayBuffer,
+} from '../../../Http/ProcessPromise';
+import { cameraDefaults, camerasMock, cameraToImageUrl } from './mockData';
 
 export default class CameraServiceMock implements ICameraService {
     cameras: DTOCamera[];
 
-    constructor(cams: DTOCamera[] = camerasMock) {
-        this.cameras = cams;
+    constructor() {
+        this.cameras = camerasMock;
     }
 
     get(id: string) {
         return new TypedPromise<Camera, IProblemJson>((resolve, reject) => {
             resolve(ensure(this.cameras.find(cam => cam.id === id)));
+        });
+    }
+
+    public getDefaults(camera_id: string) {
+        return new TypedPromise<DTOCameraDefaults, IProblemJson>(
+            (resolve, reject) => {
+                resolve(cameraDefaults);
+            },
+        );
+    }
+
+    public getFrame(camera_id: string, format: string = 'image/jpeg') {
+        // rnd is used to avoid browser cache
+        return new TypedPromise<Blob, IProblemJson>((ok, fail) => {
+            processPromiseAsArrayBuffer(
+                fetch((cameraToImageUrl as any)[camera_id]),
+            )
+                .ok(response => {
+                    const blob = new Blob([response.buffer], {
+                        type: format,
+                    });
+
+                    ok(blob);
+                })
+                .fail(e => fail(e));
         });
     }
 }
