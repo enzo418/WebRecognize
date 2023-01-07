@@ -92,4 +92,15 @@ export abstract class INotificationService {
      * @param {(not: Notification[]) => any} callback
      */
     abstract unsubscribe(callback: (not: Notification[]) => any): void;
+
+    abstract getNotificationDebugBuffer(
+        groupID: number,
+    ): TypedPromise<
+        { reclaimed: boolean; videoBufferID?: string },
+        IProblemJson
+    >;
+
+    abstract tryCreateDebugBuffer(
+        groupID: number,
+    ): TypedPromise<{ videoBufferID: string }, IProblemJson>;
 }

@@ -2,10 +2,15 @@ import IHttpClient from '../../Http/IHttpClient';
 import processPromise from '../../Http/ProcessPromise';
 import TypedPromise from '../../TypedPromise';
 import DTOCamera from './interfaces/DTOCamera';
+import DTOConfigurationDetails from './interfaces/DTOConfigurationDetails';
+import IConfigurationService from './interfaces/IConfigurationService';
 import IProblemJson from './interfaces/IProblemJson';
 import Service from './Service';
 
-export default class ConfigurationService extends Service {
+export default class ConfigurationService
+    extends Service
+    implements IConfigurationService
+{
     constructor(httpClient: IHttpClient) {
         super(httpClient, '/api/configuration/');
     }
@@ -32,7 +37,7 @@ export default class ConfigurationService extends Service {
      * @returns
      */
     public getAvailable() {
-        return processPromise<any, IProblemJson>(
+        return processPromise<DTOConfigurationDetails[], IProblemJson>(
             this.client.get(this.baseUrl, {}),
         );
     }

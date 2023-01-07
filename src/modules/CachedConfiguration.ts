@@ -5,8 +5,8 @@
 export default class CachedConfiguration {
     map: Record<string, any>;
 
-    constructor() {
-        this.map = {};
+    constructor(defaultValues: any = {}) {
+        this.map = defaultValues;
     }
 
     private splitPath(path: string) {

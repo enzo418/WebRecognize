@@ -10,6 +10,7 @@ import {
     WrapperWebSocket,
 } from '../../modules/WebSocketWrapper';
 import { Size } from '../../Geometry';
+import { IVideoBufferService } from './interfaces/IVideoBufferService';
 
 export class VideoBufferWebSocket extends WrapperWebSocket {
     constructor(id: string) {
@@ -45,7 +46,10 @@ export class VideoBufferWebSocket extends WrapperWebSocket {
     }
 }
 
-export default class VideoBufferService extends Service {
+export default class VideoBufferService
+    extends Service
+    implements IVideoBufferService
+{
     constructor(pHttpClient: IHttpClient) {
         super(pHttpClient, '/api/buffer/');
     }
@@ -70,6 +74,16 @@ export default class VideoBufferService extends Service {
     deleteBuffer(id: string) {
         return processPromise<void, IProblemJson>(
             this.client.delete(this.baseUrl + id, {}),
+        );
+    }
+
+    getStreamBufferUrl(id: string, type: 'diff' | 'raw'): string {
+        return (
+            config.server +
+            config.endpoints.api.streamBuffer +
+            id +
+            '?type=' +
+            type
         );
     }
 }
