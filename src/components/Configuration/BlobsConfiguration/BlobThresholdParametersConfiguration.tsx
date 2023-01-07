@@ -82,6 +82,8 @@ export default function BlobThresholdParametersConfiguration() {
             .getAvailable(commonData.camera)
             .ok(res => {
                 setAvailableBuffers(res);
+
+                if (!res.find(b => b.id == videoBufferID)) setVideoBufferID('');
             })
             .fail(e =>
                 console.error('Could not get available video buffers: ', e),
