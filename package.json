@@ -42,7 +42,7 @@
     "eject": "react-scripts eject",
     "watch": "cra-build-watch",
     "postinstall": "patch-package",
-    "predeploy" : "npm run build",
+    "predeploy" : "PUBLIC_URL=https://enzo418.github.io/WebRecognize npm run build",
     "deploy" : "gh-pages -d build"
   },
   "eslintConfig": {

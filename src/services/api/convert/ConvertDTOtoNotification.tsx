@@ -52,7 +52,11 @@ export async function parseNotification(
                     configurationID: pNot.configurationID,
                 };
 
-                const absoluteURL = new URL(pNot.content, config.server).href;
+                const absoluteURL =
+                    process.env.PUBLIC_URL +
+                    (pNot.content.startsWith('/')
+                        ? pNot.content
+                        : '/' + pNot.content);
 
                 switch (notification.type) {
                     case ENotificationType.IMAGE:
