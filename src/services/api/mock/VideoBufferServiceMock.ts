@@ -84,7 +84,10 @@ export default class VideoBufferServiceMock
     }
 
     getStreamBufferUrl(id: string, type: 'diff' | 'raw'): string {
-        return (mapVBIDtoFile as any)[id][type];
+        const file = (mapVBIDtoFile as any)[id][type];
+        return (
+            process.env.PUBLIC_URL + (file.startsWith('/') ? file : '/' + file)
+        );
     }
 }
 
