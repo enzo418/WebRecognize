@@ -250,7 +250,7 @@ export const videoBufferDTOs = '/mock/videoBufferWoods.json';
 /* ----------------- MOCK CONFIGURATION ----------------- */
 export const configurations = [
     {
-        id: '3506890285600362711',
+        id: '3508530237822468224',
         name: 'Sample',
         telegramConfiguration: {
             enabled: false,
