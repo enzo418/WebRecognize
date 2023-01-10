@@ -10,12 +10,7 @@ import Item from '@mui/material/Grid';
 
 import NavBar from './NavBar';
 
-import {
-    BrowserRouter as Router,
-    Routes,
-    Route,
-    Outlet,
-} from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 
 import Notifications from './pages/Notifications';
 
@@ -92,7 +87,7 @@ function App() {
 
     return (
         <ThemeProvider theme={darkTheme}>
-            <Router>
+            <Router basename="/">
                 <Paper elevation={0} sx={{ borderRadius: 0 }}>
                     <Stack direction="row">
                         <NavBar sx={{ maxWidth: '60px' }} />
