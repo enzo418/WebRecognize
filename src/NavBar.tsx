@@ -39,7 +39,7 @@ interface ListItemLinkProps {
 }
 
 function ListItemLink(props: ListItemLinkProps) {
-    const { icon, to, ...rest } = props;
+    const { icon, to, badgeContent, ...rest } = props;
 
     const renderLink = React.useMemo(
         () =>
@@ -86,9 +86,7 @@ function ListItemLink(props: ListItemLinkProps) {
         <li>
             <ThemeProvider theme={ListItemTheme}>
                 <ListItem button component={renderLink} {...rest}>
-                    <Badge
-                        badgeContent={props.badgeContent || 0}
-                        color="warning">
+                    <Badge badgeContent={badgeContent || 0} color="warning">
                         {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
                     </Badge>
                 </ListItem>
