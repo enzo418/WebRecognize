@@ -20,7 +20,7 @@ import {
     notificationsMock,
 } from './mockData';
 
-type CallbackWS = (n: Notification[]) => Promise<boolean>;
+type CallbackWS = (n: Notification[]) => any;
 
 export default class NotificationServiceMock implements INotificationService {
     private cameraService: ICameraService;

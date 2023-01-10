@@ -14,6 +14,7 @@ import { tryGetEnumValueFromDirtyString } from '../../utils/enum';
 import { dateToUnix, parseDate } from '../../utils/date';
 import TypedPromise from '../../TypedPromise';
 import IProblemJson from '../../services/api/interfaces/IProblemJson';
+import { DTOCameraDefaults } from '../../services/api/interfaces/DTOCamera';
 
 function ensure<T>(
     argument: T | undefined | null,
@@ -30,6 +31,19 @@ class MockCameraService implements ICameraService {
     cameras: Array<Camera>;
     constructor(pCameras: Array<Camera>) {
         this.cameras = pCameras;
+    }
+
+    getDefaults(
+        camera_id: string,
+    ): TypedPromise<DTOCameraDefaults, IProblemJson> {
+        throw new Error('Method not implemented.');
+    }
+
+    getFrame(
+        camera_id: string,
+        format: string,
+    ): TypedPromise<Blob, IProblemJson> {
+        throw new Error('Method not implemented.');
     }
 
     get(id: string): TypedPromise<Camera, IProblemJson> {
