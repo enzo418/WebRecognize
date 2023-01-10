@@ -2,6 +2,9 @@
   "name": "recognize",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://enzo418.github.io/web-recognize-demo",
+  "predeploy" : "npm run build",
+  "deploy" : "gh-pages -d build",
   "dependencies": {
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
@@ -74,6 +77,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.29.3",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "gh-pages": "^4.0.0",
     "jest-watch-typeahead": "^0.6.5",
     "patch-package": "^6.4.7",
     "prettier": "^2.8.1",
