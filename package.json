@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "https://enzo418.github.io/web-recognize-demo",
-  "predeploy" : "npm run build",
-  "deploy" : "gh-pages -d build",
   "dependencies": {
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
@@ -43,7 +41,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "watch": "cra-build-watch",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "predeploy" : "npm run build",
+    "deploy" : "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
