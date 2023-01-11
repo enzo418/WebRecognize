@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "https://enzo418.github.io/WebRecognize/static/css/main.132612a9.css",
-    "main.js": "https://enzo418.github.io/WebRecognize/static/js/main.3be9d2c0.js",
+    "main.js": "https://enzo418.github.io/WebRecognize/static/js/main.5491ee8d.js",
     "static/js/787.678cb41e.chunk.js": "https://enzo418.github.io/WebRecognize/static/js/787.678cb41e.chunk.js",
     "static/media/roboto-all-500-normal.woff": "https://enzo418.github.io/WebRecognize/static/media/roboto-all-500-normal.0ab669b7a0d19b178f57.woff",
     "static/media/roboto-all-700-normal.woff": "https://enzo418.github.io/WebRecognize/static/media/roboto-all-700-normal.a457fde362a540fcadff.woff",
@@ -37,11 +37,11 @@
     "static/media/roboto-greek-ext-700-normal.woff2": "https://enzo418.github.io/WebRecognize/static/media/roboto-greek-ext-700-normal.bd9854c751441ccc1a70.woff2",
     "index.html": "https://enzo418.github.io/WebRecognize/index.html",
     "main.132612a9.css.map": "https://enzo418.github.io/WebRecognize/static/css/main.132612a9.css.map",
-    "main.3be9d2c0.js.map": "https://enzo418.github.io/WebRecognize/static/js/main.3be9d2c0.js.map",
+    "main.5491ee8d.js.map": "https://enzo418.github.io/WebRecognize/static/js/main.5491ee8d.js.map",
     "787.678cb41e.chunk.js.map": "https://enzo418.github.io/WebRecognize/static/js/787.678cb41e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.132612a9.css",
-    "static/js/main.3be9d2c0.js"
+    "static/js/main.5491ee8d.js"
   ]
 }
