@@ -245,7 +245,8 @@ export const mapVBIDtoFile = {
     },
 };
 
-export const videoBufferDTOs = '/mock/videoBufferWoods.json';
+export const videoBufferDTOs =
+    process.env.PUBLIC_URL + '/mock/videoBufferWoods.json';
 
 /* ----------------- MOCK CONFIGURATION ----------------- */
 export const configurations = [
