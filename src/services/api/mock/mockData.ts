@@ -50,7 +50,7 @@ export const camerasMock: DTOCamera[] = [...generatedCameras, ...woodsCam];
 
 export const cameraToImageUrl = {
     ...generateCamerasUrl,
-    '3508530276647043968': '/mock/woods.png',
+    '3508530276647043968': process.env.PUBLIC_URL + '/mock/woods.png',
 };
 
 // camera defaults
