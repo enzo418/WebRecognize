@@ -66,6 +66,9 @@ type NotificationsState = {
     currentFilter: INotificationFilters;
 
     showTimeline: boolean;
+
+    currentPage: number;
+    hasMorePages: boolean;
 };
 
 class Notifications extends React.Component<
@@ -87,6 +90,8 @@ class Notifications extends React.Component<
             fromCameras: [],
         },
         showTimeline: false,
+        currentPage: 0, // first = 1 but it increments it
+        hasMorePages: true,
     };
 
     notificationAudioPlayer: React.RefObject<any>;
@@ -112,35 +117,15 @@ class Notifications extends React.Component<
 
     filterNotifications = (filter: INotificationFilters) => {
         console.log('filtering: ', filter);
-        if (filter.active) {
-            if (filter.before && filter.after) {
-                notificationService
-                    .getBetween(filter.before, filter.after, 100)
-                    .ok(this.processNotificationRequest)
-                    .fail(console.error);
-            } else if (filter.before && !filter.after) {
-                notificationService
-                    .getBefore(filter.before, 100)
-                    .ok(this.processNotificationRequest)
-                    .fail(console.error);
-            } else if (!filter.before && filter.after) {
-                notificationService
-                    .getAfter(filter.after, 100)
-                    .ok(this.processNotificationRequest)
-                    .fail(console.error);
-            }
-        } else {
-            notificationService
-                .getAll(100)
-                .ok(this.processNotificationRequest)
-                .fail(console.error);
-        }
 
-        // TODO: Add camera filters
-
-        this.setState(() => ({
-            currentFilter: filter,
-        }));
+        this.setState(
+            () => ({
+                currentFilter: filter,
+                currentPage: 1,
+                hasMorePages: true,
+            }),
+            this.fetchNotificationsNextPage,
+        );
     };
 
     groupNotifications = (nots: Notification[]) => {
@@ -204,8 +189,6 @@ class Notifications extends React.Component<
         grouped: NotificationGroup[],
         addedANewGroup: boolean = true,
     ) => {
-        console.log('Processing new here');
-
         let index: number = -1;
 
         if (grouped.length != 0) {
@@ -226,9 +209,15 @@ class Notifications extends React.Component<
 
         const cams: Camera[] = this.getCamerasFromNotifications(grouped);
 
-        this.setState(() => ({
-            notifications: grouped,
-            cameras: cams,
+        const uniqueCameras = Array.from(
+            new Map(
+                cams.concat(this.state.cameras || []).map(v => [v.id, v]),
+            ).values(),
+        );
+
+        this.setState(prev => ({
+            notifications: prev.notifications.concat(grouped),
+            cameras: uniqueCameras,
             loading: false,
             currentNotificationIndex: index,
         }));
@@ -240,6 +229,10 @@ class Notifications extends React.Component<
             nots = [pNots];
         } else {
             nots = pNots;
+        }
+
+        if (nots.length == 0) {
+            this.setState(() => ({ hasMorePages: false }));
         }
 
         const grouped = this.groupNotifications(nots);
@@ -324,8 +317,6 @@ class Notifications extends React.Component<
                 }
 
                 addedANewGroup = addedANewGroup || group === undefined;
-
-                console.log('Processing new');
             });
 
             this.processNotifications(this.state.notifications, addedANewGroup);
@@ -351,13 +342,46 @@ class Notifications extends React.Component<
         }));
     };
 
+    fetchNotificationsNextPage = () => {
+        // add a fetching flag if needed but nav notification timeline does this by itself
+
+        const page = this.state.currentPage + 1;
+
+        this.setState(() => ({ currentPage: page }));
+
+        const filter = this.state.currentFilter;
+
+        if (filter.active) {
+            if (filter.before && filter.after) {
+                notificationService
+                    .getBetween(filter.before, filter.after, 100, page)
+                    .ok(this.processNotificationRequest)
+                    .fail(console.error);
+            } else if (filter.before && !filter.after) {
+                notificationService
+                    .getBefore(filter.before, 100, page)
+                    .ok(this.processNotificationRequest)
+                    .fail(console.error);
+            } else if (!filter.before && filter.after) {
+                notificationService
+                    .getAfter(filter.after, 100, page)
+                    .ok(this.processNotificationRequest)
+                    .fail(console.error);
+            }
+        } else {
+            this.pendingPromise = notificationService
+                .getAll(100, page)
+                .ok(this.processNotificationRequest)
+                .fail(console.error);
+        }
+
+        // TODO: Add camera filters
+    };
+
     componentDidMount() {
         notificationService.subscribe(this.handleNewNotification);
 
-        this.pendingPromise = notificationService
-            .getAll(100)
-            .ok(this.processNotificationRequest)
-            .fail(console.error);
+        this.fetchNotificationsNextPage();
     }
 
     componentWillUnmount() {
@@ -388,8 +412,10 @@ class Notifications extends React.Component<
                     notifications={this.state.notifications}
                     currentIndex={this.state.currentNotificationIndex}
                     cameras={this.state.cameras}
-                    onChangeNotification={
-                        this.onChangeNotification
+                    onChangeNotification={this.onChangeNotification}
+                    onFetchNextPage={this.fetchNotificationsNextPage}
+                    hasMorePages={
+                        this.state.hasMorePages
                     }></NavNotificationsTimeline>
             </>
         );

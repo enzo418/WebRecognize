@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
@@ -43,6 +43,8 @@ export type ClickCallback = (id: ITimelineItem['id']) => any;
 interface ITimeLineAlternateProps {
     elements: Array<ITimelineItem | ITimelineItemSectionSeparator>;
     onclick: ClickCallback;
+    onFetchNextPage: () => any;
+    hasMorePages: boolean;
 }
 
 interface TimeLineItemGeneratorProps {
@@ -183,12 +185,48 @@ function TimeLineGenerateElement(props: any) {
 export default function TimeLineAlternate(props: ITimeLineAlternateProps) {
     const parentRef = React.useRef<any>();
 
+    const [isFetchingNextPage, setIsFetchingNextPage] =
+        useState<boolean>(false);
+
+    const [prevElementsCount, setPrevElementsCount] = useState<number>(
+        props.elements.length,
+    );
+
     const rowVirtualizer = useVirtual({
         size: props.elements.length,
         parentRef,
         estimateSize: React.useCallback(() => 80, []),
         overscan: 5,
     });
+
+    useEffect(() => {
+        const [lastItem] = [...rowVirtualizer.virtualItems].reverse();
+
+        if (!lastItem) {
+            return;
+        }
+
+        if (
+            lastItem.index >= props.elements.length - 1 &&
+            props.hasMorePages &&
+            !isFetchingNextPage
+        ) {
+            setIsFetchingNextPage(true);
+            props.onFetchNextPage();
+        }
+    }, [props.hasMorePages, rowVirtualizer.virtualItems]);
+
+    useEffect(() => {
+        console.log({
+            e: props.elements.length,
+            prev: prevElementsCount,
+            setIsFetchingNextPage: isFetchingNextPage,
+        });
+        if (props.elements.length !== prevElementsCount) {
+            setIsFetchingNextPage(false);
+            setPrevElementsCount(props.elements.length);
+        }
+    }, [props.elements]);
 
     return (
         <React.Fragment>

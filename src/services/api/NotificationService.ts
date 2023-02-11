@@ -32,8 +32,10 @@ notificationWS.addEventListener('close', ev => {
     // bring the user attention
     eventBus.dispatch('notification-sound-play', null);
 
-    // block execution, maximum alert
-    alert('WARNING: Lost connection to the server');
+    setTimeout(() => {
+        // block execution, maximum alert
+        alert('WARNING: Lost connection to the server');
+    }, 5000);
 });
 
 type NotificationCallback = (notification: Notification[]) => any;
@@ -66,11 +68,14 @@ export default class NotificationService implements INotificationService {
         );
     }
 
-    getAll(limit = 100): TypedPromise<Array<Notification>, IProblemJson> {
+    getAll(
+        limit = 100,
+        page: number = 1,
+    ): TypedPromise<Array<Notification>, IProblemJson> {
         return new TypedPromise<Array<Notification>, IProblemJson>(
             (ok, fail) => {
                 return processPromise<Array<DTONotification>, IProblemJson>(
-                    this.http.get('/api/notifications/', { limit }),
+                    this.http.get('/api/notifications/', { limit, page }),
                 )
                     .ok(res => {
                         parseNotifications(res, this.cameraService)
@@ -85,6 +90,7 @@ export default class NotificationService implements INotificationService {
     getBefore(
         before: string | Date,
         limit: number,
+        page: number,
     ): TypedPromise<Array<Notification>, IProblemJson> {
         return new TypedPromise<Array<Notification>, IProblemJson>(
             (ok, fail) => {
@@ -92,6 +98,7 @@ export default class NotificationService implements INotificationService {
                     this.http.get('/', {
                         before: serialize(before),
                         limit,
+                        page,
                     }),
                 )
                     .ok(res => {
@@ -107,6 +114,7 @@ export default class NotificationService implements INotificationService {
     getAfter(
         after: string | Date,
         limit: number,
+        page: number,
     ): TypedPromise<Array<Notification>, IProblemJson> {
         return new TypedPromise<Array<Notification>, IProblemJson>(
             (ok, fail) => {
@@ -114,6 +122,7 @@ export default class NotificationService implements INotificationService {
                     this.http.get('/', {
                         after: serialize(after),
                         limit,
+                        page,
                     }),
                 )
                     .ok(res => {
@@ -130,6 +139,7 @@ export default class NotificationService implements INotificationService {
         before: T,
         after: U,
         limit: number,
+        page: number,
     ): TypedPromise<Array<Notification>, IProblemJson> {
         return new TypedPromise<Array<Notification>, IProblemJson>(
             (ok, fail) => {
@@ -138,6 +148,7 @@ export default class NotificationService implements INotificationService {
                         before: serialize(before),
                         after: serialize(after),
                         limit,
+                        page,
                     }),
                 )
                     .ok(res => {

@@ -14,10 +14,12 @@ import { ensure } from '../utils/error';
 import { NotificationGroup } from '../domain/NotificationGroup';
 
 interface INavNotificationsTimelineProps {
+    hasMorePages: boolean;
     notifications: NotificationGroup[];
     currentIndex: number;
     cameras: Camera[];
     onChangeNotification: (notf: NotificationGroup) => any;
+    onFetchNextPage: () => any;
 }
 
 const formatDate = (date: Date) => {
@@ -79,5 +81,12 @@ export function NavNotificationsTimeline(
         props.onChangeNotification(notf);
     };
 
-    return <TimeLineAlternate elements={items} onclick={onclickCallback} />;
+    return (
+        <TimeLineAlternate
+            elements={items}
+            onclick={onclickCallback}
+            onFetchNextPage={props.onFetchNextPage}
+            hasMorePages={props.hasMorePages}
+        />
+    );
 }

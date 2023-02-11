@@ -25,10 +25,12 @@ export abstract class INotificationService {
      *
      * @abstract
      * @param {number} limit max number of notifications
+     * @param {number} page page number
      * @returns {TypedPromise<Array<Notification>, IProblemJson>}
      */
     abstract getAll(
         limit: number,
+        page: number,
     ): TypedPromise<Array<Notification>, IProblemJson>;
 
     /**
@@ -38,11 +40,13 @@ export abstract class INotificationService {
      * @abstract
      * @param {(string | Date)} before
      * @param {number} limit max number of notifications
+     * @param {number} page page number
      * @returns {TypedPromise<Array<Notification>, IProblemJson>}
      */
     abstract getBefore(
         before: string | Date,
         limit: number,
+        page: number,
     ): TypedPromise<Array<Notification>, IProblemJson>;
 
     /**
@@ -52,11 +56,13 @@ export abstract class INotificationService {
      * @abstract
      * @param {(string | Date)} after
      * @param {number} limit max number of notifications
+     * @param {number} page page number
      * @returns {TypedPromise<Array<Notification>, IProblemJson>}
      */
     abstract getAfter(
         after: string | Date,
         limit: number,
+        page: number,
     ): TypedPromise<Array<Notification>, IProblemJson>;
 
     /**
@@ -69,12 +75,14 @@ export abstract class INotificationService {
      * @param {T} before
      * @param {U} after
      * @param {number} limit
+     * @param {number} page page number
      * @returns {TypedPromise<Array<Notification>, IProblemJson>}
      */
     abstract getBetween<T, U extends T>(
         before: T,
         after: U,
         limit: number,
+        page: number,
     ): TypedPromise<Array<Notification>, IProblemJson>;
 
     /**
