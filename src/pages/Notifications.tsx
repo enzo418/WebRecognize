@@ -188,11 +188,11 @@ class Notifications extends React.Component<
     processNotifications = (
         grouped: NotificationGroup[],
         addedANewGroup: boolean = true,
+        groupedIsNewerThatCurrent: boolean = false,
     ) => {
-        let index: number = -1;
+        let index: number = this.state.currentNotificationIndex;
 
         if (grouped.length != 0) {
-            index = this.state.currentNotificationIndex;
             if (
                 (this.state.currentNotificationIndex == -1 &&
                     grouped.length > 0) ||
@@ -200,11 +200,16 @@ class Notifications extends React.Component<
                 grouped.length < this.state.currentNotificationIndex
             ) {
                 index = 0;
-            } else if (addedANewGroup) {
+            } else if (addedANewGroup && groupedIsNewerThatCurrent) {
                 // since it will be added at front, we need to keep the UI in the
                 // current notification (currentIndex + 1)
                 index++;
             }
+        } else if (
+            this.state.currentNotificationIndex == -1 ||
+            this.state.jumpToNewNotification
+        ) {
+            index = 0;
         }
 
         const cams: Camera[] = this.getCamerasFromNotifications(grouped);
@@ -216,7 +221,9 @@ class Notifications extends React.Component<
         );
 
         this.setState(prev => ({
-            notifications: prev.notifications.concat(grouped),
+            notifications: groupedIsNewerThatCurrent
+                ? grouped.concat(prev.notifications)
+                : prev.notifications.concat(grouped),
             cameras: uniqueCameras,
             loading: false,
             currentNotificationIndex: index,
@@ -266,6 +273,8 @@ class Notifications extends React.Component<
     handleNewNotification = (notifications: Notification[]) => {
         return new Promise((resolve, reject) => {
             let addedANewGroup: boolean = false;
+            let newGroups: Array<NotificationGroup> = [];
+
             notifications.forEach(n => {
                 if (
                     this.state.currentFilter.active &&
@@ -279,9 +288,9 @@ class Notifications extends React.Component<
 
                 // find if the notification belongs to some group
                 // that already exists
-                const group = this.state.notifications.find(
-                    group => group.groupID == n.group,
-                );
+                const group = this.state.notifications
+                    .concat(newGroups)
+                    .find(group => group.groupID == n.group);
 
                 const type: string = getEnumNameAt(
                     ENotificationType,
@@ -313,13 +322,13 @@ class Notifications extends React.Component<
                     Object(newGroup)[typeMapped] = typedNotification;
 
                     // add it to the front since its the newer
-                    this.state.notifications.unshift(newGroup);
+                    newGroups.unshift(newGroup);
                 }
 
                 addedANewGroup = addedANewGroup || group === undefined;
             });
 
-            this.processNotifications(this.state.notifications, addedANewGroup);
+            this.processNotifications(newGroups, addedANewGroup, true);
 
             resolve(true);
         });
@@ -354,23 +363,23 @@ class Notifications extends React.Component<
         if (filter.active) {
             if (filter.before && filter.after) {
                 notificationService
-                    .getBetween(filter.before, filter.after, 100, page)
+                    .getBetween(filter.before, filter.after, 3 * 20, page)
                     .ok(this.processNotificationRequest)
                     .fail(console.error);
             } else if (filter.before && !filter.after) {
                 notificationService
-                    .getBefore(filter.before, 100, page)
+                    .getBefore(filter.before, 3 * 20, page)
                     .ok(this.processNotificationRequest)
                     .fail(console.error);
             } else if (!filter.before && filter.after) {
                 notificationService
-                    .getAfter(filter.after, 100, page)
+                    .getAfter(filter.after, 3 * 20, page)
                     .ok(this.processNotificationRequest)
                     .fail(console.error);
             }
         } else {
             this.pendingPromise = notificationService
-                .getAll(100, page)
+                .getAll(3 * 20, page)
                 .ok(this.processNotificationRequest)
                 .fail(console.error);
         }
