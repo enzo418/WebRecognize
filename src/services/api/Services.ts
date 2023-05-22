@@ -21,7 +21,7 @@ export const serverConfigurationService = new ServerConfigurationService(
     client,
 );
 
-//* */
+///*
 export const cameraService = new CameraService(client);
 export const configurationService = new ConfigurationService(client);
 export const defaultCachedConfig = {};
@@ -33,9 +33,9 @@ export const notificationService = new NotificationService(
 export const liveViewService = new LiveViewService(client);
 
 export const videoBufferService = new VideoBufferService(client);
-//* */
+// */
 
-/* MOCK
+/* //MOCK
 
 // NOTE:
 // -----

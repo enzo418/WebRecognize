@@ -239,7 +239,11 @@ class Notifications extends React.Component<
         }
 
         if (nots.length == 0) {
-            this.setState(() => ({ hasMorePages: false }));
+            this.setState(() => ({
+                hasMorePages: false,
+                loading: false,
+            }));
+            return;
         }
 
         const grouped = this.groupNotifications(nots);
@@ -478,7 +482,8 @@ class Notifications extends React.Component<
                 )}
 
                 {!this.state.loading &&
-                    this.state.currentNotificationIndex == -1 && (
+                    (this.state.currentNotificationIndex == -1 ||
+                        !this.state.notifications.length) && (
                         <Typography padding={'10px'}>
                             There are no notifications
                         </Typography>

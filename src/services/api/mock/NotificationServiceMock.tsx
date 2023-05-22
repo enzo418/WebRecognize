@@ -59,9 +59,16 @@ export default class NotificationServiceMock implements INotificationService {
         );
     }
 
-    getAll(limit = 100): TypedPromise<Array<Notification>, IProblemJson> {
+    getAll(
+        limit = 100,
+        page = 1,
+    ): TypedPromise<Array<Notification>, IProblemJson> {
         return new TypedPromise<Array<Notification>, IProblemJson>(
             (resolve, reject) => {
+                if (page > 5) {
+                    return resolve([]);
+                }
+
                 const found = [];
                 for (
                     let i = 0;

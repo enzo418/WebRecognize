@@ -159,6 +159,11 @@ const getBasicConfigurationMenu = () => {
                             icon: <DataObjectIcon />,
                         },
                         {
+                            to: 'validate-objects-detected',
+                            primary: 'Validate object detected',
+                            icon: <DataObjectIcon />,
+                        },
+                        {
                             to: 'threshold-parameters',
                             primary: 'Image processing parameters',
                             icon: <Contrast />,

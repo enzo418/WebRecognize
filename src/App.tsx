@@ -54,6 +54,7 @@ import ApplicationConfiguration from './components/ApplicationConfiguration';
 import { getLocalDefault, Key } from './LocalStore';
 import eventBus from './EventBus';
 import { notificationService } from './services/api/Services';
+import BlobValidateObjectDetectedConfiguration from './components/Configuration/BlobsConfiguration/BlobValidateObjectDetectedConfiguration';
 
 function App() {
     const notificationAudioPlayer = React.createRef<HTMLAudioElement>();
@@ -206,6 +207,11 @@ function App() {
                                                     path="contours-filters"
                                                     element={
                                                         <BlobContoursFiltersConfiguration />
+                                                    }></Route>
+                                                <Route
+                                                    path="validate-objects-detected"
+                                                    element={
+                                                        <BlobValidateObjectDetectedConfiguration />
                                                     }></Route>
                                                 <Route
                                                     path="threshold-parameters"
