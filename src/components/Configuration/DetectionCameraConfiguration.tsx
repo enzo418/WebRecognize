@@ -24,7 +24,7 @@ import HttpClient from '../../Http/HttpClient';
 import processPromise from '../../Http/ProcessPromise';
 import IProblemJson from '../../services/api/interfaces/IProblemJson';
 import CameraFrameBox from '../CameraFrameBox';
-import { HelpPopover, WarningPopover } from '../IconPopover';
+import { HelpPopover, InfoTextPopover } from '../IconPopover';
 import LiveViewBox from '../LiveViewBox';
 import {
     SelectConfigurationField,
@@ -199,7 +199,7 @@ export default function DetectionCameraConfiguration() {
                 <Box>
                     <Typography gutterBottom>
                         Video scale at processing stage
-                        <WarningPopover
+                        <InfoTextPopover
                             text="This resize will be applied after the last resize in the basics configuration.
                                     <br>So you can leave as it is by setting the same values or downscale it even more."
                         />

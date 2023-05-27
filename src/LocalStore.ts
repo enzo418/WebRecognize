@@ -7,20 +7,50 @@ export enum Key {
     LAST_CONFIGURATION_EXECUTED_ID = 'LAST_CONFIGURATION_EXECUTED_ID',
     THEME_MODE = 'THEME_MODE',
     NOTIFICATION_VOLUME = 'NOTIFICATION_VOLUME',
+    DEFAULT_SHOW_LIVE_VIEW = 'DEFAULT_SHOW_LIVE_VIEW',
 }
 
-export function saveLocal(key: Key, value: string) {
-    localStorage.setItem(key.toString(), value);
+export function saveLocal<T>(key: Key, value: T) {
+    let parsedValue: string;
+
+    switch (typeof value) {
+        case 'number':
+            parsedValue = value.toString();
+            break;
+        case 'boolean':
+            parsedValue = value.toString();
+            break;
+        default:
+            parsedValue = JSON.stringify(value);
+            break;
+    }
+
+    localStorage.setItem(key.toString(), parsedValue);
 }
 
 export function getLocal(key: Key): string | null {
     return localStorage.getItem(key.toString());
 }
 
-export function getLocalDefault<T>(key: Key, defaultValue: T): string | T {
+export function getLocalDefault<T>(key: Key, defaultValue: T): T {
     const v = localStorage.getItem(key.toString());
 
-    return v === null ? defaultValue : v;
+    if (v === null) {
+        return defaultValue;
+    } else if (typeof defaultValue === 'number') {
+        const parsedValue = parseFloat(v);
+        return (isNaN(parsedValue) ? defaultValue : parsedValue) as T;
+    } else if (typeof defaultValue === 'boolean') {
+        if (v.toLowerCase() === 'true') {
+            return true as T;
+        } else if (v.toLowerCase() === 'false') {
+            return false as T;
+        } else {
+            return defaultValue;
+        }
+    }
+
+    return defaultValue;
 }
 
 export function removeLocal(key: Key): void {

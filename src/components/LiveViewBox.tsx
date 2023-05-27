@@ -13,6 +13,7 @@ interface LiveViewBoxProps {
 
 interface LiveViewBoxState {
     loading: boolean;
+    firstImageLoaded: boolean;
     error: string;
     feedID: string;
 }
@@ -27,10 +28,13 @@ export default class LiveViewBox extends React.Component<
         feedID: '',
         loading: true,
         error: '',
+        firstImageLoaded: false,
     };
 
     constructor(props: LiveViewBoxProps) {
         super(props);
+
+        this.onImageLoaded = this.onImageLoaded.bind(this);
     }
 
     updateLiveFeed() {
@@ -71,22 +75,31 @@ export default class LiveViewBox extends React.Component<
         }
     }
 
+    onImageLoaded(): void {
+        if (!this.state.firstImageLoaded) {
+            this.setState({ firstImageLoaded: true });
+        }
+    }
+
     render() {
         return (
             <>
                 {this.state.error.length == 0 &&
-                    (this.state.loading ? (
+                    (this.state.loading || !this.state.firstImageLoaded) && (
                         <Skeleton
                             variant="rectangular"
                             width={`min(${640}px, 100%)`}
                             height={360}
                         />
-                    ) : (
-                        <LiveView
-                            feedID={this.state.feedID}
-                            onLoad={() => {}}
-                            style={this.props.style}></LiveView>
-                    ))}
+                    )}
+
+                {this.state.error.length == 0 && !this.state.loading && (
+                    <LiveView
+                        feedID={this.state.feedID}
+                        onLoad={this.onImageLoaded}
+                        style={this.props.style}></LiveView>
+                )}
+
                 {this.state.error.length != 0 &&
                     !this.props.keepSkeletonOnError &&
                     this.props.componentOnError &&

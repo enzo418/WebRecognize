@@ -27,9 +27,12 @@ $lg: 1200px;
     }
 }
     
-
 .configuration-option.selected {
     border: 1px solid #e5e6eb;
     border-left: 0;
     border-right: 0;
+}
+
+.configuration-field {
+    padding-bottom: 21px !important;
 }

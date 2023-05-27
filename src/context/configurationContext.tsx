@@ -14,14 +14,15 @@ export type GetFieldCallback = (
 
 export type GetCachedFieldCallback = (path: string) => any | undefined;
 
+export type ConfigurationContextType = {
+    params: Dictionary<any>;
+    updateCB: UpdateFieldCallback;
+    getFieldCB: GetFieldCallback;
+    getInitialValue: GetCachedFieldCallback;
+};
+
 export const ConfigurationContext = createContext<
-    | {
-          params: any;
-          updateCB: UpdateFieldCallback;
-          getFieldCB: GetFieldCallback;
-          getInitialValue: GetCachedFieldCallback;
-      }
-    | undefined
+    ConfigurationContextType | undefined
 >(undefined);
 
 export function useConfiguration() {

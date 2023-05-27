@@ -4,6 +4,8 @@ import Typography from '@mui/material/Typography';
 import { Box, IconButton } from '@mui/material';
 import HelpIcon from '@mui/icons-material/Help';
 import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 
 interface IconPopoverProps {
     iconElement: JSX.Element;
@@ -87,5 +89,32 @@ export const WarningPopover = ({
         text={text}
         style={ProcessStyle(style)}
         iconElement={<WarningIcon />}
+    />
+);
+
+export const InfoPopover = ({ text, style }: { text: string; style?: any }) => (
+    <IconPopover
+        text={text}
+        style={ProcessStyle(style)}
+        iconElement={<QuestionMarkIcon />}
+    />
+);
+
+export const InfoTextPopover = ({
+    text,
+    style,
+}: {
+    text: string;
+    style?: any;
+}) => (
+    <IconPopover
+        text={text}
+        style={ProcessStyle(style)}
+        iconElement={
+            // Colors: https://mui.com/system/palette/#color
+            <Typography variant="body2" color={'info.main'}>
+                info
+            </Typography>
+        }
     />
 );
