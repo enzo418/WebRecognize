@@ -125,20 +125,31 @@ export default function CameraBasics() {
         const calculateRatio = (defaults: Size) => {
             getFieldValue(context, 'resizeTo/width')
                 .ok((w: number) => {
-                    const storedRatio = w / defaults.width;
+                    // resize to 0 means no resize.
+                    if (w == 0) {
+                        setVideoScale({
+                            width: defaults.width,
+                            height: defaults.height,
+                            ratio: 1,
+                        });
+                    } else {
+                        const storedRatio = w / defaults.width;
 
-                    // calculate ratio
-                    setVideoScale({
-                        ...videoScale,
-                        ratio: storedRatio,
-                    });
+                        // calculate ratio
+                        setVideoScale({
+                            ...videoScale,
+                            ratio: storedRatio,
+                        });
 
-                    // only downscale is allowed
-                    if (storedRatio > 1) {
-                        console.info(
-                            `Stored ratio is bigger than 1, setting to 1. Only downscale is allowed.`,
-                        );
-                        handleRatioChange(1);
+                        // only downscale is allowed
+                        if (storedRatio > 1) {
+                            if (storedRatio > 1)
+                                console.info(
+                                    `Stored ratio is bigger than 1, setting to 1. Only downscale is allowed.`,
+                                );
+
+                            handleRatioChange(1);
+                        }
                     }
                 })
                 .fail(e => console.error("Couldn't get width: ", e));

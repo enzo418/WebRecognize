@@ -1,75 +1,29 @@
 import {
-    AppBar,
     Box,
     Button,
+    Chip,
     Dialog,
-    FormControl,
+    Divider,
     Grid,
-    InputAdornment,
-    InputLabel,
-    MenuItem,
-    Select,
-    Skeleton,
     Stack,
-    TextField,
+    Tooltip,
     Typography,
-    useMediaQuery,
-    useTheme,
 } from '@mui/material';
 
 import React, { useEffect, useState } from 'react';
-import config from '../../config';
 import { useConfiguration } from '../../context/configurationContext';
-import HttpClient from '../../Http/HttpClient';
-import processPromise from '../../Http/ProcessPromise';
-import IProblemJson from '../../services/api/interfaces/IProblemJson';
-import CameraFrameBox from '../CameraFrameBox';
-import { HelpPopover, InfoTextPopover } from '../IconPopover';
-import LiveViewBox from '../LiveViewBox';
-import {
-    SelectConfigurationField,
-    SliderConfigurationField,
-    TextConfigurationField,
-} from './configurationField';
+import { InfoTextPopover } from '../IconPopover';
+import { TextConfigurationField } from './configurationField';
 import ROICanvasInputField from './Fields/ROICanvasInputField';
-
-interface Props {
-    updateField: (field: string, value: any) => any;
-}
-
-interface IConfigurationFieldProps {
-    updateCB: any;
-    params: any;
-    name: string;
-}
-
-// function ConfigurationField(props:ConfigurationField) {
-//    const {updateCB, params, name} = props;
-//    const [error, setError] = useState()
-
-//    return <TextField
-//        label="name"
-//        defaultValue={'test'}
-//        variant="standard"
-//        sx={{width: '100%'}}
-//        onChange={(e) => updateCB(params, 'name', e.target.value)}
-//    />;
-// }
 
 interface Size {
     width: number;
     height: number;
 }
 
-interface DTOCameraDefaults {
-    fps: number;
-    size: Size;
-}
-
 export default function DetectionCameraConfiguration() {
     const { params, updateCB, getFieldCB, getInitialValue } =
         useConfiguration();
-    const theme = useTheme();
 
     const [cameraResize, setCameraResize] = useState<Size>({
         width: 0,
@@ -154,96 +108,7 @@ export default function DetectionCameraConfiguration() {
 
     return (
         <Grid container spacing={{ xs: 2, md: 2 }}>
-            <Grid item xs={12} sm={12} md={6}>
-                <Typography
-                    variant="body2"
-                    color={'GrayText'}
-                    sx={{ mb: '10px' }}>
-                    Minimum amount of pixel that changed to trigger a validator
-                    Used only as the initial value so you can set it to a big
-                    number and it will average in some time.
-                </Typography>
-
-                <TextConfigurationField
-                    label="Initial Minimum Change Threshold"
-                    variant="standard"
-                    type="number"
-                    fullWidth
-                    data={{ ...commonData, path: 'minimumChangeThreshold' }}
-                />
-            </Grid>
-
-            <Grid item xs={12} sm={12} md={6}>
-                <Typography
-                    variant="body2"
-                    color={'GrayText'}
-                    sx={{ mb: '10px' }}>
-                    When a new mean is calculated, the threshold is increased to
-                    leave a margin between normal and non-normal pixel
-                    difference.
-                </Typography>
-
-                <TextConfigurationField
-                    label="Increase Threshold Factor"
-                    variant="standard"
-                    type="number"
-                    fullWidth
-                    data={{
-                        ...commonData,
-                        path: 'increaseThresholdFactor',
-                    }}
-                />
-            </Grid>
-
-            <Grid item xs={12} sm={12} md={4}>
-                <Box>
-                    <Typography gutterBottom>
-                        Video scale at processing stage
-                        <InfoTextPopover
-                            text="This resize will be applied after the last resize in the basics configuration.
-                                    <br>So you can leave as it is by setting the same values or downscale it even more."
-                        />
-                    </Typography>
-
-                    <Typography
-                        variant="body2"
-                        color={'GrayText'}
-                        sx={{ mb: '10px' }}>
-                        This can help reduce CPU overhead because all
-                        transformation algorithms will be applied to a frame
-                        resized to this size. This does not affect notifications
-                        or output.
-                    </Typography>
-
-                    <Stack direction="row" spacing={{ xs: 1, md: 2 }}>
-                        <TextConfigurationField
-                            label="Scale Width"
-                            variant="standard"
-                            type="number"
-                            fullWidth
-                            data={{
-                                ...commonData,
-                                path: 'processingConfiguration/resize/width',
-                            }}
-                        />
-
-                        <TextConfigurationField
-                            label="Scale Height"
-                            variant="standard"
-                            type="number"
-                            fullWidth
-                            data={{
-                                ...commonData,
-                                path: 'processingConfiguration/resize/height',
-                            }}
-                        />
-                    </Stack>
-                    <Typography variant="overline" color="GrayText">
-                        Previous stage resize was{' '}
-                        {`W ${cameraResize.width} x H ${cameraResize.height}`}
-                    </Typography>
-                </Box>
-
+            <Grid item xs={12} md={4}>
                 <Box sx={{ mt: '20px' }}>
                     <Typography gutterBottom>Noise Threshold</Typography>
 
@@ -322,6 +187,122 @@ export default function DetectionCameraConfiguration() {
                     />
                 </Dialog>
             </Grid>
+
+            <Grid item xs={12}>
+                <Divider>
+                    <Tooltip title="These are settings that you will rarely have to change. Sometimes because they are calculated automatically.">
+                        <Chip label="Advanced/Optional" />
+                    </Tooltip>
+                </Divider>
+            </Grid>
+
+            <Grid item xs={12} sm={12} md={6}>
+                <Box>
+                    <Typography gutterBottom>
+                        Video scale at processing stage
+                        <InfoTextPopover
+                            text="This resize will be applied after the last resize in the basics configuration.
+                                    <br>Skip it by setting 0 or downscale it even more."
+                        />
+                    </Typography>
+
+                    <Typography
+                        variant="body2"
+                        color={'GrayText'}
+                        sx={{ mb: '10px' }}>
+                        This can help reduce CPU overhead because all
+                        transformation algorithms will be applied to a frame
+                        resized to this size. This does not affect notifications
+                        or output.
+                        <Box display={'inline'} color={'orange'}>
+                            {' '}
+                            Leave it to 0 width and height to not apply this
+                            resize.
+                        </Box>
+                    </Typography>
+
+                    <Stack direction="row" spacing={{ xs: 1, md: 2 }}>
+                        <TextConfigurationField
+                            label="Scale Width"
+                            variant="standard"
+                            type="number"
+                            fullWidth
+                            data={{
+                                ...commonData,
+                                path: 'processingConfiguration/resize/width',
+                            }}
+                        />
+
+                        <TextConfigurationField
+                            label="Scale Height"
+                            variant="standard"
+                            type="number"
+                            fullWidth
+                            data={{
+                                ...commonData,
+                                path: 'processingConfiguration/resize/height',
+                            }}
+                        />
+                    </Stack>
+                    <Typography variant="overline" color="GrayText">
+                        Previous stage{' '}
+                        {cameraResize.width != 0
+                            ? `resize was W ${cameraResize.width} x H ${cameraResize.height}`
+                            : `did not resize`}
+                    </Typography>
+                </Box>
+
+                <Box
+                    sx={{
+                        mt: '20px',
+                    }}>
+                    <Typography gutterBottom>
+                        Initial minimum change threshold
+                    </Typography>
+
+                    <Typography
+                        variant="body2"
+                        color={'GrayText'}
+                        sx={{ mb: '10px' }}>
+                        Minimum amount of pixel that changed to trigger a
+                        validator Used only as the initial value so you can set
+                        it to a big number and it will average in some time.
+                    </Typography>
+
+                    <TextConfigurationField
+                        label="Initial Minimum Change Threshold"
+                        variant="standard"
+                        type="number"
+                        fullWidth
+                        data={{ ...commonData, path: 'minimumChangeThreshold' }}
+                    />
+                </Box>
+            </Grid>
+
+            <Grid item xs={12} sm={12} md={6}>
+                <Typography gutterBottom>Threshold increase factor</Typography>
+
+                <Typography
+                    variant="body2"
+                    color={'GrayText'}
+                    sx={{ mb: '22px' }}>
+                    When a new mean is calculated, the threshold is increased to
+                    leave a margin between normal and non-normal pixel
+                    difference.
+                </Typography>
+
+                <TextConfigurationField
+                    label="Increase Threshold Factor"
+                    variant="standard"
+                    type="number"
+                    fullWidth
+                    data={{
+                        ...commonData,
+                        path: 'increaseThresholdFactor',
+                    }}
+                />
+            </Grid>
+
             {/* Not used in recognize */}
             {/*<Grid item xs={12} sm={12} md={4}>
                 <TextConfigurationField
