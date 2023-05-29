@@ -101,7 +101,9 @@ export default function BlobFiltersConfiguration() {
                     marks={marks}
                 />
             </Grid>
-            <Grid item xs={12}>
+
+            {/* Useless */}
+            {/*<Grid item xs={12}>
                 <Typography>
                     Minimum total distance traveled by the blob to be considered
                 </Typography>
@@ -136,7 +138,8 @@ export default function BlobFiltersConfiguration() {
                     valueLabelFormat={(v: number) => v + '%'}
                     valueLabelDisplay="auto"
                 />
-            </Grid>
+            </Grid>*/}
+
             {/* TODO: VELOCITY FILTER, DO WE EVEN USE IT? */}
         </Grid>
     );

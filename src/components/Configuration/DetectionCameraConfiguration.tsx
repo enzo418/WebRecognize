@@ -188,16 +188,17 @@ export default function DetectionCameraConfiguration() {
                 </Dialog>
             </Grid>
 
-            <Grid item xs={12}>
+            {/*<Grid item xs={12}>
                 <Divider>
                     <Tooltip title="These are settings that you will rarely have to change. Sometimes because they are calculated automatically.">
                         <Chip label="Advanced/Optional" />
                     </Tooltip>
                 </Divider>
-            </Grid>
+            </Grid>*/}
 
             <Grid item xs={12} sm={12} md={6}>
-                <Box>
+                {/* Not needed, those frames will not be stored. */}
+                {/*<Box>
                     <Typography gutterBottom>
                         Video scale at processing stage
                         <InfoTextPopover
@@ -250,9 +251,10 @@ export default function DetectionCameraConfiguration() {
                             ? `resize was W ${cameraResize.width} x H ${cameraResize.height}`
                             : `did not resize`}
                     </Typography>
-                </Box>
+                </Box>*/}
 
-                <Box
+                {/* Automatic */}
+                {/*<Box
                     sx={{
                         mt: '20px',
                     }}>
@@ -276,10 +278,11 @@ export default function DetectionCameraConfiguration() {
                         fullWidth
                         data={{ ...commonData, path: 'minimumChangeThreshold' }}
                     />
-                </Box>
+                </Box>*/}
             </Grid>
 
-            <Grid item xs={12} sm={12} md={6}>
+            {/* Automatic */}
+            {/*<Grid item xs={12} sm={12} md={6}>
                 <Typography gutterBottom>Threshold increase factor</Typography>
 
                 <Typography
@@ -301,7 +304,7 @@ export default function DetectionCameraConfiguration() {
                         path: 'increaseThresholdFactor',
                     }}
                 />
-            </Grid>
+            </Grid>*/}
 
             {/* Not used in recognize */}
             {/*<Grid item xs={12} sm={12} md={4}>

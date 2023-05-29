@@ -122,12 +122,12 @@ export default function BlobDetectorParametersConfiguration() {
                 />
             </Grid>
             <Grid item xs={12}>
-                <Typography>
-                    Initial and Maximum life of a blob, in number of frames
-                </Typography>
+                <Typography>Occlusion waiting time</Typography>
                 <Typography variant="body2" color={'GrayText'} gutterBottom>
-                    When a blob disappears from view, we wait a certain time
-                    until it reappears, if this time expires we forget it.
+                    During this waiting period, we keep track of the time
+                    elapsed until the object comes back into view. If the
+                    specified waiting time elapses before the object reappears,
+                    we consider it forgotten or no longer relevant.
                 </Typography>
                 <SliderConfigurationField
                     sx={{ width: '98%' }}
@@ -142,16 +142,19 @@ export default function BlobDetectorParametersConfiguration() {
                         },
                         {
                             value: cameraDefaults.fps,
-                            label: 'Camera FPS',
+                            label: '1s',
                         },
                         {
                             value: cameraDefaults.fps * 5,
-                            label: '5 x FPS',
+                            label: '5s',
                         },
                     ]}
                     max={cameraDefaults.fps * 5}
                     min={0}
                     step={1}
+                    valueLabelFormat={(v: number) =>
+                        (v / cameraDefaults.fps).toFixed(2) + 's'
+                    }
                     valueLabelDisplay="auto"
                     disabled={loading}
                 />
