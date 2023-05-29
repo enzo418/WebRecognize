@@ -12,8 +12,10 @@ import {
     Box,
     Button,
     ButtonGroup,
+    Fade,
     IconButton,
     Skeleton,
+    Stack,
     Tooltip,
     Typography,
 } from '@mui/material';
@@ -51,6 +53,14 @@ enum Mode {
     DELETE,
 }
 
+enum State {
+    IDLE = ' ',
+    DRAWING_POLYGON = '  ',
+    LOADING_PREVIEW = 'loading preview...',
+    SAVING = 'saving changes...',
+    SAVED = 'changes saved',
+}
+
 export default function MasksCanvasInputField(
     props: MasksCanvasInputFieldProps,
 ) {
@@ -62,6 +72,7 @@ export default function MasksCanvasInputField(
         height: 0,
     });
     const [mode, setMode] = useState<Mode>(Mode.ADD);
+    const [state, setState] = useState<State>(State.IDLE);
 
     const id = props.camera_id;
 
@@ -75,6 +86,8 @@ export default function MasksCanvasInputField(
         // wait until it's calculated
         if (calculatedCanvasSize.width * calculatedCanvasSize.height == 0)
             return;
+
+        setState(State.LOADING_PREVIEW);
 
         setLoading(true);
 
@@ -105,6 +118,8 @@ export default function MasksCanvasInputField(
                                 );
 
                                 setLoading(false);
+
+                                setState(State.IDLE);
                             })
                             .fail(e =>
                                 console.error(
@@ -172,6 +187,8 @@ export default function MasksCanvasInputField(
     }, [props.camera_id, calculatedCanvasSize]);
 
     const onMasksChanged = (masks: Mask[]) => {
+        setState(State.SAVING);
+
         // We need to get the resize again because it might have been changed here or by another user
         cameraService
             .getDefaults(id)
@@ -188,6 +205,7 @@ export default function MasksCanvasInputField(
                     ])
                     .ok(() => {
                         if (props.onMasksUpdated) props.onMasksUpdated();
+                        setState(State.SAVED);
                     })
                     .fail(e => console.error('Could not update masks', e));
             })
@@ -204,52 +222,99 @@ export default function MasksCanvasInputField(
         setMode(pMode);
     };
 
+    const onPolyStarted = () => {
+        setState(State.DRAWING_POLYGON);
+    };
+
+    const getStateHelpText = () => {
+        if (state == State.IDLE) {
+            switch (mode) {
+                case Mode.ADD:
+                    return 'Click in the image to add a point';
+                case Mode.DELETE:
+                    return 'Click on an area to delete it';
+                default:
+                    return '';
+            }
+        } else if (state == State.DRAWING_POLYGON && mode == Mode.ADD) {
+            return 'Connect the polygon ends to save it';
+        } else if (state.trim().length > 0) {
+            return state;
+        }
+    };
+
     return (
         <>
-            <ButtonGroup
-                sx={{
-                    display: props.showButtons ? 'auto' : 'none',
-                    ml: '3px',
-                }}
-                ref={buttonHeaderRef}
-                variant="text">
-                <Tooltip title="enter add points mode">
-                    <Button
-                        onClick={() => onChangeMode(Mode.ADD)}
-                        variant={mode == Mode.ADD ? 'contained' : 'outlined'}
-                        color="success"
-                        aria-label=""
-                        startIcon={<AddCircleOutline />}></Button>
-                </Tooltip>
+            <Stack direction="row" spacing={2} justifyContent="space-between">
+                <ButtonGroup
+                    sx={{
+                        display: props.showButtons ? 'auto' : 'none',
+                        ml: '3px',
+                    }}
+                    ref={buttonHeaderRef}
+                    variant="text">
+                    <Tooltip title="enter add points mode">
+                        <Button
+                            onClick={() => onChangeMode(Mode.ADD)}
+                            variant={
+                                mode == Mode.ADD ? 'contained' : 'outlined'
+                            }
+                            color="success"
+                            aria-label=""
+                            startIcon={<AddCircleOutline />}></Button>
+                    </Tooltip>
 
-                <Tooltip title="Enter delete mode (click on a mask to delete it)">
-                    <Button
-                        variant={mode == Mode.DELETE ? 'contained' : 'outlined'}
-                        onClick={() => onChangeMode(Mode.DELETE)}
-                        color="warning"
-                        startIcon={<Delete />}></Button>
-                </Tooltip>
+                    <Tooltip title="Enter delete mode (click on a mask to delete it)">
+                        <Button
+                            variant={
+                                mode == Mode.DELETE ? 'contained' : 'outlined'
+                            }
+                            onClick={() => onChangeMode(Mode.DELETE)}
+                            color="warning"
+                            startIcon={<Delete />}></Button>
+                    </Tooltip>
 
-                <Tooltip title="undo last action">
-                    <IconButton
-                        onClick={() => canvasHandlerRef.current?.undo()}>
-                        <Undo />
-                    </IconButton>
-                </Tooltip>
+                    <Tooltip title="undo last action">
+                        <IconButton
+                            onClick={() => canvasHandlerRef.current?.undo()}>
+                            <Undo />
+                        </IconButton>
+                    </Tooltip>
 
-                <Tooltip title="redo last action">
-                    <IconButton
-                        onClick={() => canvasHandlerRef.current?.redo()}>
-                        <Redo />
-                    </IconButton>
-                </Tooltip>
+                    <Tooltip title="redo last action">
+                        <IconButton
+                            onClick={() => canvasHandlerRef.current?.redo()}>
+                            <Redo />
+                        </IconButton>
+                    </Tooltip>
 
-                <Tooltip title="exit edit mode">
-                    <IconButton onClick={() => props.onExit && props.onExit()}>
-                        <CloseFullscreen />
-                    </IconButton>
-                </Tooltip>
-            </ButtonGroup>
+                    <Tooltip title="exit edit mode">
+                        <IconButton
+                            onClick={() => props.onExit && props.onExit()}>
+                            <CloseFullscreen />
+                        </IconButton>
+                    </Tooltip>
+                </ButtonGroup>
+
+                {/* Show state */}
+                {props.showButtons && (
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            pr:
+                                screen.width > props.canvasSize.width
+                                    ? '20%'
+                                    : '20px',
+                            pl: '10px',
+                            //backgroundColor: state === '' ? '' : '#0f0f0f',
+                        }}
+                        color={'white'}>
+                        {getStateHelpText()}
+                    </Typography>
+                )}
+            </Stack>
 
             {loading ? (
                 <Skeleton
@@ -268,6 +333,7 @@ export default function MasksCanvasInputField(
                             onPolygonsChanged={onMasksChanged}
                             canvasSize={calculatedCanvasSize}
                             fullScreen={props.fullScreen}
+                            onPolyStarted={onPolyStarted}
                         />
                     )}
                 </>

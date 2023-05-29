@@ -14,6 +14,9 @@ interface CanvasHandlerPolyProps {
 
     // Called when a polygon was added, takes all the polygons as parameter
     onPolygonsChanged: (polys: Polygon[]) => any;
+
+    // Called when the user starts drawing a new polygon
+    onPolyStarted?: () => any;
 }
 
 export default class CanvasHandlerPOLY extends CanvasHandler<CanvasHandlerPolyProps> {
@@ -201,6 +204,10 @@ export default class CanvasHandlerPOLY extends CanvasHandler<CanvasHandlerPolyPr
                 }
             }
         } else {
+            if (this.currentPoly.length == 0) {
+                this.props.onPolyStarted?.();
+            }
+
             this.currentPoly.push({ x, y });
 
             const epsilon = 5;
