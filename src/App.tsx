@@ -176,7 +176,8 @@ function App() {
                                             <Route
                                                 path="detection"
                                                 element={
-                                                    <DetectionCameraConfiguration />
+                                                    //<DetectionCameraConfiguration />
+                                                    <AreasCameraConfiguration />
                                                 }></Route>
                                             {/* <Route path="output" element={<p>camera output</p>}></Route>*/}
                                             <Route
@@ -184,11 +185,11 @@ function App() {
                                                 element={
                                                     <p>camera processing</p>
                                                 }></Route>
-                                            <Route
+                                            {/*<Route
                                                 path="areas"
                                                 element={
                                                     <AreasCameraConfiguration />
-                                                }></Route>
+                                                }></Route>*/}
                                             <Route
                                                 path="blobs"
                                                 element={<Outlet />}>

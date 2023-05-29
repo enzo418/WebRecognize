@@ -126,18 +126,13 @@ const getBasicConfigurationMenu = () => {
                 {
                     to: 'detection',
                     primary: 'Detection',
-                    icon: <TrackChangesIcon />,
+                    icon: <FormatShapesIcon />,
                 },
                 // {
                 //    to: 'output',
                 //    primary: 'Output',
                 //    icon: <MonitorIcon />,
                 // },
-                {
-                    to: 'areas',
-                    primary: 'Areas',
-                    icon: <FormatShapesIcon />,
-                },
                 {
                     to: 'blobs',
                     primary: 'Blobs',

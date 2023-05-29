@@ -1,13 +1,18 @@
 import { CloseFullscreen } from '@mui/icons-material';
-import { Box, Button, Dialog, Stack, Typography } from '@mui/material';
+import { Box, Button, Dialog, Grid, Stack, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useConfiguration } from '../../context/configurationContext';
 import { HelpPopover } from '../IconPopover';
 import InfoCard from '../InfoCard';
 import MasksCanvasInputField from './Fields/MasksCanvasInputField';
+import {
+    SliderConfigurationField,
+    TextConfigurationField,
+} from './configurationField';
 
 export default function AreasCameraConfiguration() {
-    const { params, updateCB, getFieldCB } = useConfiguration();
+    const { params, updateCB, getFieldCB, getInitialValue } =
+        useConfiguration();
 
     const [showModalMasks, setShowModalMasks] = useState<boolean>(false);
 
@@ -15,6 +20,13 @@ export default function AreasCameraConfiguration() {
     const [masksForceReload, setMasksForceReload] = useState<number>(0);
 
     const refModalMasks = React.createRef<HTMLDivElement>();
+
+    const commonData = {
+        getFieldCB,
+        updateCB,
+        getInitialValue,
+        camera: params?.camera_id,
+    };
 
     const isBiggerThanMD = screen.width >= 900; // by default md is 900
 
@@ -47,13 +59,58 @@ export default function AreasCameraConfiguration() {
         document.exitFullscreen();
     };
 
-    return (
-        <Box>
-            <Typography></Typography>
+    const maxSensibility = 100;
 
-            <Stack direction="column">
+    return (
+        <Grid container spacing={{ xs: 2, md: 2 }}>
+            <Grid item xs={12} md={12} sx={{ mb: '40px' }}>
+                <Typography gutterBottom>Sensibility</Typography>
+
+                <Typography
+                    variant="body2"
+                    color={'GrayText'}
+                    sx={{ mb: '10px' }}>
+                    This field helps to improve detection accuracy. Low
+                    sensibility value ({'<'} 40%) may cause the system to miss
+                    some events, and value too large ({'>'} 80%) may cause it to
+                    analyze false positives, resulting in wasted CPU time.
+                </Typography>
+
+                <Stack direction="row" spacing={{ xs: 1, md: 2 }}>
+                    {/* NOTE: IT'S REVERSED for ease of use. */}
+                    <SliderConfigurationField
+                        sx={{ margin: '0 5%', width: '90%' }}
+                        data={{
+                            ...commonData,
+                            path: 'processingConfiguration/noiseThreshold',
+                            beforeSendValue: (v: number) => maxSensibility - v,
+                        }}
+                        marks={[
+                            {
+                                value: 0,
+                                label: 'disable detection',
+                            },
+                            {
+                                value: 55,
+                                label: 'recommended',
+                            },
+                            {
+                                value: maxSensibility,
+                                label: 'MAX',
+                            },
+                        ]}
+                        max={maxSensibility}
+                        min={0}
+                        step={1}
+                        valueLabelFormat={(v: number) => v + '%'}
+                        valueLabelDisplay="auto"
+                    />
+                </Stack>
+            </Grid>
+
+            <Grid item xs={12} sx={{ overscrollBehavior: 'none' }}>
                 <Typography>
-                    Camera masks
+                    Detection zones
                     <Typography
                         variant="body2"
                         color={'GrayText'}
@@ -89,7 +146,7 @@ export default function AreasCameraConfiguration() {
                     onMasksUpdated={() => {}}
                     canvasSize={fitInScreenWithRatio169}
                 />
-            </Stack>
+            </Grid>
 
             {/* Full screen modal for mobile users */}
             <Dialog
@@ -110,6 +167,6 @@ export default function AreasCameraConfiguration() {
                     onExit={onMasksExit}
                 />
             </Dialog>
-        </Box>
+        </Grid>
     );
 }
