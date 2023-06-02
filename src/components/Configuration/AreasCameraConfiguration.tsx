@@ -76,6 +76,8 @@ export default function AreasCameraConfiguration() {
                     analyze false positives, resulting in wasted CPU time.
                 </Typography>
 
+                {/* SHOW DEMO !! */}
+
                 <Stack direction="row" spacing={{ xs: 1, md: 2 }}>
                     {/* NOTE: IT'S REVERSED for ease of use. */}
                     <SliderConfigurationField

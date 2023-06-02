@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { ReactEventHandler } from 'react';
 import config from '../config';
 
 interface LiveViewProps {
     onLoad: any;
     style?: object;
-    feedID: string;
+    source: {
+        cameraID?: string;
+        uri?: string;
+        observer?: boolean;
+    };
+    onError?: ReactEventHandler<HTMLImageElement>;
 }
 
 interface LiveViewState {
@@ -21,65 +26,45 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
         super(props);
 
         this.image = React.createRef();
-    }
 
-    onImageLoaded = (e: any) => {
-        // Moz.org: Browsers will release object URLs automatically
-        // when the document is unloaded; however, for optimal
-        // performance and memory usage, if there are safe times
-        // when you can explicitly unload them, you should do so.
-        URL.revokeObjectURL(this.image.current.src);
-
-        this.props.onLoad(e);
-    };
-
-    componentDidMount() {
-        if (this.state.socket == null) {
-            console.log('connecting to socket');
-            this.setState({
-                socket: this.getAndSetLiveView(this.props.feedID),
-            });
+        if (
+            this.props.source === undefined ||
+            (this.props.source.cameraID === undefined &&
+                this.props.source.observer === undefined &&
+                this.props.source.uri === undefined)
+        ) {
+            throw new Error(
+                'LiveView component must have at least one of the following props: cameraID, uri, observer',
+            );
         }
     }
 
-    componentWillUnmount() {
-        this.state.socket?.close();
-    }
-
-    getAndSetLiveView = (feed: string) => {
-        const socket = new WebSocket(
-            `${config.endpoints.websocket.liveView}${feed}`,
-        );
-
-        // set socket as binary
-        socket.binaryType = 'blob';
-
-        // Listen for frames
-        socket.addEventListener('message', event => {
-            // - Blob:
-            // eslint-disable-next-line max-len
-            //   https://developer.mozilla.org/en-US/docs/Web/API/Blob#creating_a_url_representing_the_contents_of_a_typed_array
-            // - Blob to file:
-            // eslint-disable-next-line max-len
-            //   https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications#example_using_object_urls_to_display_images
-
-            // console.log(event.data);
-            const blob = new Blob([event.data], { type: 'image/jpeg' });
-
-            if (this.image.current) {
-                this.image.current.src = URL.createObjectURL(blob);
-            }
-        });
-
-        return socket;
+    onImageLoaded = (e: any) => {
+        this.props.onLoad(e);
     };
 
+    componentDidMount() {}
+
+    componentWillUnmount() {}
+
     render() {
+        const url =
+            config.server +
+            (this.props.source.observer
+                ? config.endpoints.api.stream.observer
+                : this.props.source.cameraID !== undefined
+                ? config.endpoints.api.stream.camera +
+                  this.props.source.cameraID
+                : config.endpoints.api.stream.uri +
+                  '?uri=' +
+                  encodeURI(this.props.source.uri as string));
         return (
             <img
                 ref={this.image}
                 onLoad={this.onImageLoaded}
-                style={this.props.style || {}}></img>
+                onError={this.props.onError}
+                style={this.props.style || {}}
+                src={url}></img>
         );
     }
 }

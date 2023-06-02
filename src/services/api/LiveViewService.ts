@@ -16,7 +16,7 @@ export default class LiveViewService
     public getCameraView(camera_id: string) {
         return processPromise<{ ws_feed_id: string }, IProblemJson>(
             this.client.get(
-                this.baseUrl + '/camera/' + camera_id + '/stream',
+                this.baseUrl + '/camera/' + camera_id + '/request_stream',
                 {},
             ),
         );

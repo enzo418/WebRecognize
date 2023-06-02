@@ -5,7 +5,11 @@ import LiveView from '../modules/LiveView';
 import { liveViewService } from '../services/api/Services';
 
 interface LiveViewBoxProps {
-    camera_id: string;
+    source: {
+        cameraID?: string;
+        uri?: string;
+        observer?: boolean;
+    };
     componentOnError?: (error: string) => any;
     keepSkeletonOnError?: boolean;
     style?: object;
@@ -15,7 +19,6 @@ interface LiveViewBoxState {
     loading: boolean;
     firstImageLoaded: boolean;
     error: string;
-    feedID: string;
 }
 
 export default class LiveViewBox extends React.Component<
@@ -25,7 +28,6 @@ export default class LiveViewBox extends React.Component<
     lastPendingPromise: any;
 
     state: LiveViewBoxState = {
-        feedID: '',
         loading: true,
         error: '',
         firstImageLoaded: false,
@@ -35,38 +37,7 @@ export default class LiveViewBox extends React.Component<
         super(props);
 
         this.onImageLoaded = this.onImageLoaded.bind(this);
-    }
-
-    updateLiveFeed() {
-        if (!this.props.camera_id || this.props.camera_id.length == 0) return;
-
-        this.lastPendingPromise = liveViewService
-            .getCameraView(this.props.camera_id)
-            .ok(data => {
-                this.setState({
-                    feedID: data.ws_feed_id,
-                    error: '',
-                    loading: false,
-                });
-            })
-            .fail(err => {
-                console.log('Live view camera error: ', err);
-                this.setState({
-                    error: err.title || 'unknown error',
-                    loading: false,
-                });
-            });
-    }
-
-    componentDidMount() {
-        this.updateLiveFeed();
-    }
-
-    componentDidUpdate(prevProps: LiveViewBoxProps) {
-        // Typical usage (don't forget to compare props):
-        if (this.props.camera_id !== prevProps.camera_id) {
-            this.updateLiveFeed();
-        }
+        this.onError = this.onError.bind(this);
     }
 
     componentWillUnmount(): void {
@@ -77,8 +48,13 @@ export default class LiveViewBox extends React.Component<
 
     onImageLoaded(): void {
         if (!this.state.firstImageLoaded) {
-            this.setState({ firstImageLoaded: true });
+            this.setState({ firstImageLoaded: true, loading: false });
         }
+    }
+
+    onError(e: any) {
+        console.error(e);
+        this.setState({ error: 'Error loading live view' });
     }
 
     render() {
@@ -93,10 +69,11 @@ export default class LiveViewBox extends React.Component<
                         />
                     )}
 
-                {this.state.error.length == 0 && !this.state.loading && (
+                {this.state.error.length == 0 && (
                     <LiveView
-                        feedID={this.state.feedID}
+                        source={this.props.source}
                         onLoad={this.onImageLoaded}
+                        onError={this.onError}
                         style={this.props.style}></LiveView>
                 )}
 

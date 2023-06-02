@@ -398,7 +398,7 @@ export default function CameraBasics() {
                             borderRadius: '9px',
                             boxShadow: '0px 0px 2px 3px #0e0e11f7',
                         }}
-                        camera_id={commonData.camera}
+                        source={{ cameraID: commonData.camera }}
                         keepSkeletonOnError={true}
                     />
                 )}

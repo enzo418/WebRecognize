@@ -2,7 +2,7 @@ import { Box, Skeleton, Typography } from '@mui/material';
 import React from 'react';
 import config from '../config';
 import LiveView from '../modules/LiveView';
-import { liveViewService } from '../services/api/Services';
+import { liveViewService, observerService } from '../services/api/Services';
 import TypedPromise from '../TypedPromise';
 
 interface LiveViewPageProps {}
@@ -10,7 +10,8 @@ interface LiveViewPageProps {}
 interface LiveViewPageState {
     loading: boolean;
     error: string;
-    feedsID: string[];
+    firstImageLoaded: boolean;
+    observerRunning: boolean;
 }
 
 export default class LiveViewPage extends React.Component<
@@ -18,35 +19,29 @@ export default class LiveViewPage extends React.Component<
     LiveViewPageState
 > {
     state: LiveViewPageState = {
-        feedsID: [],
         loading: true,
+        firstImageLoaded: false,
         error: '',
+        observerRunning: false,
     };
 
     constructor(props: LiveViewPageProps) {
         super(props);
     }
 
-    componentDidMount() {
-        liveViewService
-            .getAllCamerasView()
-            .ok(data => {
-                this.setState(prev => {
-                    if (prev.feedsID.indexOf(data.ws_feed_id) < 0) {
-                        prev.feedsID.push(data.ws_feed_id);
-                    }
+    componentDidMount(): void {
+        observerService
+            .status()
+            .ok(status => {
+                if (status.running) {
+                    this.setState({ observerRunning: true });
+                }
 
-                    return {
-                        loading: false,
-                        error: '',
-                        feedsID: prev.feedsID,
-                    };
-                });
+                this.setState({ loading: false });
             })
-            .fail(err => {
-                console.log('Live view page error: ', err);
+            .catch(e => {
                 this.setState({
-                    error: err.title || 'unknown error',
+                    error: 'Error loading observer status',
                     loading: false,
                 });
             });
@@ -55,19 +50,35 @@ export default class LiveViewPage extends React.Component<
     render() {
         return (
             <Box sx={{ padding: '10px' }}>
-                {this.state.error.length == 0 && this.state.loading ? (
+                {this.state.error.length == 0 && this.state.loading && (
                     <Skeleton variant="rectangular" width={640} height={360} />
-                ) : (
-                    this.state.feedsID.map(feedID => (
-                        <LiveView
-                            key={feedID}
-                            feedID={feedID}
-                            onLoad={() => {}}
-                            style={{}}></LiveView>
-                    ))
                 )}
+
+                {this.state.observerRunning && (
+                    <LiveView
+                        source={{
+                            observer: true,
+                        }}
+                        onLoad={() => {
+                            if (!this.state.firstImageLoaded)
+                                this.setState({ firstImageLoaded: true });
+                        }}
+                        onError={e =>
+                            this.setState({
+                                error: `Error loading live view: "${e}"`,
+                            })
+                        }
+                        style={{}}></LiveView>
+                )}
+
                 {this.state.error.length != 0 && (
                     <Typography>ERROR {this.state.error}</Typography>
+                )}
+
+                {!this.state.observerRunning && (
+                    <Typography>
+                        Observer is not running. Please start it.
+                    </Typography>
                 )}
             </Box>
         );

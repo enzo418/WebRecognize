@@ -9,7 +9,12 @@ const config = {
             notification: '/api/notifications',
             liveViewObserver: '/api/requestObserverStream',
             liveViewCamera: '/api/requestCameraStream',
-            streamBuffer: '/stream/buffer/',
+            streamBuffer: '/stream/buffer/', // tf?
+            stream: {
+                camera: '/api/stream/camera/',
+                observer: '/api/stream/observer',
+                uri: '/api/stream/source/',
+            },
         },
         websocket: {
             notification: `ws://${host}:${port}/notifications`,
