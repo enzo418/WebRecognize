@@ -1,9 +1,11 @@
-import { Box, Skeleton, Typography } from '@mui/material';
+import { Box, Fade, Skeleton, Stack, Typography } from '@mui/material';
 import React from 'react';
 import config from '../config';
 import LiveView from '../modules/LiveView';
 import { liveViewService, observerService } from '../services/api/Services';
 import TypedPromise from '../TypedPromise';
+import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
+import { Link } from 'react-router-dom';
 
 interface LiveViewPageProps {}
 
@@ -49,7 +51,7 @@ export default class LiveViewPage extends React.Component<
 
     render() {
         return (
-            <Box sx={{ padding: '10px' }}>
+            <Box sx={{ padding: '0', height: '100%' }}>
                 {this.state.error.length == 0 && this.state.loading && (
                     <Skeleton variant="rectangular" width={640} height={360} />
                 )}
@@ -68,7 +70,7 @@ export default class LiveViewPage extends React.Component<
                                 error: `Error loading live view: "${e}"`,
                             })
                         }
-                        style={{}}></LiveView>
+                        style={{ padding: '10px' }}></LiveView>
                 )}
 
                 {this.state.error.length != 0 && (
@@ -76,9 +78,25 @@ export default class LiveViewPage extends React.Component<
                 )}
 
                 {!this.state.observerRunning && (
-                    <Typography>
-                        Observer is not running. Please start it.
-                    </Typography>
+                    <Fade in={true} timeout={1000}>
+                        <Stack
+                            direction={'column'}
+                            alignItems={'center'}
+                            justifyContent={'center'}
+                            height={'100%'}
+                            spacing={2}>
+                            <SettingsInputAntennaIcon sx={{ fontSize: 50 }} />
+
+                            <Typography variant="h4" gutterBottom>
+                                Observer is not running
+                            </Typography>
+
+                            <Typography variant="body1" gutterBottom>
+                                The observer is not running. You can start it
+                                from <Link to="/dashboard"> here</Link>
+                            </Typography>
+                        </Stack>
+                    </Fade>
                 )}
             </Box>
         );
