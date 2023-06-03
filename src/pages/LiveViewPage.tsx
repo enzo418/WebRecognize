@@ -39,7 +39,7 @@ export default class LiveViewPage extends React.Component<
 
                 this.setState({ loading: false });
             })
-            .catch(e => {
+            .catch(() => {
                 this.setState({
                     error: 'Error loading observer status',
                     loading: false,

@@ -91,4 +91,10 @@ export default class ConfigurationService
                 .fail(e => fail(e));
         });
     }
+
+    public exportConfiguration(configurationId: string) {
+        return processPromise<string, IProblemJson>(
+            this.client.get(this.baseUrl + configurationId + '/export', {}),
+        );
+    }
 }

@@ -420,12 +420,19 @@ export default function ConfigurationPage() {
                     justifyContent="center"
                     alignItems="center"
                     spacing={2}
-                    sx={{ pl: '0px' }}>
+                    sx={{
+                        pl: '0px',
+                        height: '100vh',
+                        flexWrap: 'nowrap',
+                        justifyContent: 'flex-start',
+                        overflow: 'hidden',
+                    }}>
                     {/* header */}
                     <Box
                         sx={{
                             width: '100%',
                             borderBottom: '1px solid #e5e6eb',
+                            position: 'sticky',
                         }}>
                         <Stack
                             direction="row"
@@ -446,13 +453,33 @@ export default function ConfigurationPage() {
                     <Grid
                         container
                         spacing={{ xs: 2, md: 2 }}
-                        // className="grid-padding-0"
-                        sx={{ overflowWrap: 'anywhere', pl: '0px' }}>
-                        <Grid item xs={12} md={2}>
+                        className={
+                            belowMD ? 'configuration-scroll-content' : ''
+                        }
+                        sx={{
+                            overflowWrap: 'anywhere',
+                            pl: '0px',
+                            height: '100%',
+                            margin: '0 !important',
+                            overflowY: belowMD ? 'scroll' : '',
+                        }}>
+                        {/* Configuration Nav */}
+                        <Grid
+                            item
+                            xs={12}
+                            md={3}
+                            sx={{
+                                paddingTop: '0px !important',
+                            }}>
                             <List
                                 sx={{
                                     width: '100%',
-                                    maxWidth: 360,
+                                    maxWidth: belowMD ? '' : 360,
+                                    borderRight: belowMD
+                                        ? ''
+                                        : '1px solid #e5e6eb',
+                                    height: '100%',
+                                    position: belowMD ? '' : 'sticky',
                                 }}
                                 component="nav"
                                 className="list-configurations">
@@ -463,15 +490,20 @@ export default function ConfigurationPage() {
                                 )}
                             </List>
                         </Grid>
+
+                        {/* Outlet */}
                         <Grid
                             item
                             xs
                             md
+                            className="configuration-scroll-content"
                             sx={{
-                                borderLeft: belowMD ? '' : '1px solid #e5e6eb',
                                 borderTop: belowMD ? '1px solid #e5e6eb' : '',
                                 width: '99%',
                                 pb: '60px',
+                                overflowY: belowMD ? 'visible' : 'scroll',
+                                height: '100%',
+                                paddingBottom: '150px',
                             }}>
                             <Outlet />
                         </Grid>

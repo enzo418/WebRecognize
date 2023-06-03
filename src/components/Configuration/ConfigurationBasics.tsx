@@ -5,6 +5,8 @@ import {
     Dialog,
     DialogTitle,
     DialogActions,
+    Stack,
+    Box,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +15,9 @@ import eventBus from '../../EventBus';
 import { Key, removeLocal } from '../../LocalStore';
 import { configurationService } from '../../services/api/Services';
 import { TextConfigurationField } from './configurationField';
+import downloadFromText from '../../utils/file';
+import IProblemJson from '../../services/api/interfaces/IProblemJson';
+import DownloadIcon from '@mui/icons-material/Download';
 
 export default function ConfigurationBasics() {
     const { params, updateCB, getFieldCB, getInitialValue } =
@@ -39,21 +44,88 @@ export default function ConfigurationBasics() {
             .fail(e => console.error("Couldn't delete the camera: ", e));
     };
 
+    const exportConfigurationToFile = () => {
+        configurationService
+            .exportConfiguration(params.id)
+            .ok(response => {
+                getFieldCB('name')
+                    .ok(name => {
+                        const filename =
+                            'configuration_' +
+                            name +
+                            '_' +
+                            new Date()
+                                .toLocaleDateString()
+                                .replaceAll('/', '_') +
+                            '.json';
+                        downloadFromText(filename, response);
+                    })
+                    .catch(() => {
+                        const filename = 'configuration_' + params.id + '.json';
+                        downloadFromText(filename, response);
+                    });
+            })
+            .catch((e: IProblemJson) =>
+                console.error("Couldn't export the configuration: ", e.title, {
+                    error: e,
+                }),
+            );
+    };
+
     return (
-        <Grid item xs={12} sm={12} md={8}>
-            <Grid item xs={12} sm={12} md={4}>
-                <TextConfigurationField
-                    label="name"
-                    variant="standard"
-                    fullWidth
-                    data={{
-                        ...commonData,
-                        path: 'name',
-                    }}
-                />
+        <Stack
+            direction="column"
+            justifyContent={'space-between'}
+            height={'100%'}>
+            <Grid item xs={12}>
+                <Grid item xs={11}>
+                    <TextConfigurationField
+                        label="name"
+                        variant="standard"
+                        fullWidth
+                        data={{
+                            ...commonData,
+                            path: 'name',
+                        }}
+                    />
+                </Grid>
+
+                <Dialog
+                    open={showDeleteConfigurationDialog}
+                    onClose={handleCloseDeleteDialog}
+                    aria-labelledby="delete-dialog-title"
+                    aria-describedby="delete-dialog-description">
+                    <DialogTitle id="delete-dialog-title">
+                        {'Delete configuration?'}
+                    </DialogTitle>
+                    {/*<DialogContent>
+                    <DialogContentText id="delete-dialog-description">
+                        It will be deleted forever
+                    </DialogContentText>
+                    </DialogContent>*/}
+                    <DialogActions>
+                        <Button onClick={handleCloseDeleteDialog} autoFocus>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleAcceptDeleteDialog}>YES</Button>
+                    </DialogActions>
+                </Dialog>
             </Grid>
 
-            <Grid item xs={12} paddingTop="10px">
+            <Stack
+                direction="row"
+                justifyContent={'space-around'}
+                sx={{
+                    position: 'sticky',
+                    bottom: 0,
+                }}>
+                <Button
+                    variant="contained"
+                    startIcon={<DownloadIcon />}
+                    onClick={exportConfigurationToFile}>
+                    Export
+                </Button>
+
                 <Button
                     variant="contained"
                     color="warning"
@@ -61,28 +133,7 @@ export default function ConfigurationBasics() {
                     onClick={() => setShowDeleteConfigurationDialog(true)}>
                     Delete configuration
                 </Button>
-            </Grid>
-
-            <Dialog
-                open={showDeleteConfigurationDialog}
-                onClose={handleCloseDeleteDialog}
-                aria-labelledby="delete-dialog-title"
-                aria-describedby="delete-dialog-description">
-                <DialogTitle id="delete-dialog-title">
-                    {'Delete configuration?'}
-                </DialogTitle>
-                {/*<DialogContent>
-                    <DialogContentText id="delete-dialog-description">
-                        It will be deleted forever
-                    </DialogContentText>
-                    </DialogContent>*/}
-                <DialogActions>
-                    <Button onClick={handleCloseDeleteDialog} autoFocus>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleAcceptDeleteDialog}>YES</Button>
-                </DialogActions>
-            </Dialog>
-        </Grid>
+            </Stack>
+        </Stack>
     );
 }
