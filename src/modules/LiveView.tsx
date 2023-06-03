@@ -12,15 +12,12 @@ interface LiveViewProps {
     onError?: ReactEventHandler<HTMLImageElement>;
 }
 
-interface LiveViewState {
-    socket: WebSocket | null;
-}
+interface LiveViewState {}
 
 class LiveView extends React.Component<LiveViewProps, LiveViewState> {
     image: React.RefObject<any>;
-    state: LiveViewState = {
-        socket: null,
-    };
+    url: string;
+    state: LiveViewState = {};
 
     constructor(props: LiveViewProps) {
         super(props);
@@ -37,18 +34,8 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
                 'LiveView component must have at least one of the following props: cameraID, uri, observer',
             );
         }
-    }
 
-    onImageLoaded = (e: any) => {
-        this.props.onLoad(e);
-    };
-
-    componentDidMount() {}
-
-    componentWillUnmount() {}
-
-    render() {
-        const url =
+        this.url =
             config.server +
             (this.props.source.observer
                 ? config.endpoints.api.stream.observer
@@ -58,13 +45,33 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
                 : config.endpoints.api.stream.uri +
                   '?uri=' +
                   encodeURI(this.props.source.uri as string));
+    }
+
+    onImageLoaded = (e: any) => {
+        this.props.onLoad(e);
+    };
+
+    componentDidMount() {
+        console.info("LiveView's MOUNT");
+    }
+
+    componentWillUnmount() {
+        console.info("LiveView's UNMOUNT");
+
+        if (this.image.current) {
+            // Stop http stream
+            this.image.current.src = '';
+        }
+    }
+
+    render() {
         return (
             <img
                 ref={this.image}
                 onLoad={this.onImageLoaded}
                 onError={this.props.onError}
                 style={this.props.style || {}}
-                src={url}></img>
+                src={this.url}></img>
         );
     }
 }
