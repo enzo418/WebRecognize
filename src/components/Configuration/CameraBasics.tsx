@@ -393,7 +393,7 @@ export default function CameraBasics() {
                 {showLiveView && (
                     <LiveViewBox
                         key={url} // update if url changed
-                        style={{
+                        imageStyle={{
                             width: calculatedWidth,
                             borderRadius: '9px',
                             boxShadow: '0px 0px 2px 3px #0e0e11f7',

@@ -1,18 +1,14 @@
-import { Box, Skeleton, Typography } from '@mui/material';
+import { Box, Skeleton, SxProps, Theme, Typography } from '@mui/material';
 import React from 'react';
 import config from '../config';
-import LiveView from '../modules/LiveView';
+import LiveView, { LiveViewProps } from '../modules/LiveView';
 import { liveViewService } from '../services/api/Services';
 
-interface LiveViewBoxProps {
-    source: {
-        cameraID?: string;
-        uri?: string;
-        observer?: boolean;
-    };
+export interface LiveViewBoxProps extends LiveViewProps {
     componentOnError?: (error: string) => any;
     keepSkeletonOnError?: boolean;
-    style?: object;
+    forwardedRef?: any;
+    imageStyle?: object;
 }
 
 interface LiveViewBoxState {
@@ -21,10 +17,7 @@ interface LiveViewBoxState {
     error: string;
 }
 
-export default class LiveViewBox extends React.Component<
-    LiveViewBoxProps,
-    LiveViewBoxState
-> {
+class LiveViewBox extends React.Component<LiveViewBoxProps, LiveViewBoxState> {
     lastPendingPromise: any;
 
     state: LiveViewBoxState = {
@@ -59,7 +52,7 @@ export default class LiveViewBox extends React.Component<
 
     render() {
         return (
-            <>
+            <Box sx={this.props.style}>
                 {this.state.error.length == 0 &&
                     (this.state.loading || !this.state.firstImageLoaded) && (
                         <Skeleton
@@ -71,10 +64,11 @@ export default class LiveViewBox extends React.Component<
 
                 {this.state.error.length == 0 && (
                     <LiveView
+                        ref={this.props.forwardedRef}
                         source={this.props.source}
                         onLoad={this.onImageLoaded}
                         onError={this.onError}
-                        style={this.props.style}></LiveView>
+                        style={this.props.imageStyle}></LiveView>
                 )}
 
                 {this.state.error.length != 0 &&
@@ -84,7 +78,11 @@ export default class LiveViewBox extends React.Component<
                 {this.state.error.length != 0 && (
                     <Skeleton variant="rectangular" width={640} height={360} />
                 )}
-            </>
+            </Box>
         );
     }
 }
+
+export default React.forwardRef<LiveView, LiveViewBoxProps>((props, ref) => (
+    <LiveViewBox {...props} forwardedRef={ref} />
+));

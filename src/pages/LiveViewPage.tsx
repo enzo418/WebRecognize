@@ -6,6 +6,7 @@ import { liveViewService, observerService } from '../services/api/Services';
 import TypedPromise from '../TypedPromise';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import { Link } from 'react-router-dom';
+import LiveViewInteractiveBox from '../components/LiveViewInteractiveBox';
 
 interface LiveViewPageProps {}
 
@@ -51,13 +52,13 @@ export default class LiveViewPage extends React.Component<
 
     render() {
         return (
-            <Box sx={{ padding: '0', height: '100%' }}>
+            <Box sx={{ padding: '0', margin: 0, height: '100%' }}>
                 {this.state.error.length == 0 && this.state.loading && (
                     <Skeleton variant="rectangular" width={640} height={360} />
                 )}
 
                 {this.state.observerRunning && (
-                    <LiveView
+                    <LiveViewInteractiveBox
                         source={{
                             observer: true,
                         }}
@@ -69,8 +70,7 @@ export default class LiveViewPage extends React.Component<
                             this.setState({
                                 error: `Error loading live view: "${e}"`,
                             })
-                        }
-                        style={{ padding: '10px' }}></LiveView>
+                        }></LiveViewInteractiveBox>
                 )}
 
                 {this.state.error.length != 0 && (
