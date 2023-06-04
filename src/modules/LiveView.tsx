@@ -64,9 +64,9 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
         this.realSource = this.url;
     }
 
-    public stop() {
+    public stop(isUnmounting = false) {
         if (this.image.current) {
-            if (this.image.current.src == this.realSource) {
+            if (this.image.current.src == this.realSource && !isUnmounting) {
                 this.getCurrentAsUrl()
                     .ok(url => {
                         this.image.current.src = url;
@@ -79,6 +79,8 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
                             this.image.current.src = '';
                         }
                     });
+            } else {
+                this.image.current.src = emptyImage;
             }
         }
     }
@@ -100,7 +102,7 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
     componentDidMount() {}
 
     componentWillUnmount() {
-        this.stop();
+        this.stop(true);
     }
 
     private getCurrentAsUrl(): TypedPromise<string, string> {
