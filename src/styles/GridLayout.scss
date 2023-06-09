@@ -1,0 +1,15 @@
+.react-grid-item{
+    &:hover {
+        .grid-item-header-settings,.react-resizable-handle {
+            visibility: visible;
+        }
+    }
+
+    .grid-item-header {
+        transition: all 1s;
+    }
+
+    .grid-item-header-settings,.react-resizable-handle {
+        visibility: hidden;
+    }
+}

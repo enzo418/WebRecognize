@@ -3,6 +3,12 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
+import './App.scss';
+import './styles/Typography.scss';
+
+import '/node_modules/react-grid-layout/css/styles.css';
+import '/node_modules/react-resizable/css/styles.css';
+
 import React, { useEffect, useMemo, useState } from 'react';
 
 import Grid from '@mui/material/Grid';
@@ -18,9 +24,6 @@ import {
 } from 'react-router-dom';
 
 import Notifications from './pages/Notifications';
-
-import './App.scss';
-import './styles/Typography.scss';
 import {
     Box,
     createTheme,
@@ -28,7 +31,6 @@ import {
     ThemeProvider,
     useMediaQuery,
 } from '@mui/material';
-import LiveViewPage from './pages/LiveViewPage';
 import ConfigurationPage from './pages/ConfigurationPage';
 import { Stack } from '@mui/system';
 import CameraBasics from './components/Configuration/CameraBasics';
@@ -102,9 +104,9 @@ function App() {
                                 <Route
                                     path="/notifications"
                                     element={<Notifications />}></Route>
-                                <Route
+                                {/*<Route
                                     path="/liveView"
-                                    element={<LiveViewPage />}></Route>
+                                    element={<LiveViewPage />}></Route>*/}
                                 <Route
                                     path="/dashboard"
                                     element={<DashboardPage />}></Route>

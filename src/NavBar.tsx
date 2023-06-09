@@ -28,6 +28,7 @@ import { Dashboard } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { Badge } from '@mui/material';
 import { notificationService } from './services/api/Services';
+import svgToIcon from './utils/icons';
 
 interface ListItemLinkProps {
     icon?: React.ReactElement;
@@ -102,14 +103,18 @@ interface NavBarProps {
 const items = [
     {
         to: '/configuration/',
-        icon: <SettingsIcon />,
+        icon: svgToIcon('/icons/camera-cfg.svg'),
     },
     { to: '/notifications', icon: <NotificationsNoneIcon /> },
-    {
-        to: '/liveView',
-        icon: <SettingsInputAntennaIcon />,
-    },
+    //{
+    //    to: '/liveView',
+    //    icon: <SettingsInputAntennaIcon />,
+    //},
     { to: '/dashboard', icon: <Dashboard /> },
+    {
+        to: 'application/configuration',
+        icon: <SettingsIcon />,
+    },
 ];
 
 export default function NavBar(props: NavBarProps) {

@@ -1,11 +1,88 @@
 import { SettingsApplicationsOutlined } from '@mui/icons-material';
-import { Button, Grid, Stack, Theme } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import {
+    Box,
+    Button,
+    Grid,
+    IconButton,
+    Stack,
+    Theme,
+    Typography,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ToggleRecognizeButton from '../components/ToggleRecognizeButton';
 import { Key, saveLocal } from '../LocalStore';
 import DTOObserverStatus from '../services/api/interfaces/DTOObserverStatus';
 import { observerService } from '../services/api/Services';
+
+import '../styles/GridLayout.scss';
+
+import GridLayout from 'react-grid-layout';
+import LiveViewObserver from '../components/LiveViewObserver';
+import eventBus from '../EventBus';
+
+const CustomGridItemComponent = React.forwardRef(
+    (
+        {
+            title,
+            style,
+            onMouseDown,
+            onMouseUp,
+            onTouchEnd,
+            children,
+            ...props
+        }: any,
+        ref: any,
+    ) => {
+        return (
+            <Box
+                style={{ ...style }}
+                className={'grid-item'}
+                ref={ref}
+                onMouseDown={onMouseDown}
+                onMouseUp={onMouseUp}
+                onTouchEnd={onTouchEnd}
+                sx={{
+                    backgroundColor: (theme: Theme) =>
+                        theme.palette.mode === 'dark' ? '#171819' : '#f5f5f5',
+                    padding: '5px',
+                    '> .react-resizable-handle': {
+                        filter: (theme: Theme) =>
+                            theme.palette.mode === 'dark'
+                                ? 'invert(1)'
+                                : 'invert(0)',
+                    },
+                }}
+                {...props}>
+                <Stack
+                    className="grid-item-header"
+                    direction="row"
+                    sx={{
+                        width: '100%',
+                        color: (theme: Theme) => theme.palette.text.secondary,
+                        cursor: 'move',
+                    }}
+                    justifyContent={'space-between'}>
+                    <Typography variant={'body1'}>{title}</Typography>
+
+                    <IconButton
+                        aria-label="Settings"
+                        className="grid-item-header-settings"
+                        sx={{
+                            padding: 0,
+                            margin: 0,
+                            color: (theme: Theme) =>
+                                theme.palette.text.secondary,
+                        }}>
+                        <MoreVertIcon />
+                    </IconButton>
+                </Stack>
+                {children}
+            </Box>
+        );
+    },
+);
 
 export default function DashboardPage() {
     const [observerStatus, setObserverStatus] = useState<DTOObserverStatus>({
@@ -30,6 +107,8 @@ export default function DashboardPage() {
         lastPendingPromise = observerService
             .start(config_id)
             .ok(status => {
+                eventBus.dispatch('observer-status-changed', { running: true });
+
                 saveLocal(Key.LAST_CONFIGURATION_EXECUTED_ID, config_id);
                 setObserverStatus(status);
             })
@@ -43,7 +122,12 @@ export default function DashboardPage() {
     const onClickStop = () => {
         lastPendingPromise = observerService
             .stop()
-            .ok(status => setObserverStatus(status))
+            .ok(status => {
+                eventBus.dispatch('observer-status-changed', {
+                    running: false,
+                });
+                setObserverStatus(status);
+            })
             .fail(e => {
                 console.error('could not stop observer: ', e);
                 updateObserverStatus();
@@ -63,30 +147,35 @@ export default function DashboardPage() {
         navigate('/application/configuration');
     };
 
-    return (
-        <Grid sx={{ padding: '20px 6px' }}>
-            <Grid item xs={12} sm={12} md={12}>
-                <Stack direction={'row'} justifyContent={'space-between'}>
-                    <ToggleRecognizeButton
-                        status={observerStatus}
-                        onClickStart={onClickStart}
-                        onClickStop={onClickStop}
-                    />
+    const layout = [
+        { i: 'a', x: 0, y: 0, w: 3, h: 2, static: true },
+        { i: 'b', x: 3, y: 0, w: 5, h: 8, minH: 8 },
+    ];
 
-                    <Button
-                        variant="contained"
-                        startIcon={<SettingsApplicationsOutlined />}
-                        onClick={onNavigateToApplicationConfiguration}
-                        sx={{
-                            bgcolor: (theme: Theme) =>
-                                theme.palette.mode == 'light'
-                                    ? theme.palette.grey[700]
-                                    : theme.palette.grey[300],
-                        }}>
-                        Application settings
-                    </Button>
-                </Stack>
-            </Grid>
-        </Grid>
+    return (
+        <GridLayout
+            className="layout"
+            layout={layout}
+            cols={12}
+            rowHeight={30}
+            width={1200}
+            margin={[15, 15]}
+            draggableHandle=".grid-item-header">
+            <CustomGridItemComponent key="a" title="Observer control">
+                <ToggleRecognizeButton
+                    sx={{ padding: '20px' }}
+                    status={observerStatus}
+                    onClickStart={onClickStart}
+                    onClickStop={onClickStop}
+                />
+            </CustomGridItemComponent>
+
+            <CustomGridItemComponent key="b" title="Live">
+                <LiveViewObserver playerHeight={'90%'} />
+            </CustomGridItemComponent>
+
+            {/* TODO: Camera controls */}
+            {/* TODO: Movement charts */}
+        </GridLayout>
     );
 }

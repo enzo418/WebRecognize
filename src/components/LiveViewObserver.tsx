@@ -1,4 +1,13 @@
-import { Box, Fade, Skeleton, Stack, Typography } from '@mui/material';
+import {
+    Box,
+    Button,
+    Fade,
+    Skeleton,
+    Stack,
+    SxProps,
+    Theme,
+    Typography,
+} from '@mui/material';
 import React from 'react';
 import config from '../config';
 import LiveView from '../modules/LiveView';
@@ -6,33 +15,44 @@ import { liveViewService, observerService } from '../services/api/Services';
 import TypedPromise from '../TypedPromise';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import { Link } from 'react-router-dom';
-import LiveViewInteractiveBox from '../components/LiveViewInteractiveBox';
+import LiveViewInteractiveBox from './LiveViewInteractiveBox';
+import eventBus from '../EventBus';
 
-interface LiveViewPageProps {}
+interface LiveViewObserverProps {
+    sx?: SxProps<Theme>;
 
-interface LiveViewPageState {
+    playerHeight?: string;
+}
+
+interface LiveViewObserverState {
     loading: boolean;
     error: string;
-    firstImageLoaded: boolean;
     observerRunning: boolean;
 }
 
-export default class LiveViewPage extends React.Component<
-    LiveViewPageProps,
-    LiveViewPageState
+export default class LiveViewObserver extends React.Component<
+    LiveViewObserverProps,
+    LiveViewObserverState
 > {
-    state: LiveViewPageState = {
+    state: LiveViewObserverState = {
         loading: true,
-        firstImageLoaded: false,
         error: '',
         observerRunning: false,
     };
 
-    constructor(props: LiveViewPageProps) {
+    constructor(props: LiveViewObserverProps) {
         super(props);
+
+        this.observerChangedStatus = this.observerChangedStatus.bind(this);
+    }
+
+    observerChangedStatus({ running }: any) {
+        this.setState({ observerRunning: running, loading: false });
     }
 
     componentDidMount(): void {
+        eventBus.on('observer-status-changed', this.observerChangedStatus);
+
         observerService
             .status()
             .ok(status => {
@@ -50,9 +70,19 @@ export default class LiveViewPage extends React.Component<
             });
     }
 
+    componentWillUnmount(): void {
+        eventBus.remove('observer-status-changed', this.observerChangedStatus);
+    }
+
     render() {
         return (
-            <Box sx={{ padding: '0', margin: 0, height: '100%' }}>
+            <Box
+                sx={{
+                    padding: '0',
+                    margin: 0,
+                    height: '100%',
+                    ...this.props.sx,
+                }}>
                 {this.state.error.length == 0 && this.state.loading && (
                     <Skeleton variant="rectangular" width={640} height={360} />
                 )}
@@ -62,14 +92,14 @@ export default class LiveViewPage extends React.Component<
                         source={{
                             observer: true,
                         }}
-                        onLoad={() => {
-                            if (!this.state.firstImageLoaded)
-                                this.setState({ firstImageLoaded: true });
-                        }}
-                        onError={e =>
+                        onLoad={() => {}}
+                        onError={e => {
                             this.setState({
                                 error: `Error loading live view: "${e}"`,
-                            })
+                            });
+                        }}
+                        playerHeight={
+                            this.props.playerHeight
                         }></LiveViewInteractiveBox>
                 )}
 

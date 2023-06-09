@@ -20,6 +20,8 @@ interface LiveViewInteractiveBoxProps extends LiveViewBoxProps {
     showPIP?: boolean;
     showMiniPlayer?: boolean;
     showPlayStop?: boolean;
+
+    playerHeight?: string;
 }
 
 enum Mode {
@@ -103,18 +105,18 @@ export default function LiveViewInteractiveBox(
                 //paddingBottom: '18px',
                 backgroundColor: '#07060a4f',
                 width: 'fit-content',
-                height: 'fit-content',
+                height: props.playerHeight ? props.playerHeight : 'fit-content',
                 borderRadius: '3px',
                 boxShadow: '0px 1px 4px 0px rgb(36 35 35)',
             }}
             direction={'column'}>
-            <LiveViewBox
+            <LiveView
                 {...props}
                 ref={player}
-                style={{ overflow: 'hidden' }}
-                imageStyle={{
+                style={{
                     width: '100%',
                     height: '100%',
+                    overflow: 'overlay',
                 }}
             />
 
