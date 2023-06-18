@@ -257,8 +257,24 @@ export const TextConfigurationField = configurationField(
     '',
 );
 
+const customSelect = ({ InputProps, ...rest }: any) => {
+    return (
+        <>
+            <div
+                style={{
+                    position: 'absolute',
+                    right: '0px',
+                    top: '0px',
+                }}>
+                {InputProps.endAdornment}
+            </div>
+            <Select {...rest} />
+        </>
+    );
+};
+
 export const SelectConfigurationField = configurationField(
-    Select,
+    customSelect,
     fixSelectProps,
     '',
 );
@@ -295,7 +311,7 @@ function fixSelectProps(props: any) {
     props = removeChecked(props);
 
     delete props.helperText;
-    delete props.InputProps;
+    //delete props.InputProps;
 
     return props;
 }

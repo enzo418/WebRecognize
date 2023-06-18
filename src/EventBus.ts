@@ -1,3 +1,5 @@
+import DTOObserverStatus from './services/api/interfaces/DTOObserverStatus';
+
 type EventBusData = { id: string };
 
 interface EventTypes {
@@ -10,7 +12,7 @@ interface EventTypes {
     'camera-name-changed': EventBusData & { name: string };
     'notification-sound-volume-changed': number;
     'notification-sound-play': any;
-    'observer-status-changed': { running: boolean };
+    'observer-status-changed': DTOObserverStatus;
 }
 
 // CustomEvent and dispatching events

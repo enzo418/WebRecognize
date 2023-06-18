@@ -21,6 +21,7 @@ import '../styles/GridLayout.scss';
 import GridLayout from 'react-grid-layout';
 import LiveViewObserver from '../components/LiveViewObserver';
 import eventBus from '../EventBus';
+import CamerasStatus from '../components/CamerasStatus';
 
 const CustomGridItemComponent = React.forwardRef(
     (
@@ -70,6 +71,7 @@ const CustomGridItemComponent = React.forwardRef(
                         aria-label="Settings"
                         className="grid-item-header-settings"
                         sx={{
+                            borderRadius: '2px',
                             padding: 0,
                             margin: 0,
                             color: (theme: Theme) =>
@@ -88,6 +90,7 @@ export default function DashboardPage() {
     const [observerStatus, setObserverStatus] = useState<DTOObserverStatus>({
         running: false,
         config_id: '',
+        cameras: [],
     });
 
     const navigate = useNavigate();
@@ -107,7 +110,7 @@ export default function DashboardPage() {
         lastPendingPromise = observerService
             .start(config_id)
             .ok(status => {
-                eventBus.dispatch('observer-status-changed', { running: true });
+                eventBus.dispatch('observer-status-changed', status);
 
                 saveLocal(Key.LAST_CONFIGURATION_EXECUTED_ID, config_id);
                 setObserverStatus(status);
@@ -123,9 +126,7 @@ export default function DashboardPage() {
         lastPendingPromise = observerService
             .stop()
             .ok(status => {
-                eventBus.dispatch('observer-status-changed', {
-                    running: false,
-                });
+                eventBus.dispatch('observer-status-changed', status);
                 setObserverStatus(status);
             })
             .fail(e => {
@@ -149,7 +150,8 @@ export default function DashboardPage() {
 
     const layout = [
         { i: 'a', x: 0, y: 0, w: 3, h: 2, static: true },
-        { i: 'b', x: 3, y: 0, w: 5, h: 8, minH: 8 },
+        { i: 'b', x: 0, y: 1, w: 6, h: 9, minH: 8 },
+        { i: 'c', x: 6, y: 0, w: 4, h: 12, minH: 2 },
     ];
 
     return (
@@ -158,7 +160,7 @@ export default function DashboardPage() {
             layout={layout}
             cols={12}
             rowHeight={30}
-            width={1200}
+            width={screen.width * 0.97}
             margin={[15, 15]}
             draggableHandle=".grid-item-header">
             <CustomGridItemComponent key="a" title="Observer control">
@@ -174,7 +176,10 @@ export default function DashboardPage() {
                 <LiveViewObserver playerHeight={'90%'} />
             </CustomGridItemComponent>
 
-            {/* TODO: Camera controls */}
+            <CustomGridItemComponent key="c" title="Camera controls">
+                <CamerasStatus />
+            </CustomGridItemComponent>
+
             {/* TODO: Movement charts */}
         </GridLayout>
     );
