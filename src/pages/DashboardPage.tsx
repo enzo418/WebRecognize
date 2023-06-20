@@ -18,10 +18,12 @@ import { observerService } from '../services/api/Services';
 
 import '../styles/GridLayout.scss';
 
-import GridLayout from 'react-grid-layout';
+import GridLayout, { Responsive, WidthProvider } from 'react-grid-layout';
 import LiveViewObserver from '../components/LiveViewObserver';
 import eventBus from '../EventBus';
 import CamerasStatus from '../components/CamerasStatus';
+
+const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const CustomGridItemComponent = React.forwardRef(
     (
@@ -148,21 +150,32 @@ export default function DashboardPage() {
         navigate('/application/configuration');
     };
 
-    const layout = [
-        { i: 'a', x: 0, y: 0, w: 3, h: 2, static: true },
-        { i: 'b', x: 0, y: 1, w: 6, h: 9, minH: 8 },
-        { i: 'c', x: 6, y: 0, w: 4, h: 12, minH: 2 },
-    ];
+    const layout = {
+        xss: [
+            { i: 'a', x: 0, y: 0, w: 5.5, h: 1 },
+            { i: 'b', x: 0, y: 1, w: 5.5, h: 2 },
+            { i: 'c', x: 0, y: 2, w: 5.5, h: 1 },
+        ],
+        sm: [
+            { i: 'a', x: 0, y: 0, w: 4, h: 1 },
+            { i: 'b', x: 4, y: 0, w: 7, h: 2 },
+            { i: 'c', x: 0, y: 1, w: 8, h: 1 },
+        ],
+        lg: [
+            { i: 'a', x: 0, y: 0, w: 3, h: 1 },
+            { i: 'b', x: 3, y: 0, w: 8.5, h: 3 },
+            { i: 'c', x: 0, y: 1, w: 4, h: 1 },
+        ],
+    };
 
     return (
-        <GridLayout
+        <ResponsiveGridLayout
             className="layout"
-            layout={layout}
-            cols={12}
-            rowHeight={30}
-            width={screen.width * 0.97}
+            layouts={layout}
             margin={[15, 15]}
-            draggableHandle=".grid-item-header">
+            draggableHandle=".grid-item-header"
+            breakpoints={{ xl: 1536, lg: 1200, md: 900, sm: 600, xss: 0 }}
+            cols={{ xl: 12, lg: 12, md: 12, sm: 12, xs: 12, xss: 6 }}>
             <CustomGridItemComponent key="a" title="Observer control">
                 <ToggleRecognizeButton
                     sx={{ padding: '20px' }}
@@ -181,6 +194,6 @@ export default function DashboardPage() {
             </CustomGridItemComponent>
 
             {/* TODO: Movement charts */}
-        </GridLayout>
+        </ResponsiveGridLayout>
     );
 }
