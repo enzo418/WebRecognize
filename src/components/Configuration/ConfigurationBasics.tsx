@@ -58,11 +58,26 @@ export default function ConfigurationBasics() {
                                 .toLocaleDateString()
                                 .replaceAll('/', '_') +
                             '.json';
-                        downloadFromText(filename, response);
+                        if (typeof response === 'string') {
+                            downloadFromText(filename, response);
+                        } else {
+                            downloadFromText(
+                                filename,
+                                JSON.stringify(response),
+                            );
+                        }
                     })
                     .catch(() => {
                         const filename = 'configuration_' + params.id + '.json';
-                        downloadFromText(filename, response);
+
+                        if (typeof response === 'string') {
+                            downloadFromText(filename, response);
+                        } else {
+                            downloadFromText(
+                                filename,
+                                JSON.stringify(response),
+                            );
+                        }
                     });
             })
             .catch((e: IProblemJson) =>

@@ -53,12 +53,12 @@ export default function BlobValidateObjectDetectedConfiguration() {
     return (
         <Grid container spacing={4}>
             <Grid item xs={12}>
-                <InfoCard>
+                <Typography>
                     This configuration enables the automatic classification of
                     detections as valid or invalid based on the detected
                     objects. To make this functionality possible, an inference
                     server is necessary.
-                </InfoCard>
+                </Typography>
             </Grid>
 
             <Grid item xs={12} sm={12} md={12}>
