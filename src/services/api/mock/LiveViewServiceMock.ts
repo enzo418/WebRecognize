@@ -4,7 +4,7 @@ import processPromise, {
     processPromiseAsArrayBuffer,
 } from '../../../Http/ProcessPromise';
 import TypedPromise from '../../../TypedPromise';
-import ILiveViewService from '../interfaces/ILiveViewService';
+import ILiveViewService, { LiveViewType } from '../interfaces/ILiveViewService';
 import IProblemJson from '../interfaces/IProblemJson';
 import Service from '../Service';
 import { cameraToImageUrl } from './mockData';
@@ -51,6 +51,27 @@ export default class LiveViewServiceMock
                 ok({ ws_feed_id: 'all' });
             },
         );
+    }
+
+    public call(type: LiveViewType, data: string | null | undefined) {
+        return new TypedPromise<
+            { clientId: string; offer: string },
+            IProblemJson
+        >((ok, fail) => {
+            ok({ clientId: 'mock', offer: 'mock' });
+        });
+    }
+
+    public answer(client_id: string, answer: string | object) {
+        return new TypedPromise<void, IProblemJson>((ok, fail) => {
+            ok();
+        });
+    }
+
+    public hangUp(client_id: string) {
+        return new TypedPromise<void, IProblemJson>((ok, fail) => {
+            ok();
+        });
     }
 }
 

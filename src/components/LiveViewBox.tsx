@@ -3,8 +3,9 @@ import React from 'react';
 import config from '../config';
 import LiveView, { LiveViewProps } from '../modules/LiveView';
 import { liveViewService } from '../services/api/Services';
+import WebRTCLiveView, { WebRTCLiveViewProps } from '../modules/WebRTCLiveView';
 
-export interface LiveViewBoxProps extends LiveViewProps {
+export interface LiveViewBoxProps extends WebRTCLiveViewProps {
     componentOnError?: (error: string) => any;
     keepSkeletonOnError?: boolean;
     forwardedRef?: any;
@@ -63,12 +64,12 @@ class LiveViewBox extends React.Component<LiveViewBoxProps, LiveViewBoxState> {
                     )}
 
                 {this.state.error.length == 0 && (
-                    <LiveView
+                    <WebRTCLiveView
                         ref={this.props.forwardedRef}
                         source={this.props.source}
                         onLoad={this.onImageLoaded}
                         onError={this.onError}
-                        style={this.props.imageStyle}></LiveView>
+                        style={this.props.imageStyle}></WebRTCLiveView>
                 )}
 
                 {this.state.error.length != 0 &&

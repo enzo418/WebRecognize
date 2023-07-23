@@ -122,16 +122,6 @@ export default function NavBar(props: NavBarProps) {
 
     let location = useLocation();
 
-    const finalSx = {
-        ...{
-            bgcolor: 'background.paper',
-            overflowX: 'hidden',
-            borderRight: '1px solid #000',
-            borderColor: (theme: Theme) => theme.palette.divider,
-        },
-        ...(sx || {}),
-    };
-
     const [notificationBadgeContent, setNotificationBadgeContent] =
         useState<number>(0);
 
@@ -154,7 +144,17 @@ export default function NavBar(props: NavBarProps) {
     }, [location]);
 
     return (
-        <Box className="simple-bar" sx={finalSx} {...rest}>
+        <Box
+            className="simple-bar"
+            sx={{
+                // TODO: add a "muted" color, e.g. dark #0b0b0b
+                bgcolor: 'background.paper',
+                overflowX: 'hidden',
+                borderRight: '1px solid #000',
+                borderColor: (theme: Theme) => theme.palette.divider,
+                ...sx,
+            }}
+            {...rest}>
             <List sx={{ height: '100%' }} className="navbar-list">
                 {items.map(item => (
                     <ListItemLink

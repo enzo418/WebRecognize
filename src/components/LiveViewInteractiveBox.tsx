@@ -12,6 +12,7 @@ import PhotoSizeSelectLargeIcon from '@mui/icons-material/PhotoSizeSelectLarge';
 
 import '../styles/LiveViewInteractiveBox.scss';
 import LiveView from '../modules/LiveView';
+import WebRTCLiveView from '../modules/WebRTCLiveView';
 
 interface LiveViewInteractiveBoxProps extends LiveViewBoxProps {
     showControls?: boolean;
@@ -37,7 +38,7 @@ export default function LiveViewInteractiveBox(
     const [playing, setPlaying] = React.useState<boolean>(true);
     const [mode, setMode] = React.useState<Mode>(Mode.Normal);
 
-    const player = React.createRef<LiveView>();
+    const player = React.createRef<WebRTCLiveView>();
     const playerUI = React.createRef<HTMLDivElement>();
 
     const togglePlaying = () => {
@@ -55,34 +56,7 @@ export default function LiveViewInteractiveBox(
     const openPictureInPicture = () => {
         if (!player.current) return;
 
-        if (playing) {
-            togglePlaying();
-        }
-
-        const features =
-            'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=yes,width=400,height=300';
-        const newWindow = window.open('', '_blank', features);
-        if (!newWindow) return;
-
-        setMode(Mode.PictureInPicture);
-
-        newWindow.document.write(`
-        <html>
-            <head>
-            <title>Image Window</title>
-            </head>
-            <body style="margin:0">
-            <img src="${player.current.realSource}" alt="Image" style="display: block; width: 100%; height: 100%;">
-            </body>
-        </html>
-        `);
-
-        newWindow.addEventListener('beforeunload', () => {
-            console.log('closing pip... resuming player');
-            if (player.current && !playing) {
-                togglePlaying();
-            }
-        });
+        player.current.video.current?.requestPictureInPicture();
     };
 
     const toggleFullScreen = () => {
@@ -110,7 +84,7 @@ export default function LiveViewInteractiveBox(
                 boxShadow: '0px 1px 4px 0px rgb(36 35 35)',
             }}
             direction={'column'}>
-            <LiveView
+            <WebRTCLiveView
                 {...props}
                 ref={player}
                 style={{
