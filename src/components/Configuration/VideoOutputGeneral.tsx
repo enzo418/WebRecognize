@@ -1,7 +1,15 @@
-import { Box, FormControlLabel, Grid, Stack, Typography } from '@mui/material';
+import {
+    Box,
+    Divider,
+    FormControlLabel,
+    Grid,
+    Stack,
+    Typography,
+} from '@mui/material';
 import React from 'react';
 import { useConfiguration } from '../../context/configurationContext';
 import {
+    SliderConfigurationField,
     SwitchConfigurationField,
     TextConfigurationField,
 } from './configurationField';
@@ -12,8 +20,8 @@ export default function VideoOutputGeneral() {
     const commonData = { getFieldCB, updateCB, getInitialValue };
 
     return (
-        <Grid container spacing={{ xs: 2, md: 1 }}>
-            <Grid item xs={12} sm={12} md={4}>
+        <Grid container spacing={{ xs: 2, md: 4 }}>
+            <Grid item md={12}>
                 <FormControlLabel
                     control={
                         <SwitchConfigurationField
@@ -28,37 +36,7 @@ export default function VideoOutputGeneral() {
                 />
             </Grid>
 
-            <Grid item xs={12} sm={12} md={4}>
-                <FormControlLabel
-                    control={
-                        <SwitchConfigurationField
-                            data={{
-                                ...commonData,
-                                path: 'outputConfiguration/showIgnoredAreas',
-                                defaultValue: false,
-                            }}
-                        />
-                    }
-                    label="Show ignored areas in the output"
-                />
-            </Grid>
-
-            <Grid item xs={12} sm={12} md={4}>
-                <FormControlLabel
-                    control={
-                        <SwitchConfigurationField
-                            data={{
-                                ...commonData,
-                                path: 'outputConfiguration/showProcessedFrames',
-                                defaultValue: false,
-                            }}
-                        />
-                    }
-                    label="Show processed frames in the output"
-                />
-            </Grid>
-
-            <Grid item xs={12} sm={12} md={6}>
+            <Grid item md={12}>
                 <Box>
                     <Typography id="video-scale-slider" gutterBottom>
                         Video output resolution
@@ -88,6 +66,39 @@ export default function VideoOutputGeneral() {
                         />
                     </Stack>
                 </Box>
+            </Grid>
+
+            <Grid item md={12}>
+                <Typography gutterBottom>
+                    Set the maximum frames to emit per second
+                </Typography>
+                <Typography variant="body2" color={'GrayText'} gutterBottom>
+                    This can help to redue the CPU usage, by setting this value
+                    to 2-10. Default means that the system chooses a acceptable
+                    value.
+                </Typography>
+                <SliderConfigurationField
+                    sx={{ margin: '0 5%', width: '90%' }}
+                    data={{
+                        ...commonData,
+                        path: 'outputConfiguration/maxOutputFps',
+                    }}
+                    marks={[
+                        {
+                            value: 0,
+                            label: 'default',
+                        },
+                        {
+                            value: 60,
+                            label: '60',
+                        },
+                    ]}
+                    max={60}
+                    min={0}
+                    step={1}
+                    valueLabelFormat={(v: number) => v}
+                    valueLabelDisplay="auto"
+                />
             </Grid>
         </Grid>
     );
