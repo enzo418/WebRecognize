@@ -49,13 +49,15 @@ const CustomGridItemComponent = React.forwardRef(
                 sx={{
                     backgroundColor: (theme: Theme) =>
                         theme.palette.mode === 'dark' ? '#171819' : '#f5f5f5',
-                    padding: '5px',
+                    padding: '0 5px 5px 5px',
                     '> .react-resizable-handle': {
                         filter: (theme: Theme) =>
                             theme.palette.mode === 'dark'
                                 ? 'invert(1)'
                                 : 'invert(0)',
                     },
+                    boxShadow: '5px 5px 15px rgb(0 0 0 / 57%)',
+                    borderRadius: '10px',
                 }}
                 {...props}>
                 <Stack
@@ -67,7 +69,12 @@ const CustomGridItemComponent = React.forwardRef(
                         cursor: 'move',
                     }}
                     justifyContent={'space-between'}>
-                    <Typography variant={'body1'}>{title}</Typography>
+                    <Typography
+                        variant={'overline'}
+                        fontSize={'0.7rem'}
+                        pl={'5px'}>
+                        {title}
+                    </Typography>
 
                     <IconButton
                         aria-label="Settings"
@@ -178,7 +185,7 @@ export default function DashboardPage() {
             cols={{ xl: 12, lg: 12, md: 12, sm: 12, xs: 12, xss: 6 }}>
             <CustomGridItemComponent key="a" title="Observer control">
                 <ToggleRecognizeButton
-                    sx={{ padding: '20px' }}
+                    sx={{ margin: 'auto' }}
                     status={observerStatus}
                     onClickStart={onClickStart}
                     onClickStop={onClickStop}

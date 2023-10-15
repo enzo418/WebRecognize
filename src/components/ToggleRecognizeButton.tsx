@@ -38,10 +38,13 @@ export default function ToggleRecognizeButton(props: Props) {
     };
 
     const style = {
+        height: 'calc(100% - 45px)',
+        display: 'flex',
+        gap: '10px',
+        alignItems: 'center',
         ...props.sx,
         //border: '1px solid gray',
         width: 'max-content',
-        padding: '0 10px',
     };
 
     return (
