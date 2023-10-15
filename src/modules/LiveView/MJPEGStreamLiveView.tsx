@@ -1,24 +1,24 @@
 import React, { ReactEventHandler } from 'react';
-import config from '../config';
-import TypedPromise from '../TypedPromise';
+import config from '../../config';
+import TypedPromise from '../../TypedPromise';
+import ILiveView, { ILiveViewProps } from './ILiveView';
+import { ILiveViewResponse } from '../../services/api/interfaces/ILiveViewService';
 
 const emptyImage =
     'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-export interface LiveViewProps {
-    onLoad?: any;
-    style?: object;
-    source: {
-        cameraID?: string;
-        uri?: string;
-        observer?: boolean;
+interface MJPEGStreamLiveViewState {}
+
+interface MJPEGStreamLiveViewProps extends ILiveViewProps {
+    response: ILiveViewResponse & {
+        stream_url: string;
     };
-    onError?: ReactEventHandler<HTMLImageElement>;
 }
 
-interface LiveViewState {}
-
-class LiveView extends React.Component<LiveViewProps, LiveViewState> {
+class MJPEGStreamLiveView
+    extends React.Component<MJPEGStreamLiveViewProps, MJPEGStreamLiveViewState>
+    implements ILiveView
+{
     // img element
     image: React.RefObject<any>;
 
@@ -31,37 +31,46 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
     // url that points to the backend
     public readonly realSource: string;
 
-    state: LiveViewState = {};
+    state: MJPEGStreamLiveViewState = {};
 
-    constructor(props: LiveViewProps) {
+    constructor(props: MJPEGStreamLiveViewProps) {
         super(props);
 
         this.image = React.createRef();
         this.canvas = React.createRef();
 
-        if (
-            this.props.source === undefined ||
-            (this.props.source.cameraID === undefined &&
-                this.props.source.observer === undefined &&
-                this.props.source.uri === undefined)
-        ) {
-            throw new Error(
-                'LiveView component must have at least one of the following props: cameraID, uri, observer',
-            );
-        }
+        this.url = config.server + this.props.response.stream_url;
 
-        this.url =
-            config.server +
-            (this.props.source.observer
-                ? config.endpoints.api.stream.observer
-                : this.props.source.cameraID !== undefined
-                ? config.endpoints.api.stream.camera +
-                  this.props.source.cameraID
-                : config.endpoints.api.stream.uri +
-                  '?uri=' +
-                  encodeURI(this.props.source.uri as string));
+        console.log('MJPEGStreamLiveView', this.url);
 
         this.realSource = this.url;
+    }
+
+    tryPictureInPicture(onClose: () => any): Promise<boolean> {
+        return new Promise<boolean>((res, _) => {
+            const features =
+                'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=yes,width=400,height=300';
+            const newWindow = window.open('', '_blank', features);
+            if (!newWindow) return res(false);
+
+            newWindow.document.write(`
+        <html>
+            <head>
+            <title>Image Window</title>
+            </head>
+            <body style="margin:0">
+            <img src="${this.url}" alt="Image" style="display: block; width: 100%; height: 100%;">
+            </body>
+        </html>
+        `);
+
+            newWindow.addEventListener('beforeunload', () => {
+                console.log('closing pip...');
+                onClose();
+            });
+
+            res(true);
+        });
     }
 
     public stop(isUnmounting = false) {
@@ -82,16 +91,21 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
             } else {
                 this.image.current.src = emptyImage;
             }
+
+            if (this.props.onStopped) this.props.onStopped();
         }
     }
 
     public play() {
+        console.log('play', this.url);
         if (this.image.current) {
             if (this.image.current.src.startsWith('blob:')) {
                 URL.revokeObjectURL(this.image.current.src);
             }
 
             this.image.current.src = this.url;
+
+            if (this.props.onPlaying) this.props.onPlaying();
         }
     }
 
@@ -144,7 +158,7 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
                 <img
                     ref={this.image}
                     onLoad={this.onImageLoaded}
-                    onError={this.props.onError}
+                    onError={e => this.props.onError()}
                     style={this.props.style || {}}
                     src={this.url}
                     crossOrigin={'anonymous'}></img>
@@ -155,4 +169,4 @@ class LiveView extends React.Component<LiveViewProps, LiveViewState> {
     }
 }
 
-export default LiveView;
+export default MJPEGStreamLiveView;

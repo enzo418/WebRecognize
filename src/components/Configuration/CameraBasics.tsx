@@ -41,7 +41,7 @@ import {
     configurationService,
 } from '../../services/api/Services';
 import { HelpPopover, InfoTextPopover } from '../IconPopover';
-import LiveViewBox from '../LiveViewBox';
+import LiveViewBox from '../LivewView/LiveViewBox';
 import {
     SelectConfigurationField,
     SliderConfigurationField,
@@ -400,6 +400,7 @@ export default function CameraBasics() {
                         }}
                         source={{ cameraID: commonData.camera }}
                         keepSkeletonOnError={true}
+                        onError={() => {}}
                     />
                 )}
             </Grid>

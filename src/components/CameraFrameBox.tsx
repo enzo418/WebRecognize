@@ -1,10 +1,6 @@
-import { Box, Skeleton, Typography } from '@mui/material';
+import { Skeleton } from '@mui/material';
 import React from 'react';
-import config from '../config';
-import processPromise from '../Http/ProcessPromise';
-import LiveView from '../modules/LiveView';
-import IProblemJson from '../services/api/interfaces/IProblemJson';
-import { cameraService, client } from '../services/api/Services';
+import { cameraService } from '../services/api/Services';
 
 interface CameraFrameBoxProps {
     camera_id: string;

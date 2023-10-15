@@ -1,7 +1,11 @@
 import config from '../../config';
 import IHttpClient from '../../Http/IHttpClient';
 import processPromise from '../../Http/ProcessPromise';
-import ILiveViewService, { LiveViewType } from './interfaces/ILiveViewService';
+import { BrowserCapabilities } from '../BrowserCapabilities/BrowserCapabilities';
+import ILiveViewService, {
+    ILiveViewResponse,
+    LiveViewType,
+} from './interfaces/ILiveViewService';
 import IProblemJson from './interfaces/IProblemJson';
 import Service from './Service';
 
@@ -10,55 +14,36 @@ export default class LiveViewService
     implements ILiveViewService
 {
     constructor(httpClient: IHttpClient) {
-        super(httpClient, '/api');
+        super(httpClient, '/api/stream');
     }
 
-    public getCameraView(camera_id: string) {
-        return processPromise<{ ws_feed_id: string }, IProblemJson>(
-            this.client.get(
-                this.baseUrl + '/camera/' + camera_id + '/request_stream',
-                {},
+    public getCameraView(camera_id: string, capabilities: BrowserCapabilities) {
+        return processPromise<ILiveViewResponse, IProblemJson>(
+            this.client.post(
+                this.baseUrl + '/camera/' + camera_id,
+                capabilities,
             ),
         );
     }
 
-    public getAllCamerasView() {
-        return processPromise<{ ws_feed_id: string }, IProblemJson>(
-            this.client.get(this.baseUrl + '/observer/stream', {
-                rnd: Math.random(),
+    public getSourceView(source: string, capabilities: BrowserCapabilities) {
+        return processPromise<ILiveViewResponse, IProblemJson>(
+            this.client.post(this.baseUrl + '/source', {
+                source,
+                capabilities,
             }),
         );
     }
 
-    public call(type: LiveViewType, data: string | null | undefined) {
-        let url = '';
-
-        switch (type) {
-            case LiveViewType.OBSERVER:
-                url = config.endpoints.api.stream.observer;
-                break;
-            case LiveViewType.CAMERA:
-                url = config.endpoints.api.stream.camera + data;
-                break;
-            case LiveViewType.SOURCE:
-                url =
-                    config.endpoints.api.stream.uri +
-                    '?uri=' +
-                    encodeURI(data as string);
-                break;
-            default:
-                throw new Error('Invalid LiveViewType');
-        }
-
-        return processPromise<
-            { clientId: string; offer: string },
-            IProblemJson
-        >(this.client.get(url, {}));
+    public getObserverView(capabilities: BrowserCapabilities) {
+        return processPromise<ILiveViewResponse, IProblemJson>(
+            this.client.post(this.baseUrl + '/observer', capabilities),
+        );
     }
 
     public answer(client_id: string, answer: string | object) {
         return processPromise<void, IProblemJson>(
-            this.client.post(this.baseUrl + '/stream/answer', {
+            this.client.post(this.baseUrl + '/webrtc/answer', {
                 clientId: client_id,
                 answer,
             }),
@@ -67,7 +52,7 @@ export default class LiveViewService
 
     public hangUp(client_id: string) {
         return processPromise<void, IProblemJson>(
-            this.client.post(this.baseUrl + '/stream/hangup', {
+            this.client.post(this.baseUrl + '/webrtc/hangup', {
                 clientId: client_id,
             }),
         );

@@ -1,32 +1,27 @@
 import React, { ReactEventHandler } from 'react';
-import config from '../config';
-import TypedPromise from '../TypedPromise';
-import { liveViewService } from '../services/api/Services';
-import { ensure } from '../utils/error';
-import { LiveViewType } from '../services/api/interfaces/ILiveViewService';
-
-const emptyImage =
-    'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-
-export interface WebRTCLiveViewProps {
-    onLoad?: any;
-    style?: object;
-    source: {
-        cameraID?: string;
-        uri?: string;
-        observer?: boolean;
-    };
-    onError?: ReactEventHandler<HTMLVideoElement>;
-}
+import { liveViewService } from '../../services/api/Services';
+import { ensure } from '../../utils/error';
+import {
+    ILiveViewResponse,
+    LiveViewType,
+} from '../../services/api/interfaces/ILiveViewService';
+import ILiveView, { ILiveViewProps } from './ILiveView';
 
 interface WebRTCLiveViewState {}
 
-class WebRTCLiveView extends React.Component<
-    WebRTCLiveViewProps,
-    WebRTCLiveViewState
-> {
-    // img element
-    video: React.RefObject<any>;
+interface IWebRTCLiveViewProps extends ILiveViewProps {
+    response: ILiveViewResponse & {
+        clientId: string;
+        offer: string;
+    };
+}
+
+class WebRTCLiveView
+    extends React.Component<IWebRTCLiveViewProps, WebRTCLiveViewState>
+    implements ILiveView
+{
+    // video element
+    video: React.RefObject<HTMLVideoElement>;
 
     // peer connection - initialized in setupPeer()
     pc!: RTCPeerConnection;
@@ -36,7 +31,7 @@ class WebRTCLiveView extends React.Component<
 
     state: WebRTCLiveViewState = {};
 
-    constructor(props: WebRTCLiveViewProps) {
+    constructor(props: IWebRTCLiveViewProps) {
         super(props);
 
         this.video = React.createRef();
@@ -53,38 +48,38 @@ class WebRTCLiveView extends React.Component<
         }
     }
 
+    tryPictureInPicture(onClose: () => any): Promise<boolean> {
+        return new Promise<boolean>((res, _) => {
+            if (this.video.current) {
+                if (this.video.current.requestPictureInPicture) {
+                    this.video.current
+                        .requestPictureInPicture()
+                        .then(() => res(true))
+                        .catch(() => res(false));
+                }
+            }
+            res(false);
+        });
+    }
+
     private setupPeer() {
         if (!this.pc || this.pc.connectionState === 'closed') {
             this.pc = new RTCPeerConnection();
 
             this.pc.onicegatheringstatechange = () => {
                 if (this.pc.iceGatheringState === 'complete') {
-                    this.lastPendingPromise = liveViewService.answer(
-                        this.peerId,
-                        ensure(this.pc.localDescription),
-                    );
+                    this.lastPendingPromise = liveViewService
+                        .answer(this.peerId, ensure(this.pc.localDescription))
+                        .fail(err => this.props.onError(err));
                 }
             };
 
-            const liveViewType = this.props.source.observer
-                ? LiveViewType.OBSERVER
-                : this.props.source.cameraID !== undefined
-                ? LiveViewType.CAMERA
-                : LiveViewType.SOURCE;
+            this.peerId = this.props.response.clientId;
+            this.pc.setRemoteDescription(JSON.parse(this.props.response.offer));
 
-            this.lastPendingPromise = liveViewService
-                .call(
-                    liveViewType,
-                    this.props.source.cameraID || this.props.source.uri,
-                )
-                .ok(({ clientId, offer }) => {
-                    this.peerId = clientId;
-                    this.pc.setRemoteDescription(JSON.parse(offer));
-
-                    this.pc
-                        .createAnswer()
-                        .then(answer => this.pc.setLocalDescription(answer));
-                });
+            this.pc
+                .createAnswer()
+                .then(answer => this.pc.setLocalDescription(answer));
 
             this.pc.addEventListener('track', (event: any) => {
                 if (!this.video.current) {
@@ -104,6 +99,8 @@ class WebRTCLiveView extends React.Component<
         if (this.pc && this.peerId) {
             this.pc.close();
             this.lastPendingPromise = liveViewService.hangUp(this.peerId);
+
+            if (this.props.onStopped) this.props.onStopped();
         }
     }
 
@@ -112,10 +109,14 @@ class WebRTCLiveView extends React.Component<
     }
 
     componentDidMount() {
-        if (!this.video.current) {
-            console.error('Video element not found');
-        } else {
-            console.log('Video element found');
+        if (this.video.current) {
+            this.video.current.addEventListener('play', () => {
+                if (this.props.onPlaying) this.props.onPlaying();
+            });
+
+            this.video.current.addEventListener('pause', () => {
+                if (this.props.onStopped) this.props.onStopped();
+            });
         }
 
         this.setupPeer();
@@ -132,7 +133,7 @@ class WebRTCLiveView extends React.Component<
             <>
                 <video
                     ref={this.video}
-                    onError={this.props.onError}
+                    onError={() => this.props.onError()}
                     onLoadedData={this.props.onLoad}
                     style={this.props.style || {}}
                     crossOrigin={'anonymous'}></video>

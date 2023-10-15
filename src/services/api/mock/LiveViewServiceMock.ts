@@ -4,7 +4,12 @@ import processPromise, {
     processPromiseAsArrayBuffer,
 } from '../../../Http/ProcessPromise';
 import TypedPromise from '../../../TypedPromise';
-import ILiveViewService, { LiveViewType } from '../interfaces/ILiveViewService';
+import { BrowserCapabilities } from '../../BrowserCapabilities/BrowserCapabilities';
+import ILiveViewService, {
+    ILiveViewResponse,
+    LiveViewStreamSource,
+    LiveViewType,
+} from '../interfaces/ILiveViewService';
 import IProblemJson from '../interfaces/IProblemJson';
 import Service from '../Service';
 import { cameraToImageUrl } from './mockData';
@@ -37,12 +42,33 @@ export default class LiveViewServiceMock
         });
     }
 
-    public getCameraView(camera_id: string) {
-        return new TypedPromise<{ ws_feed_id: string }, IProblemJson>(
-            (ok, fail) => {
-                ok({ ws_feed_id: camera_id });
-            },
-        );
+    getSourceView(
+        source: string,
+        capabilities: BrowserCapabilities,
+    ): TypedPromise<ILiveViewResponse, IProblemJson> {
+        return new TypedPromise<ILiveViewResponse, IProblemJson>((ok, fail) => {
+            ok({
+                type: LiveViewStreamSource.MJPEGSTREAM,
+            });
+        });
+    }
+
+    getObserverView(
+        capabilities: BrowserCapabilities,
+    ): TypedPromise<ILiveViewResponse, IProblemJson> {
+        return new TypedPromise<ILiveViewResponse, IProblemJson>((ok, fail) => {
+            ok({
+                type: LiveViewStreamSource.MJPEGSTREAM,
+            });
+        });
+    }
+
+    public getCameraView(camera_id: string, capabilities: BrowserCapabilities) {
+        return new TypedPromise<ILiveViewResponse, IProblemJson>((ok, fail) => {
+            ok({
+                type: LiveViewStreamSource.MJPEGSTREAM,
+            });
+        });
     }
 
     public getAllCamerasView() {

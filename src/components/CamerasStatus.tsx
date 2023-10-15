@@ -337,8 +337,13 @@ export default function CamerasStatus(props: any) {
     const [loading, setLoading] = React.useState<boolean>(true);
     const [updateInterval, setUpdateInterval] = React.useState<any>(null);
 
+    let lastPendingPromise = React.useRef<TypedPromise<
+        any,
+        IProblemJson
+    > | null>(null);
+
     const fetchStatus = () => {
-        observerService
+        lastPendingPromise.current = observerService
             .status()
             .ok(status => {
                 setStatus(status);
@@ -366,7 +371,12 @@ export default function CamerasStatus(props: any) {
         );
 
         return () => {
+            if (lastPendingPromise.current) {
+                lastPendingPromise.current.cancel();
+            }
+
             eventBus.remove('observer-status-changed', handleStatus);
+
             clearInterval(updateInterval);
         };
     }, []);

@@ -9,14 +9,14 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
-import config from '../config';
-import LiveView from '../modules/LiveView';
-import { liveViewService, observerService } from '../services/api/Services';
-import TypedPromise from '../TypedPromise';
+import config from '../../config';
+import LiveView from '../../modules/LiveView/MJPEGStreamLiveView';
+import { liveViewService, observerService } from '../../services/api/Services';
+import TypedPromise from '../../TypedPromise';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import { Link } from 'react-router-dom';
 import LiveViewInteractiveBox from './LiveViewInteractiveBox';
-import eventBus from '../EventBus';
+import eventBus from '../../EventBus';
 
 interface LiveViewObserverProps {
     sx?: SxProps<Theme>;
@@ -103,9 +103,9 @@ export default class LiveViewObserver extends React.Component<
                         }></LiveViewInteractiveBox>
                 )}
 
-                {this.state.error.length != 0 && (
+                {/*{this.state.error.length != 0 && (
                     <Typography>ERROR {this.state.error}</Typography>
-                )}
+                )}*/}
 
                 {!this.state.observerRunning && (
                     <Fade in={true} timeout={1000}>

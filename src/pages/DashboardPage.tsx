@@ -19,7 +19,7 @@ import { observerService } from '../services/api/Services';
 import '../styles/GridLayout.scss';
 
 import GridLayout, { Responsive, WidthProvider } from 'react-grid-layout';
-import LiveViewObserver from '../components/LiveViewObserver';
+import LiveViewObserver from '../components/LivewView/LiveViewObserver';
 import eventBus from '../EventBus';
 import CamerasStatus from '../components/CamerasStatus';
 

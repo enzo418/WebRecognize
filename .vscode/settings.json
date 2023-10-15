@@ -15,7 +15,9 @@
 		"Catchable",
 		"catched",
 		"cfgs",
+		"MJPEG",
 		"notificator",
-		"utif"
+		"utif",
+		"WEBRTC"
 	]
 }

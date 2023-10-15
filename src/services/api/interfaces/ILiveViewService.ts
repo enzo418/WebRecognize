@@ -1,4 +1,5 @@
 import TypedPromise from '../../../TypedPromise';
+import { BrowserCapabilities } from '../../BrowserCapabilities/BrowserCapabilities';
 import IProblemJson from './IProblemJson';
 
 export enum LiveViewType {
@@ -7,17 +8,31 @@ export enum LiveViewType {
     SOURCE = 'uri',
 }
 
+export enum LiveViewStreamSource {
+    WEBRTC = 'webrtc',
+    MJPEGSTREAM = 'mjpeg',
+}
+
+export interface ILiveViewResponse {
+    type: LiveViewStreamSource;
+
+    [x: string]: any; // Defined by the server
+}
+
 export default interface ILiveViewService {
     getCameraView(
         camera_id: string,
-    ): TypedPromise<{ ws_feed_id: string }, IProblemJson>;
+        capabilities: BrowserCapabilities,
+    ): TypedPromise<ILiveViewResponse, IProblemJson>;
 
-    getAllCamerasView(): TypedPromise<{ ws_feed_id: string }, IProblemJson>;
+    getSourceView(
+        source: string,
+        capabilities: BrowserCapabilities,
+    ): TypedPromise<ILiveViewResponse, IProblemJson>;
 
-    call(
-        type: LiveViewType,
-        data: string | undefined | null,
-    ): TypedPromise<{ clientId: string; offer: string }, IProblemJson>;
+    getObserverView(
+        capabilities: BrowserCapabilities,
+    ): TypedPromise<ILiveViewResponse, IProblemJson>;
 
     answer(
         client_id: string,

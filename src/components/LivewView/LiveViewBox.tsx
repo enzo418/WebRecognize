@@ -1,11 +1,13 @@
 import { Box, Skeleton, SxProps, Theme, Typography } from '@mui/material';
 import React from 'react';
-import config from '../config';
-import LiveView, { LiveViewProps } from '../modules/LiveView';
-import { liveViewService } from '../services/api/Services';
-import WebRTCLiveView, { WebRTCLiveViewProps } from '../modules/WebRTCLiveView';
+import config from '../../config';
+import MJPEGStreamLiveView from '../../modules/LiveView/MJPEGStreamLiveView';
+import { liveViewService } from '../../services/api/Services';
+import WebRTCLiveView from '../../modules/LiveView/WebRTCLiveView';
+import ILiveView, { ILiveViewProps } from '../../modules/LiveView/ILiveView';
+import LiveViewSelector from '../../modules/LiveView/LiveViewSelector';
 
-export interface LiveViewBoxProps extends WebRTCLiveViewProps {
+export interface LiveViewBoxProps extends ILiveViewProps {
     componentOnError?: (error: string) => any;
     keepSkeletonOnError?: boolean;
     forwardedRef?: any;
@@ -64,12 +66,13 @@ class LiveViewBox extends React.Component<LiveViewBoxProps, LiveViewBoxState> {
                     )}
 
                 {this.state.error.length == 0 && (
-                    <WebRTCLiveView
+                    <LiveViewSelector
                         ref={this.props.forwardedRef}
                         source={this.props.source}
                         onLoad={this.onImageLoaded}
                         onError={this.onError}
-                        style={this.props.imageStyle}></WebRTCLiveView>
+                        style={this.props.imageStyle}
+                    />
                 )}
 
                 {this.state.error.length != 0 &&
@@ -84,6 +87,6 @@ class LiveViewBox extends React.Component<LiveViewBoxProps, LiveViewBoxState> {
     }
 }
 
-export default React.forwardRef<LiveView, LiveViewBoxProps>((props, ref) => (
+export default React.forwardRef<ILiveView, LiveViewBoxProps>((props, ref) => (
     <LiveViewBox {...props} forwardedRef={ref} />
 ));
