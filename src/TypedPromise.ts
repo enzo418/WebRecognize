@@ -61,90 +61,7 @@ class PromiseContext<OkType, FailType> {
     };
 }
 
-interface TPHasOk<OkType, FailType> {
-    /**
-     *
-     * @param callback callback on success
-     * @param rejected callback on fail. Is preferred to use a following call to catch.
-     * This argument is needed enable await support.
-     */
-    ok(
-        callback: (val: OkType) => OkType | void,
-        rejected?: (error: FailType) => any,
-    ): any;
-}
-
-interface TPHasCancel {
-    /**
-     * Sets the promise as cancelled, when it resolves cancelled will be called
-     */
-    cancel(): any;
-}
-
-interface TPHasFail<FailType> {
-    /**
-     * Fail is called only when the promise is rejected.
-     * This method isn't called if `ok` or `finally` throws.
-     *
-     * @param {(v: FailType) => any} callback
-     */
-    fail(callback: (v: FailType) => any): any;
-}
-
-interface TPHasFinally {
-    /**
-     * If succeed, finally is called after the last catch/then, ok if there are no then registered.
-     * If failed it's called after fail.
-     *
-     * Callback it's expected to have 2 parameters.
-     *
-     * - The first is the same as `ok` if the promise was resolved, if there are `then` callbacks
-     *   it would be the same as the last value returned from those calls. Else if the promise was
-     *   rejected it's undefined.
-     *
-     * - The second parameter is the error returned by the last catch call to `catch` if the promise
-     *   was resolved and a throw happened, else if the promise was rejected, is the same as the
-     *   value passed to `fail`.
-     *
-     * @public
-     * @param {(lastOkResult: any, lastError: any) => any} callback
-     */
-    finally(callback: (lastOkResult: any, lastError: any) => any): any;
-}
-
-interface TPHasCancelled {
-    /**
-     * Sets a listener to cancelled
-     * @param callback
-     */
-    cancelled(callback: () => any): any;
-}
-
-interface TPHasCatch {
-    /**
-     * Catch will be called if `then` or `ok` throws.
-     *
-     * @public
-     * @param {Function} callback
-     */
-    catch(callback: Function): any;
-}
-
-type TPHasAll<OkType, FailType> = TPHasOk<OkType, FailType> &
-    TPHasCancel &
-    TPHasFail<FailType> &
-    TPHasFinally &
-    TPHasCancelled &
-    TPHasCatch;
-
-// Constructs a type with a set of function properties that eliminate themselves if called
-type RecursiveReduce<T> = {
-    [P in keyof T]: T[P] extends (...args: infer A) => any
-        ? (...args: A) => RecursiveReduce<Omit<T, P>>
-        : never;
-}; // pg: https://www.typescriptlang.org/play?#code/JYOwLgpgTgZghgYwgAgBJwM4FkJgBYD2AJgILIDeAUMjQPQBU91N9yCBAthxOMgSGkw58xEgDo4zZPVrM4ACgCUALmQA3AsCIBuSgF9KlUJFiIU6bLkJEAQhSkMmNaW07de-QZZG2xAIykZZj95NTgAG1UQAFcOP2gVdU0dfUNjaHgkL2FrAGF7OkZA1y4eMD4BCxziXLEEQNkaBCVVDS1dA0owAE8AB3NMEht8gF5sq1FkADJxnzsZqomiXN0jcAyzZABpAB4AJQA+AuQFRIB5DmAwfYAaZAByOHuD1ZoQ88vrvbv7v2fXtgtZAXK63B4If6pSi0WjsEAYcpgZQABTgUDg3BMGB2uxicWgBwA2o97gBdF6GLp9FAAFWROxpRzGVBohORyFAyAA1hBugQYMgaaTVDS2aTkBAAB6QEBEDDIeRiJVogDmGFUoBg0GQJEUyBGRzgIG6yAA-AqlRIoGrVLr9Uc6TsQdcaXdkQcjlEIGpoB1DAhwph5QANHYASRAV2AESOLOQjmK7FKHgEwYkDTkQMdzvDkbA0fCPyeHuONCguGiUAE+GA8swyGiIC5IAIAHcBPXs59c1GIkXnhSaJ1Ck4WCV3OVPGmAs4gm9QhEorF4lBEl3QRHe4WHn8S3GyxWq8ga3X5Y3m22O-L19dN-m+zuB7oh4YR4m3GUKsg0-VZ41AWu9I5neBY-BCe5SMg5ZgJW1Z4LWJxnk2LbtohgpAd2IEPvc4GDsgBidHCCLIJK+rICAECtt+OwWEMuQHEoqyShISj+EohgwiRLGKIYPT9Dq4ThGRiw+GQCxCEs8yzHkqxUvxJCCQAMhAGAYKMwLdgp248nyAoiXkFJySgWnKapZBjDmWl3Dp-LSaIhlrCYmS0hK0o8HKAnhKZGBkFQUJEYiyg0mRVAIKoMCNgg+b8ECbREPY+BQG25GUcgACiUBJVA8gAEQAGKRdFAgtuUwAcL04QQBOEBEGIOWKB0NyUH44WFcAMWJHFCV4ElVEUVRGVZblBUgFF7XFQQpXlZV1W1fVfp6EAA
-
-class BaseTypedPromise<OkType, FailType, InitialCallable> {
+class BaseTypedPromise<OkType, FailType> {
     // internal members are stored in a separated class to
     // make it possible to only shows certain function,
     // following the State pattern
@@ -162,7 +79,7 @@ class BaseTypedPromise<OkType, FailType, InitialCallable> {
      */
     ok(
         callback: (val: OkType) => OkType | void,
-    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasOk<OkType, FailType>>> {
+    ): TypedPromise<OkType, FailType> {
         if (this.context.status === 'resolved') {
             try {
                 this.context.value =
@@ -175,9 +92,7 @@ class BaseTypedPromise<OkType, FailType, InitialCallable> {
             this.context.okCallback = callback;
         }
 
-        return this as RecursiveReduce<
-            Omit<InitialCallable, keyof TPHasOk<OkType, FailType>>
-        >;
+        return this as any;
     }
 
     /**
@@ -187,18 +102,14 @@ class BaseTypedPromise<OkType, FailType, InitialCallable> {
      * @public
      * @param {(v: FailType) => any} callback
      */
-    fail(
-        callback: (v: FailType) => any,
-    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasFail<FailType>>> {
+    fail(callback: (v: FailType) => any): TypedPromise<OkType, FailType> {
         if (this.context.status === 'rejected') {
             callback(this.context.error);
         } else {
             this.context.failCallback = callback;
         }
 
-        return this as RecursiveReduce<
-            Omit<InitialCallable, keyof TPHasFail<FailType>>
-        >;
+        return this as any;
     }
 
     /**
@@ -207,16 +118,14 @@ class BaseTypedPromise<OkType, FailType, InitialCallable> {
      * @public
      * @param {Function} callback
      */
-    catch(
-        callback: Function,
-    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasCatch>> {
+    catch(callback: Function): TypedPromise<OkType, FailType> {
         if (this.context.status === 'rejected') {
             callback(this.context.error);
         } else {
             this.context.catchCallback = callback;
         }
 
-        return this as RecursiveReduce<Omit<InitialCallable, keyof TPHasCatch>>;
+        return this as any;
     }
 
     /**
@@ -225,18 +134,14 @@ class BaseTypedPromise<OkType, FailType, InitialCallable> {
      * @public
      * @param callback
      */
-    cancelled(
-        callback: () => any,
-    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasCancelled>> {
+    cancelled(callback: () => any): TypedPromise<OkType, FailType> {
         if (this.context.status === 'cancelled') {
             callback();
         } else {
             this.context.cancelledCallback = callback;
         }
 
-        return this as RecursiveReduce<
-            Omit<InitialCallable, keyof TPHasCancelled>
-        >;
+        return this as any;
     }
 
     /**
@@ -258,7 +163,7 @@ class BaseTypedPromise<OkType, FailType, InitialCallable> {
      */
     finally(
         callback: (lastOkResult: any, lastError: any) => any,
-    ): RecursiveReduce<Omit<InitialCallable, keyof TPHasFinally>> {
+    ): TypedPromise<OkType, FailType> {
         if (
             this.context.status === 'resolved' ||
             this.context.status === 'rejected'
@@ -267,9 +172,8 @@ class BaseTypedPromise<OkType, FailType, InitialCallable> {
         } else {
             this.context.finallyCallback = callback;
         }
-        return this as RecursiveReduce<
-            Omit<InitialCallable, keyof TPHasFinally>
-        >;
+
+        return this as any;
     }
 
     /**
@@ -309,8 +213,7 @@ class BaseTypedPromise<OkType, FailType, InitialCallable> {
  */
 export default class TypedPromise<OkType, FailType> extends BaseTypedPromise<
     OkType,
-    FailType,
-    TPHasAll<OkType, FailType>
+    FailType
 > {
     constructor(
         action: (
