@@ -11,6 +11,7 @@ import MJPEGStreamLiveView from './MJPEGStreamLiveView';
 import { GetBrowserCapabilities } from '../../services/BrowserCapabilities/BrowserCapabilities';
 import TypedPromise from '../../TypedPromise';
 import IProblemJson from '../../services/api/interfaces/IProblemJson';
+import JPEGCacheBustingStreamLiveView from './JPEGCacheBustingStreamLiveView';
 
 export default React.forwardRef(
     (props: ILiveViewProps, ref: React.Ref<ILiveView>) => {
@@ -37,6 +38,16 @@ export default React.forwardRef(
                 case LiveViewStreamSource.MJPEGSTREAM:
                     setLiveViewComponent(
                         <MJPEGStreamLiveView
+                            {...props}
+                            response={response as any}
+                            ref={ref as any}
+                        />,
+                    );
+                    break;
+
+                case LiveViewStreamSource.JPEGCacheBusting:
+                    setLiveViewComponent(
+                        <JPEGCacheBustingStreamLiveView
                             {...props}
                             response={response as any}
                             ref={ref as any}

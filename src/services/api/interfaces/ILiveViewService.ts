@@ -11,6 +11,7 @@ export enum LiveViewType {
 export enum LiveViewStreamSource {
     WEBRTC = 'webrtc',
     MJPEGSTREAM = 'mjpeg',
+    JPEGCacheBusting = 'jpeg_cache_busting',
 }
 
 export interface ILiveViewResponse {
