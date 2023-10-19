@@ -1,26 +1,14 @@
-import { SettingsApplicationsOutlined } from '@mui/icons-material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import {
-    Box,
-    Button,
-    Grid,
-    IconButton,
-    Stack,
-    Theme,
-    Typography,
-} from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Box, IconButton, Stack, Theme, Typography } from '@mui/material';
+import React, { useEffect, useRef } from 'react';
 import ToggleRecognizeButton from '../components/Dashboard/ToggleRecognizeButton';
 import { Key, saveLocal } from '../LocalStore';
-import DTOObserverStatus from '../services/api/interfaces/DTOObserverStatus';
 import { observerService } from '../services/api/Services';
 
 import '../styles/GridLayout.scss';
 
-import GridLayout, { Responsive, WidthProvider } from 'react-grid-layout';
+import { Responsive, WidthProvider } from 'react-grid-layout';
 import LiveViewObserver from '../components/Dashboard/LiveViewObserver';
-import eventBus from '../EventBus';
 import CamerasStatus from '../components/Dashboard/CamerasStatus';
 import { DashboardItemContext } from '../components/Dashboard/DashboardItemContext';
 
@@ -104,37 +92,16 @@ const CustomGridItemComponent = React.forwardRef(
 );
 
 export default function DashboardPage() {
-    const [observerStatus, setObserverStatus] = useState<DTOObserverStatus>({
-        running: false,
-        config_id: '',
-        cameras: [],
-    });
-
-    const navigate = useNavigate();
-
-    let lastPendingPromise: any;
-    const updateObserverStatus = () => {
-        lastPendingPromise = observerService
-            .status()
-            .ok(status => {
-                setObserverStatus(status);
-            })
-            .fail(e => console.error('Could not get observer status', e))
-            .cancelled(() => console.debug('canceled update status'));
-    };
+    let lastPendingPromise: any = useRef(null);
 
     const onClickStart = (config_id: string) => {
         lastPendingPromise = observerService
             .start(config_id)
-            .ok(status => {
-                eventBus.dispatch('observer-status-changed', status);
-
+            .ok(() => {
                 saveLocal(Key.LAST_CONFIGURATION_EXECUTED_ID, config_id);
-                setObserverStatus(status);
             })
             .fail(e => {
                 console.error('could not start observer: ', e);
-                updateObserverStatus();
             })
             .cancelled(() => console.debug('canceled start'));
     };
@@ -142,28 +109,17 @@ export default function DashboardPage() {
     const onClickStop = () => {
         lastPendingPromise = observerService
             .stop()
-            .ok(status => {
-                eventBus.dispatch('observer-status-changed', status);
-                setObserverStatus(status);
-            })
             .fail(e => {
                 console.error('could not stop observer: ', e);
-                updateObserverStatus();
             })
             .cancelled(() => console.debug('canceled stop'));
     };
 
     useEffect(() => {
-        updateObserverStatus();
-
         return () => {
             if (lastPendingPromise) lastPendingPromise.cancel();
         };
     }, []);
-
-    const onNavigateToApplicationConfiguration = () => {
-        navigate('/application/configuration');
-    };
 
     const layout = {
         xss: [
@@ -172,13 +128,13 @@ export default function DashboardPage() {
             { i: 'c', x: 0, y: 2, w: 5.5, h: 1 },
         ],
         sm: [
-            { i: 'a', x: 0, y: 0, w: 4, h: 1 },
-            { i: 'b', x: 4, y: 0, w: 6, h: 2 },
-            { i: 'c', x: 0, y: 1, w: 4, h: 1 },
+            { i: 'a', x: 0, y: 0, w: 5, h: 1 },
+            { i: 'b', x: 5, y: 0, w: 7, h: 2 },
+            { i: 'c', x: 0, y: 1, w: 5, h: 1 },
         ],
         lg: [
             { i: 'a', x: 0, y: 0, w: 3, h: 1 },
-            { i: 'b', x: 3, y: 0, w: 8.5, h: 3 },
+            { i: 'b', x: 3, y: 0, w: 9, h: 3 },
             { i: 'c', x: 0, y: 1, w: 3, h: 2 },
         ],
     };
@@ -194,7 +150,6 @@ export default function DashboardPage() {
             <CustomGridItemComponent key="a" title="Observer control">
                 <ToggleRecognizeButton
                     sx={{ margin: 'auto' }}
-                    status={observerStatus}
                     onClickStart={onClickStart}
                     onClickStop={onClickStop}
                 />

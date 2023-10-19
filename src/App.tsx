@@ -55,8 +55,10 @@ import BlobThresholdParametersConfiguration from './components/Configuration/Blo
 import ApplicationConfiguration from './components/ApplicationConfiguration';
 import { getLocalDefault, Key } from './LocalStore';
 import eventBus from './EventBus';
-import { notificationService } from './services/api/Services';
+import { notificationService, observerService } from './services/api/Services';
 import BlobValidateObjectDetectedConfiguration from './components/Configuration/BlobsConfiguration/BlobValidateObjectDetectedConfiguration';
+import DTOObserverStatus from './services/api/interfaces/DTOObserverStatus';
+import { ObserverStatusContext } from './context/observerStatusContext';
 
 function App() {
     const notificationAudioPlayer = React.createRef<HTMLAudioElement>();
@@ -65,6 +67,8 @@ function App() {
     const [themeMode, setThemeMode] = useState<'dark' | 'light'>(
         getLocalDefault(Key.THEME_MODE, 'dark') as any,
     );
+
+    const [status, setStatus] = useState<DTOObserverStatus | null>(null);
 
     const darkTheme = useMemo(
         () =>
@@ -85,6 +89,10 @@ function App() {
         notificationService.subscribe(playNotificationSound);
         eventBus.on('notification-sound-play', playNotificationSound);
 
+        observerService.onStatusChange(status => {
+            setStatus(status);
+        });
+
         return () => {
             notificationService.unsubscribe(playNotificationSound);
             eventBus.remove('notification-sound-play', playNotificationSound);
@@ -95,154 +103,162 @@ function App() {
 
     return (
         <ThemeProvider theme={darkTheme}>
-            <Router>
-                <Paper elevation={0} sx={{ borderRadius: 0 }}>
-                    <Stack direction="row">
-                        <NavBar sx={{ maxWidth: '60px' }} />
-                        <Box sx={{ width: 'calc(99% - 60px)', padding: '0px' }}>
-                            <Routes>
-                                <Route
-                                    path="/notifications"
-                                    element={<Notifications />}></Route>
-                                {/*<Route
+            <ObserverStatusContext.Provider value={status}>
+                <Router>
+                    <Paper elevation={0} sx={{ borderRadius: 0 }}>
+                        <Stack direction="row">
+                            <NavBar sx={{ maxWidth: '60px' }} />
+                            <Box
+                                sx={{
+                                    width: 'calc(99% - 60px)',
+                                    padding: '0px',
+                                }}>
+                                <Routes>
+                                    <Route
+                                        path="/notifications"
+                                        element={<Notifications />}></Route>
+                                    {/*<Route
                                     path="/liveView"
                                     element={<LiveViewPage />}></Route>*/}
-                                <Route
-                                    path="/dashboard"
-                                    element={<DashboardPage />}></Route>
-                                <Route
-                                    path="/application/configuration"
-                                    element={
-                                        <ApplicationConfiguration />
-                                    }></Route>
-                                <Route
-                                    path="/configuration"
-                                    element={
-                                        <ConfigurationSelection />
-                                    }></Route>
-                                <Route
-                                    path="/configuration_file"
-                                    element={
-                                        <CreateConfigurationFromFilePage />
-                                    }></Route>
-                                <Route
-                                    path="/configuration-clone"
-                                    element={
-                                        <CloneConfigurationPage />
-                                    }></Route>
-                                <Route
-                                    path="/configuration_file"
-                                    element={
-                                        <CreateConfigurationFromFilePage />
-                                    }></Route>
-                                <Route
-                                    path="/configuration/:id"
-                                    element={<ConfigurationPage />}>
-                                    <Route path="general" element={<Outlet />}>
+                                    <Route
+                                        path="/dashboard"
+                                        element={<DashboardPage />}></Route>
+                                    <Route
+                                        path="/application/configuration"
+                                        element={
+                                            <ApplicationConfiguration />
+                                        }></Route>
+                                    <Route
+                                        path="/configuration"
+                                        element={
+                                            <ConfigurationSelection />
+                                        }></Route>
+                                    <Route
+                                        path="/configuration_file"
+                                        element={
+                                            <CreateConfigurationFromFilePage />
+                                        }></Route>
+                                    <Route
+                                        path="/configuration-clone"
+                                        element={
+                                            <CloneConfigurationPage />
+                                        }></Route>
+                                    <Route
+                                        path="/configuration_file"
+                                        element={
+                                            <CreateConfigurationFromFilePage />
+                                        }></Route>
+                                    <Route
+                                        path="/configuration/:id"
+                                        element={<ConfigurationPage />}>
                                         <Route
-                                            path="basics"
-                                            element={
-                                                <ConfigurationBasics />
-                                            }></Route>
-                                        <Route
-                                            path="notifications"
-                                            element={<Outlet />}>
-                                            <Route
-                                                path="telegram"
-                                                element={
-                                                    <NotificationsTelegramConfiguration />
-                                                }></Route>
-
-                                            <Route
-                                                path="local"
-                                                element={
-                                                    <NotificationsLocalConfiguration />
-                                                }></Route>
-                                        </Route>
-                                        <Route
-                                            path="add-camera"
-                                            element={<AddCamera />}></Route>
-                                        <Route
-                                            path="video-output"
-                                            element={
-                                                <VideoOutputGeneral />
-                                            }></Route>
-                                        <Route
-                                            path="camera/:camera_id"
+                                            path="general"
                                             element={<Outlet />}>
                                             <Route
                                                 path="basics"
                                                 element={
-                                                    <CameraBasics />
+                                                    <ConfigurationBasics />
                                                 }></Route>
                                             <Route
-                                                path="detection"
-                                                element={
-                                                    //<DetectionCameraConfiguration />
-                                                    <AreasCameraConfiguration />
-                                                }></Route>
-                                            {/* <Route path="output" element={<p>camera output</p>}></Route>*/}
+                                                path="notifications"
+                                                element={<Outlet />}>
+                                                <Route
+                                                    path="telegram"
+                                                    element={
+                                                        <NotificationsTelegramConfiguration />
+                                                    }></Route>
+
+                                                <Route
+                                                    path="local"
+                                                    element={
+                                                        <NotificationsLocalConfiguration />
+                                                    }></Route>
+                                            </Route>
                                             <Route
-                                                path="processing"
+                                                path="add-camera"
+                                                element={<AddCamera />}></Route>
+                                            <Route
+                                                path="video-output"
                                                 element={
-                                                    <p>camera processing</p>
+                                                    <VideoOutputGeneral />
                                                 }></Route>
-                                            {/*<Route
+                                            <Route
+                                                path="camera/:camera_id"
+                                                element={<Outlet />}>
+                                                <Route
+                                                    path="basics"
+                                                    element={
+                                                        <CameraBasics />
+                                                    }></Route>
+                                                <Route
+                                                    path="detection"
+                                                    element={
+                                                        //<DetectionCameraConfiguration />
+                                                        <AreasCameraConfiguration />
+                                                    }></Route>
+                                                {/* <Route path="output" element={<p>camera output</p>}></Route>*/}
+                                                <Route
+                                                    path="processing"
+                                                    element={
+                                                        <p>camera processing</p>
+                                                    }></Route>
+                                                {/*<Route
                                                 path="areas"
                                                 element={
                                                     <AreasCameraConfiguration />
                                                 }></Route>*/}
-                                            <Route
-                                                path="blobs"
-                                                element={<Outlet />}>
                                                 <Route
-                                                    path="detection"
-                                                    element={
-                                                        <BlobDetectorParametersConfiguration />
-                                                    }></Route>
-                                                <Route
-                                                    path="filters"
-                                                    element={
-                                                        <BlobFiltersConfiguration />
-                                                    }></Route>
-                                                {/* maybe merge those two into blobs-basics */}
-                                                <Route
-                                                    path="contours-filters"
-                                                    element={
-                                                        <BlobContoursFiltersConfiguration />
-                                                    }></Route>
-                                                <Route
-                                                    path="validate-objects-detected"
-                                                    element={
-                                                        <BlobValidateObjectDetectedConfiguration />
-                                                    }></Route>
-                                                <Route
-                                                    path="threshold-parameters"
-                                                    element={
-                                                        <BlobThresholdParametersConfiguration />
-                                                    }></Route>
+                                                    path="blobs"
+                                                    element={<Outlet />}>
+                                                    <Route
+                                                        path="detection"
+                                                        element={
+                                                            <BlobDetectorParametersConfiguration />
+                                                        }></Route>
+                                                    <Route
+                                                        path="filters"
+                                                        element={
+                                                            <BlobFiltersConfiguration />
+                                                        }></Route>
+                                                    {/* maybe merge those two into blobs-basics */}
+                                                    <Route
+                                                        path="contours-filters"
+                                                        element={
+                                                            <BlobContoursFiltersConfiguration />
+                                                        }></Route>
+                                                    <Route
+                                                        path="validate-objects-detected"
+                                                        element={
+                                                            <BlobValidateObjectDetectedConfiguration />
+                                                        }></Route>
+                                                    <Route
+                                                        path="threshold-parameters"
+                                                        element={
+                                                            <BlobThresholdParametersConfiguration />
+                                                        }></Route>
+                                                </Route>
                                             </Route>
                                         </Route>
                                     </Route>
-                                </Route>
-                            </Routes>
-                            <ToastContainer
-                                position="bottom-right"
-                                autoClose={5000}
-                                hideProgressBar={false}
-                                newestOnTop={false}
-                                closeOnClick
-                                rtl={false}
-                                pauseOnFocusLoss
-                                draggable
-                                pauseOnHover
-                                theme="dark"
-                            />
-                        </Box>
-                    </Stack>
-                    <NotificationAudio ref={notificationAudioPlayer} />
-                </Paper>
-            </Router>
+                                </Routes>
+                                <ToastContainer
+                                    position="bottom-right"
+                                    autoClose={5000}
+                                    hideProgressBar={false}
+                                    newestOnTop={false}
+                                    closeOnClick
+                                    rtl={false}
+                                    pauseOnFocusLoss
+                                    draggable
+                                    pauseOnHover
+                                    theme="dark"
+                                />
+                            </Box>
+                        </Stack>
+                        <NotificationAudio ref={notificationAudioPlayer} />
+                    </Paper>
+                </Router>
+            </ObserverStatusContext.Provider>
         </ThemeProvider>
     );
 }

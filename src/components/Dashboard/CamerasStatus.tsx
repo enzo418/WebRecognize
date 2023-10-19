@@ -16,24 +16,23 @@ import {
     useMediaQuery,
     useTheme,
 } from '@mui/material';
-import React, { useEffect, useMemo } from 'react';
-import DTOObserverStatus, {
+import React, { useMemo } from 'react';
+import {
     CameraType,
     DTOCameraStatus,
 } from '../../services/api/interfaces/DTOObserverStatus';
-import eventBus from '../../EventBus';
-import { cameraService, observerService } from '../../services/api/Services';
+import { cameraService } from '../../services/api/Services';
 
 import TypedPromise from '../../TypedPromise';
 import IProblemJson from '../../services/api/interfaces/IProblemJson';
 
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { DashboardItemContext } from './DashboardItemContext';
 import {
     NotificationsActiveOutlined,
     StopCircleOutlined,
     VisibilityOutlined,
 } from '@mui/icons-material';
+import { useObserverStatus } from '../../context/observerStatusContext';
 
 const SelectTimeMenu = ({ handleSelectTime }: any) => (
     <Grid container spacing={1}>
@@ -125,15 +124,7 @@ const StatusIconButton = ({
     </Tooltip>
 );
 
-function CameraStatus({
-    onStatusChanged,
-    status,
-    sx,
-}: {
-    onStatusChanged: (s: DTOCameraStatus) => any;
-    status: DTOCameraStatus;
-    sx?: any;
-}) {
+function CameraStatus({ status, sx }: { status: DTOCameraStatus; sx?: any }) {
     const originalType = status.dynamicType.originalType;
 
     // Menu
@@ -162,9 +153,11 @@ function CameraStatus({
     const handleChangeStatusRequest = (
         promise: TypedPromise<DTOCameraStatus, IProblemJson>,
     ) => {
-        promise.ok(onStatusChanged).catch((e: any) => {
-            console.log(`Couldn't change the type of '${status.name}'`, e);
-        });
+        promise
+            .ok(() => {})
+            .catch((e: any) => {
+                console.log(`Couldn't change the type of '${status.name}'`, e);
+            });
     };
 
     const handleSelectTime = (time_seconds: number | undefined) => {
@@ -233,6 +226,14 @@ function CameraStatus({
                 '&:hover .status-help-text': {
                     opacity: 1,
                 },
+                borderLeft: (theme: Theme) =>
+                    `3px solid ${
+                        status.currentType === CameraType.Disabled
+                            ? theme.palette.error.main
+                            : status.currentType === CameraType.View
+                            ? theme.palette.success.main
+                            : theme.palette.warning.main
+                    }`,
                 ...sx,
             }}>
             <Stack
@@ -247,7 +248,7 @@ function CameraStatus({
                     <LiveIndicator size={10} type={2} />
                 )}*/}
 
-                <Typography variant="overline" pl="10px">
+                <Typography variant="overline" pl="20px" margin="auto 0">
                     {status.name}
                 </Typography>
 
@@ -329,75 +330,7 @@ function CameraStatus({
 }
 
 export default function CamerasStatus(props: any) {
-    const [status, setStatus] = React.useState<DTOObserverStatus>({
-        running: false,
-        cameras: [],
-    });
-    const [loading, setLoading] = React.useState<boolean>(true);
-    const [updateInterval, setUpdateInterval] = React.useState<any>(null);
-
-    //const dashboardItemContext = React.useContext(DashboardItemContext);
-
-    let lastPendingPromise = React.useRef<TypedPromise<
-        any,
-        IProblemJson
-    > | null>(null);
-
-    const fetchStatus = () => {
-        lastPendingPromise.current = observerService
-            .status()
-            .ok(status => {
-                setStatus(status);
-                setLoading(false);
-            })
-            .catch(() => {
-                setLoading(false);
-            });
-    };
-
-    useEffect(() => {
-        const handleStatus = (status: DTOObserverStatus) => {
-            setStatus(status);
-        };
-
-        eventBus.on('observer-status-changed', handleStatus);
-
-        fetchStatus();
-
-        // TODO: Use a better way to update the status!
-        setUpdateInterval(
-            setInterval(() => {
-                fetchStatus();
-            }, 10000),
-        );
-
-        return () => {
-            if (lastPendingPromise.current) {
-                lastPendingPromise.current.cancel();
-            }
-
-            eventBus.remove('observer-status-changed', handleStatus);
-
-            clearInterval(updateInterval);
-        };
-    }, []);
-
-    const onStatusChanged = (camStatus: DTOCameraStatus) => {
-        const updatedObserverStatus: DTOObserverStatus = {
-            ...status,
-            cameras: status.cameras.map(camera => {
-                if (camera.name === camStatus.name) {
-                    return camStatus;
-                } else {
-                    return camera;
-                }
-            }),
-        };
-
-        setStatus(updatedObserverStatus);
-
-        eventBus.dispatch('observer-status-changed', updatedObserverStatus);
-    };
+    const status = useObserverStatus();
 
     return (
         <Stack
@@ -413,13 +346,10 @@ export default function CamerasStatus(props: any) {
                 overflowY: 'scroll',
                 maxHeight: '86%',
             }}>
-            {status.cameras.map((camera, index) => (
-                <CameraStatus
-                    key={index}
-                    status={camera}
-                    onStatusChanged={onStatusChanged}
-                />
-            ))}
+            {status &&
+                status.cameras.map((camera, index) => (
+                    <CameraStatus key={index} status={camera} />
+                ))}
         </Stack>
     );
 }

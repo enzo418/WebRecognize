@@ -17,6 +17,7 @@ const config = {
             },
         },
         websocket: {
+            observerStatus: `ws://${host}:${port}/observer/status`,
             notification: `ws://${host}:${port}/notifications`,
             liveView: `ws://${host}:${port}/live/`, // ws:/live/liveID
             videoBuffer: `ws://${host}:${port}/buffer/`, // ws:/buffer/bufferID

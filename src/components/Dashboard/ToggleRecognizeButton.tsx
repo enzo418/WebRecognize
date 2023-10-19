@@ -13,9 +13,9 @@ import React, { useState } from 'react';
 import { Key } from '../../LocalStore';
 import DTOObserverStatus from '../../services/api/interfaces/DTOObserverStatus';
 import SelectConfiguration from '../SelectConfiguration';
+import { useObserverStatus } from '../../context/observerStatusContext';
 
 interface Props {
-    status: DTOObserverStatus;
     onClickStart: (config_id: string) => any;
     onClickStop: () => any;
     sx?: SxProps<Theme>;
@@ -24,6 +24,7 @@ interface Props {
 export default function ToggleRecognizeButton(props: Props) {
     const [selected, setSelected] = useState('');
     const [error, setError] = useState<string | undefined>(undefined);
+    const status = useObserverStatus();
 
     const onConfigurationSelected = (selected: string) => {
         setSelected(selected);
@@ -49,8 +50,8 @@ export default function ToggleRecognizeButton(props: Props) {
 
     return (
         <Box sx={style}>
-            {!props.status.running && (
-                <Zoom in={!props.status.running}>
+            {!status?.running && (
+                <Zoom in={!status?.running}>
                     <Button
                         sx={{
                             color: (theme: Theme) => theme.palette.text.primary,
@@ -62,8 +63,8 @@ export default function ToggleRecognizeButton(props: Props) {
                 </Zoom>
             )}
 
-            {props.status.running && (
-                <Zoom in={props.status.running}>
+            {status?.running && (
+                <Zoom in={status?.running}>
                     <Button
                         sx={{
                             color: (theme: Theme) => theme.palette.text.primary,
@@ -84,12 +85,8 @@ export default function ToggleRecognizeButton(props: Props) {
                     defaultLocalValue={Key.LAST_CONFIGURATION_EXECUTED_ID}
                     onSelected={onConfigurationSelected}
                     selectFirstByDefault={true}
-                    disabled={props.status.running}
-                    forceValue={
-                        props.status.running
-                            ? props.status.config_id
-                            : undefined
-                    }
+                    disabled={status?.running}
+                    forceValue={status?.running ? status?.config_id : undefined}
                     sx={{
                         minWidth: '100px',
                         '& .MuiSelect-select': {

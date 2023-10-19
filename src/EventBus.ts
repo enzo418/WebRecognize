@@ -12,7 +12,6 @@ interface EventTypes {
     'camera-name-changed': EventBusData & { name: string };
     'notification-sound-volume-changed': number;
     'notification-sound-play': any;
-    'observer-status-changed': DTOObserverStatus;
 }
 
 // CustomEvent and dispatching events

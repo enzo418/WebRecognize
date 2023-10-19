@@ -17,6 +17,8 @@ import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import { Link } from 'react-router-dom';
 import LiveViewInteractiveBox from '../LivewView/LiveViewInteractiveBox';
 import eventBus from '../../EventBus';
+import DTOObserverStatus from '../../services/api/interfaces/DTOObserverStatus';
+import { ObserverStatusContext } from '../../context/observerStatusContext';
 
 interface LiveViewObserverProps {
     sx?: SxProps<Theme>;
@@ -25,53 +27,21 @@ interface LiveViewObserverProps {
 }
 
 interface LiveViewObserverState {
-    loading: boolean;
     error: string;
-    observerRunning: boolean;
 }
 
 export default class LiveViewObserver extends React.Component<
     LiveViewObserverProps,
     LiveViewObserverState
 > {
+    static contextType? = ObserverStatusContext;
+
     state: LiveViewObserverState = {
-        loading: true,
         error: '',
-        observerRunning: false,
     };
 
     constructor(props: LiveViewObserverProps) {
         super(props);
-
-        this.observerChangedStatus = this.observerChangedStatus.bind(this);
-    }
-
-    observerChangedStatus({ running }: any) {
-        this.setState({ observerRunning: running, loading: false });
-    }
-
-    componentDidMount(): void {
-        eventBus.on('observer-status-changed', this.observerChangedStatus);
-
-        observerService
-            .status()
-            .ok(status => {
-                if (status.running) {
-                    this.setState({ observerRunning: true });
-                }
-
-                this.setState({ loading: false });
-            })
-            .catch(() => {
-                this.setState({
-                    error: 'Error loading observer status',
-                    loading: false,
-                });
-            });
-    }
-
-    componentWillUnmount(): void {
-        eventBus.remove('observer-status-changed', this.observerChangedStatus);
     }
 
     render() {
@@ -83,11 +53,7 @@ export default class LiveViewObserver extends React.Component<
                     height: '100%',
                     ...this.props.sx,
                 }}>
-                {this.state.error.length == 0 && this.state.loading && (
-                    <Skeleton variant="rectangular" width={640} height={360} />
-                )}
-
-                {this.state.observerRunning && (
+                {this.context?.running && (
                     <LiveViewInteractiveBox
                         source={{
                             observer: true,
@@ -103,11 +69,7 @@ export default class LiveViewObserver extends React.Component<
                         }></LiveViewInteractiveBox>
                 )}
 
-                {/*{this.state.error.length != 0 && (
-                    <Typography>ERROR {this.state.error}</Typography>
-                )}*/}
-
-                {!this.state.observerRunning && (
+                {!this.context?.running && (
                     <Fade in={true} timeout={1000}>
                         <Stack
                             direction={'column'}
