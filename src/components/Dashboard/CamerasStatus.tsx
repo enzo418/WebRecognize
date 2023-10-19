@@ -18,12 +18,12 @@ import React, { useEffect, useMemo } from 'react';
 import DTOObserverStatus, {
     CameraType,
     DTOCameraStatus,
-} from '../services/api/interfaces/DTOObserverStatus';
-import eventBus from '../EventBus';
-import { cameraService, observerService } from '../services/api/Services';
+} from '../../services/api/interfaces/DTOObserverStatus';
+import eventBus from '../../EventBus';
+import { cameraService, observerService } from '../../services/api/Services';
 
-import TypedPromise from '../TypedPromise';
-import IProblemJson from '../services/api/interfaces/IProblemJson';
+import TypedPromise from '../../TypedPromise';
+import IProblemJson from '../../services/api/interfaces/IProblemJson';
 
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 

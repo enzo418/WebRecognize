@@ -10,9 +10,9 @@ import {
     Zoom,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { Key } from '../LocalStore';
-import DTOObserverStatus from '../services/api/interfaces/DTOObserverStatus';
-import SelectConfiguration from './SelectConfiguration';
+import { Key } from '../../LocalStore';
+import DTOObserverStatus from '../../services/api/interfaces/DTOObserverStatus';
+import SelectConfiguration from '../SelectConfiguration';
 
 interface Props {
     status: DTOObserverStatus;

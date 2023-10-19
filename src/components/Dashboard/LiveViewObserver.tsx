@@ -15,7 +15,7 @@ import { liveViewService, observerService } from '../../services/api/Services';
 import TypedPromise from '../../TypedPromise';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import { Link } from 'react-router-dom';
-import LiveViewInteractiveBox from './LiveViewInteractiveBox';
+import LiveViewInteractiveBox from '../LivewView/LiveViewInteractiveBox';
 import eventBus from '../../EventBus';
 
 interface LiveViewObserverProps {

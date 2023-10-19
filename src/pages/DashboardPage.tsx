@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ToggleRecognizeButton from '../components/ToggleRecognizeButton';
+import ToggleRecognizeButton from '../components/Dashboard/ToggleRecognizeButton';
 import { Key, saveLocal } from '../LocalStore';
 import DTOObserverStatus from '../services/api/interfaces/DTOObserverStatus';
 import { observerService } from '../services/api/Services';
@@ -19,9 +19,9 @@ import { observerService } from '../services/api/Services';
 import '../styles/GridLayout.scss';
 
 import GridLayout, { Responsive, WidthProvider } from 'react-grid-layout';
-import LiveViewObserver from '../components/LivewView/LiveViewObserver';
+import LiveViewObserver from '../components/Dashboard/LiveViewObserver';
 import eventBus from '../EventBus';
-import CamerasStatus from '../components/CamerasStatus';
+import CamerasStatus from '../components/Dashboard/CamerasStatus';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
