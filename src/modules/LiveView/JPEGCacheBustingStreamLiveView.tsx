@@ -38,6 +38,10 @@ class JPEGCacheBustingStreamLiveView
 
     onLoadCalled = false;
 
+    stopped = false;
+
+    startTime = Date.now();
+
     constructor(props: JPEGCacheBustingStreamLiveViewProps) {
         super(props);
 
@@ -79,6 +83,7 @@ class JPEGCacheBustingStreamLiveView
     }
 
     public stop(isUnmounting = false) {
+        this.stopped = true;
         if (this.image.current) {
             if (this.image.current.src == this.realSource && !isUnmounting) {
                 this.getCurrentAsUrl()
@@ -102,6 +107,13 @@ class JPEGCacheBustingStreamLiveView
     }
 
     public play() {
+        this.stopped = false;
+        this.updateImage();
+    }
+
+    public updateImage() {
+        if (this.stopped) return;
+
         if (this.image.current) {
             if (this.image.current.src.startsWith('blob:')) {
                 URL.revokeObjectURL(this.image.current.src);
@@ -113,6 +125,12 @@ class JPEGCacheBustingStreamLiveView
         }
     }
 
+    getTimeoutTime() {
+        // Is the least as possible but also capped to 10 fps
+        const time = Date.now() - this.startTime;
+        return Math.max(100, 1000 / 10 - time);
+    }
+
     onImageLoaded = (e: any) => {
         if (!this.onLoadCalled) {
             if (this.props.onLoad) this.props.onLoad(e);
@@ -121,8 +139,8 @@ class JPEGCacheBustingStreamLiveView
 
         // Request a new image every 0.5 seconds
         setTimeout(() => {
-            this.play();
-        }, 500);
+            this.updateImage();
+        }, this.getTimeoutTime());
     };
 
     componentDidMount() {}
