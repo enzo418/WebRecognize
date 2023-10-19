@@ -8,6 +8,8 @@ import {
     MenuItem,
     Stack,
     Theme,
+    ToggleButton,
+    ToggleButtonGroup,
     Tooltip,
     Typography,
     responsiveFontSizes,
@@ -26,6 +28,12 @@ import TypedPromise from '../../TypedPromise';
 import IProblemJson from '../../services/api/interfaces/IProblemJson';
 
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { DashboardItemContext } from './DashboardItemContext';
+import {
+    NotificationsActiveOutlined,
+    StopCircleOutlined,
+    VisibilityOutlined,
+} from '@mui/icons-material';
 
 const SelectTimeMenu = ({ handleSelectTime }: any) => (
     <Grid container spacing={1}>
@@ -141,7 +149,7 @@ function CameraStatus({
 
     const handleClick = (
         CameraType: CameraType,
-        event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>,
+        event: React.MouseEvent<HTMLElement>,
     ) => {
         setAnchorEl(event.currentTarget);
         setTargetType(CameraType);
@@ -207,6 +215,16 @@ function CameraStatus({
         [targetType],
     );
 
+    const onChangeToggle = (
+        event: React.MouseEvent<HTMLElement>,
+        newTargetType: CameraType,
+    ) => {
+        if (newTargetType !== null) {
+            setTargetType(newTargetType);
+            handleClick(newTargetType, event);
+        }
+    };
+
     return (
         <Stack
             direction="row"
@@ -229,7 +247,9 @@ function CameraStatus({
                     <LiveIndicator size={10} type={2} />
                 )}*/}
 
-                <Typography variant="overline">{status.name}</Typography>
+                <Typography variant="overline" pl="10px">
+                    {status.name}
+                </Typography>
 
                 <Typography
                     className="status-help-text"
@@ -263,45 +283,24 @@ function CameraStatus({
             </Stack>
 
             <Stack direction="row" alignItems={'center'}>
-                <ButtonGroup
-                    variant="outlined"
+                <ToggleButtonGroup
                     size="small"
-                    sx={{
-                        '> .MuiButton-contained': {
-                            borderRadius: '4px !important',
-                        },
-                    }}>
-                    <Button
-                        id="state-disabled-button"
-                        onClick={e => handleClick(CameraType.Disabled, e)}
-                        variant={
-                            status.currentType == CameraType.Disabled
-                                ? 'contained'
-                                : 'outlined'
-                        }>
-                        Disabled
-                    </Button>
-                    <Button
-                        id="state-view-button"
-                        onClick={e => handleClick(CameraType.View, e)}
-                        variant={
-                            status.currentType == CameraType.View
-                                ? 'contained'
-                                : 'outlined'
-                        }>
-                        View
-                    </Button>
-                    <Button
-                        id="state-notificator-button"
-                        onClick={e => handleClick(CameraType.Notificator, e)}
-                        variant={
-                            status.currentType == CameraType.Notificator
-                                ? 'contained'
-                                : 'outlined'
-                        }>
-                        Notificator
-                    </Button>
-                </ButtonGroup>
+                    color="primary"
+                    value={status.currentType}
+                    exclusive
+                    onChange={onChangeToggle}>
+                    <ToggleButton value={CameraType.Disabled} aria-label="list">
+                        <StopCircleOutlined />
+                    </ToggleButton>
+                    <ToggleButton value={CameraType.View} aria-label="list">
+                        <VisibilityOutlined />
+                    </ToggleButton>
+                    <ToggleButton
+                        value={CameraType.Notificator}
+                        aria-label="list">
+                        <NotificationsActiveOutlined />
+                    </ToggleButton>
+                </ToggleButtonGroup>
 
                 {!belowMD && (
                     <Menu
@@ -336,6 +335,8 @@ export default function CamerasStatus(props: any) {
     });
     const [loading, setLoading] = React.useState<boolean>(true);
     const [updateInterval, setUpdateInterval] = React.useState<any>(null);
+
+    //const dashboardItemContext = React.useContext(DashboardItemContext);
 
     let lastPendingPromise = React.useRef<TypedPromise<
         any,
