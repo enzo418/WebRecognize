@@ -1,6 +1,7 @@
 import config from '../../config';
 import HttpClient from '../../Http/HttpClient';
 import CameraService from './CameraService';
+import AIServer from './AIServer';
 import ConfigurationService from './ConfigurationService';
 import LiveViewService from './LiveViewService';
 import CameraServiceMock from './mock/CameraServiceMock';
@@ -33,6 +34,8 @@ export const notificationService = new NotificationService(
 export const liveViewService = new LiveViewService(client);
 
 export const videoBufferService = new VideoBufferService(client);
+
+export const aiServerService = new AIServer(client);
 // */
 
 /* //MOCK

@@ -1,4 +1,4 @@
-import { Box, FormControlLabel, Grid, Typography } from '@mui/material';
+import { Box, Button, FormControlLabel, Grid, Typography } from '@mui/material';
 import InfoCard from '../../InfoCard';
 import {
     SliderConfigurationField,
@@ -7,10 +7,19 @@ import {
 } from '../configurationField';
 import { useConfiguration } from '../../../context/configurationContext';
 import { useEffect, useState } from 'react';
-import { cameraService } from '../../../services/api/Services';
+import { cameraService, aiServerService } from '../../../services/api/Services';
 import { DTOCameraDefaults } from '../../../services/api/interfaces/DTOCamera';
+import { DTOAIServer } from '../../../services/api/interfaces/DTOAIServer';
 
-export default function BlobValidateObjectDetectedConfiguration() {
+import CircularProgress from '@mui/material/CircularProgress';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import ComputerIcon from '@mui/icons-material/Computer';
+
+//import { Refresh as RefreshIcon, Computer } from '@mui/icons-material';
+
+export default function AIValidateEventCameraConfiguration() {
     const { params, updateCB, getFieldCB, getInitialValue } =
         useConfiguration();
 
@@ -31,6 +40,9 @@ export default function BlobValidateObjectDetectedConfiguration() {
         },
     });
 
+    const [aiServer, setAiServer] = useState<DTOAIServer | null>(null);
+    const [searchingAiServer, setSearchingAiServer] = useState<boolean>(false);
+
     const id = params?.camera_id;
 
     useEffect(() => {
@@ -43,12 +55,26 @@ export default function BlobValidateObjectDetectedConfiguration() {
                 setLoading(false);
             })
             .fail(e => console.error('could not get camera defaults', e))
-            .cancelled(() => console.debug('cancelled params defaults'));
+            .cancelled(() => console.debug('cancelled params defaults'))
+            .finally(() => handleFindServer());
 
         return () => {
             promise.cancel();
         };
     }, []);
+
+    const handleFindServer = () => {
+        setSearchingAiServer(true);
+
+        const promise = aiServerService
+            .findAnyService()
+            .ok(server => {
+                setAiServer(server);
+            })
+            .fail(e => setAiServer(null))
+            .cancelled(() => console.debug('cancelled findAnyService'))
+            .finally(() => setSearchingAiServer(false));
+    };
 
     return (
         <Grid container spacing={4}>
@@ -79,14 +105,70 @@ export default function BlobValidateObjectDetectedConfiguration() {
             <Grid item xs={12} sm={12} md={12}>
                 <Box>
                     <Typography gutterBottom>
-                        Inference server address
+                        Inference server instance
                     </Typography>
                     <Typography variant="body2" color={'GrayText'} gutterBottom>
-                        The address of the inference server. It should be in the
-                        format {'<ip>:<port>'}, for example localhost:50051
+                        The server will be found automatically if it is running
+                        when needed. You can press the button below to verify if
+                        the server is running.
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<RefreshIcon />}
+                        onClick={handleFindServer}>
+                        Search for AI Server
+                    </Button>
+                    {searchingAiServer && (
+                        <Box display="flex" alignItems="center" mt={2}>
+                            <CircularProgress size={24} />
+                            <Typography
+                                variant="body2"
+                                color="textSecondary"
+                                ml={2}>
+                                Searching for server...
+                            </Typography>
+                        </Box>
+                    )}
+                    {!searchingAiServer && aiServer ? (
+                        <Typography
+                            variant="body2"
+                            color="green"
+                            gutterBottom
+                            mt={2}>
+                            <CheckCircleIcon
+                                style={{
+                                    verticalAlign: 'middle',
+                                    marginRight: '8px',
+                                }}
+                            />
+                            Server found: {aiServer.hostname}
+                        </Typography>
+                    ) : (
+                        !searchingAiServer && (
+                            <Typography
+                                variant="body2"
+                                color="error"
+                                gutterBottom
+                                mt={2}>
+                                <ErrorIcon
+                                    style={{
+                                        verticalAlign: 'middle',
+                                        marginRight: '8px',
+                                    }}
+                                />
+                                Server not found. Please ensure the server is
+                                running and try again.
+                            </Typography>
+                        )
+                    )}
+                    <Typography variant="body2" color={'GrayText'} gutterBottom>
+                        Otherwise you can manually enter the address of the
+                        inference server below. It should be in the format{' '}
+                        {'<ip>:<port>'}, for example localhost:50051
                     </Typography>
                     <TextConfigurationField
-                        label=""
+                        label="Server Address"
                         variant="standard"
                         type="string"
                         fullWidth

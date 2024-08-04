@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { FormControlLabel, Grid, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { promises } from 'stream';
 import { useConfiguration } from '../../../context/configurationContext';
@@ -6,7 +6,10 @@ import { Size } from '../../../Geometry';
 import CanvasDisplayBlobDistanceThreshold from '../../../modules/CanvasDisplayBlobDistanceThreshold';
 import { DTOCameraDefaults } from '../../../services/api/interfaces/DTOCamera';
 import { cameraService } from '../../../services/api/Services';
-import { SliderConfigurationField } from '../configurationField';
+import {
+    SliderConfigurationField,
+    SwitchConfigurationField,
+} from '../configurationField';
 
 export default function BlobDetectorParametersConfiguration() {
     const { params, updateCB, getFieldCB, getInitialValue } =
@@ -65,6 +68,21 @@ export default function BlobDetectorParametersConfiguration() {
 
     return (
         <Grid container spacing={2}>
+            <Grid item xs={12} sm={12} md={12}>
+                <FormControlLabel
+                    control={
+                        <SwitchConfigurationField
+                            data={{
+                                ...commonData,
+                                path: 'blobDetection/enabled',
+                                defaultValue: false,
+                            }}
+                        />
+                    }
+                    label="Validate events with Blob detection technique"
+                />
+            </Grid>
+
             <Grid item xs={12}>
                 <Typography>
                     Maximum distance between a blob and a finding to be

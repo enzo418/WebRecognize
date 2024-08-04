@@ -128,40 +128,42 @@ const getBasicConfigurationMenu = () => {
                     primary: 'Detection',
                     icon: <FormatShapesIcon />,
                 },
-                // {
-                //    to: 'output',
-                //    primary: 'Output',
-                //    icon: <MonitorIcon />,
-                // },
                 {
-                    to: 'blobs',
-                    primary: 'Blobs',
+                    to: 'validation',
+                    primary: 'Validate Event',
                     icon: <SensorOccupiedIcon />,
                     elements: [
                         {
-                            to: 'detection',
-                            primary: 'Detection',
+                            to: 'ai',
+                            primary: 'AI object detection',
                             icon: <DataObjectIcon />,
                         },
                         {
-                            to: 'filters',
-                            primary: 'Filters',
-                            icon: <DataObjectIcon />,
-                        },
-                        {
-                            to: 'contours-filters',
-                            primary: 'Contours filters',
-                            icon: <DataObjectIcon />,
-                        },
-                        {
-                            to: 'validate-objects-detected',
-                            primary: 'Validate object detected',
-                            icon: <DataObjectIcon />,
-                        },
-                        {
-                            to: 'threshold-parameters',
-                            primary: 'Image processing parameters',
-                            icon: <Contrast />,
+                            to: 'blob',
+                            primary: 'Fast blob detection technique',
+                            icon: <SensorOccupiedIcon />,
+                            elements: [
+                                {
+                                    to: 'detection',
+                                    primary: 'Detection',
+                                    icon: <DataObjectIcon />,
+                                },
+                                {
+                                    to: 'filters',
+                                    primary: 'Filters',
+                                    icon: <DataObjectIcon />,
+                                },
+                                {
+                                    to: 'contours-filters',
+                                    primary: 'Contours filters',
+                                    icon: <DataObjectIcon />,
+                                },
+                                {
+                                    to: 'threshold-parameters',
+                                    primary: 'Image processing parameters',
+                                    icon: <Contrast />,
+                                },
+                            ],
                         },
                     ],
                 },

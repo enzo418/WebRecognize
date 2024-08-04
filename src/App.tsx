@@ -39,10 +39,10 @@ import CreateConfigurationFromFilePage from './pages/CreateConfigurationFromFile
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import DetectionCameraConfiguration from './components/Configuration/DetectionCameraConfiguration';
+import BlobDetectionCameraConfiguration from './components/Configuration/BlobDetectionCameraConfiguration';
 import VideoOutputGeneral from './components/Configuration/VideoOutputGeneral';
 import DashboardPage from './pages/DashboardPage';
-import AreasCameraConfiguration from './components/Configuration/AreasCameraConfiguration';
+import DetectionCameraConfiguration from './components/Configuration/DetectionCameraConfiguration';
 import NotificationsTelegramConfiguration from './components/Configuration/NotificationsTelegramConfiguration';
 import NotificationsLocalConfiguration from './components/Configuration/NotificationsLocalConfiguration';
 import CloneConfigurationPage from './pages/CloneConfigurationPage';
@@ -56,7 +56,7 @@ import ApplicationConfiguration from './components/ApplicationConfiguration';
 import { getLocalDefault, Key } from './LocalStore';
 import eventBus from './EventBus';
 import { notificationService, observerService } from './services/api/Services';
-import BlobValidateObjectDetectedConfiguration from './components/Configuration/BlobsConfiguration/BlobValidateObjectDetectedConfiguration';
+import AIValidateEventCameraConfiguration from './components/Configuration/BlobsConfiguration/AIValidateEventCameraConfiguration';
 import DTOObserverStatus from './services/api/interfaces/DTOObserverStatus';
 import { ObserverStatusContext } from './context/observerStatusContext';
 
@@ -194,7 +194,7 @@ function App() {
                                                     path="detection"
                                                     element={
                                                         //<DetectionCameraConfiguration />
-                                                        <AreasCameraConfiguration />
+                                                        <DetectionCameraConfiguration />
                                                     }></Route>
                                                 {/* <Route path="output" element={<p>camera output</p>}></Route>*/}
                                                 <Route
@@ -202,40 +202,44 @@ function App() {
                                                     element={
                                                         <p>camera processing</p>
                                                     }></Route>
-                                                {/*<Route
+                                                <Route
+                                                    path="validation"
+                                                    element={<Outlet />}>
+                                                    <Route
+                                                        path="ai"
+                                                        element={
+                                                            <AIValidateEventCameraConfiguration />
+                                                        }></Route>
+                                                    {/*<Route
                                                 path="areas"
                                                 element={
                                                     <AreasCameraConfiguration />
                                                 }></Route>*/}
-                                                <Route
-                                                    path="blobs"
-                                                    element={<Outlet />}>
                                                     <Route
-                                                        path="detection"
-                                                        element={
-                                                            <BlobDetectorParametersConfiguration />
-                                                        }></Route>
-                                                    <Route
-                                                        path="filters"
-                                                        element={
-                                                            <BlobFiltersConfiguration />
-                                                        }></Route>
-                                                    {/* maybe merge those two into blobs-basics */}
-                                                    <Route
-                                                        path="contours-filters"
-                                                        element={
-                                                            <BlobContoursFiltersConfiguration />
-                                                        }></Route>
-                                                    <Route
-                                                        path="validate-objects-detected"
-                                                        element={
-                                                            <BlobValidateObjectDetectedConfiguration />
-                                                        }></Route>
-                                                    <Route
-                                                        path="threshold-parameters"
-                                                        element={
-                                                            <BlobThresholdParametersConfiguration />
-                                                        }></Route>
+                                                        path="blob"
+                                                        element={<Outlet />}>
+                                                        <Route
+                                                            path="detection"
+                                                            element={
+                                                                <BlobDetectorParametersConfiguration />
+                                                            }></Route>
+                                                        <Route
+                                                            path="filters"
+                                                            element={
+                                                                <BlobFiltersConfiguration />
+                                                            }></Route>
+                                                        {/* maybe merge those two into blobs-basics */}
+                                                        <Route
+                                                            path="contours-filters"
+                                                            element={
+                                                                <BlobContoursFiltersConfiguration />
+                                                            }></Route>
+                                                        <Route
+                                                            path="threshold-parameters"
+                                                            element={
+                                                                <BlobThresholdParametersConfiguration />
+                                                            }></Route>
+                                                    </Route>
                                                 </Route>
                                             </Route>
                                         </Route>
