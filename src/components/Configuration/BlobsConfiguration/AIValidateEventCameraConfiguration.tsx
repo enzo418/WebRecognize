@@ -1,4 +1,13 @@
-import { Box, Button, FormControlLabel, Grid, Typography } from '@mui/material';
+import {
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Button,
+    FormControlLabel,
+    Grid,
+    Stack,
+    Typography,
+} from '@mui/material';
 import InfoCard from '../../InfoCard';
 import {
     SliderConfigurationField,
@@ -10,6 +19,9 @@ import { useEffect, useState } from 'react';
 import { cameraService, aiServerService } from '../../../services/api/Services';
 import { DTOCameraDefaults } from '../../../services/api/interfaces/DTOCamera';
 import { DTOAIServer } from '../../../services/api/interfaces/DTOAIServer';
+
+import Accordion from '@mui/material/Accordion';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import CircularProgress from '@mui/material/CircularProgress';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -268,6 +280,60 @@ export default function AIValidateEventCameraConfiguration() {
                         path: 'objectDetectionValidatorConfig/minObjectCount/person',
                     }}
                 />
+            </Grid>
+
+            <Grid item xs={12} sm={12} md={12}>
+                <Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1-content"
+                        id="panel1-header">
+                        Advanced
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Stack direction={'column'} spacing={2}>
+                            <div>
+                                <Typography>Apply camera rotation</Typography>
+                                <Typography
+                                    variant="body2"
+                                    color={'GrayText'}
+                                    gutterBottom>
+                                    If checked, before sending the frames to the
+                                    AI, the frames will be rotated according to
+                                    rotation specified in the "Basic" camera
+                                    configuration.
+                                </Typography>
+                                <SwitchConfigurationField
+                                    data={{
+                                        ...commonData,
+                                        path: 'objectDetectionValidatorConfig/applyRotation',
+                                        defaultValue: false,
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <Typography>Apply detection masks</Typography>
+                                <Typography
+                                    variant="body2"
+                                    color={'GrayText'}
+                                    gutterBottom>
+                                    If checked, before sending the frames to the
+                                    AI, the frames will be masked according to
+                                    the masks specified in the "Detection"
+                                    configuration.
+                                </Typography>
+                                <SwitchConfigurationField
+                                    data={{
+                                        ...commonData,
+                                        path: 'objectDetectionValidatorConfig/applyMasks',
+                                        defaultValue: false,
+                                    }}
+                                />
+                            </div>
+                        </Stack>
+                    </AccordionDetails>
+                </Accordion>
             </Grid>
         </Grid>
     );

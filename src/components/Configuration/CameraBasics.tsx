@@ -262,7 +262,7 @@ export default function CameraBasics() {
                 />
 
                 <TextConfigurationField
-                    label="Output rotation (degrees)"
+                    label="Output rotation counter clock wise (degrees)"
                     variant="standard"
                     className="configuration-field"
                     type="number"
