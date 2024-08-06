@@ -120,10 +120,12 @@ export default function CameraBasics() {
 
     const navigate = useNavigate();
 
+    let lastPromise: any;
+
     // Update camera defaults on url change
     useEffect(() => {
         const calculateRatio = (defaults: Size) => {
-            getFieldValue(context, 'resizeTo/width')
+            lastPromise = getFieldValue(context, 'resizeTo/width')
                 .ok((w: number) => {
                     // resize to 0 means no resize.
                     if (w == 0) {
@@ -156,7 +158,7 @@ export default function CameraBasics() {
         };
 
         if (url.length > 0) {
-            cameraService
+            lastPromise = cameraService
                 .getDefaults(commonData.camera)
                 .ok(defaults => {
                     setCameraDefaults(defaults);
@@ -177,12 +179,16 @@ export default function CameraBasics() {
                 liveViewContainerRef.current.getBoundingClientRect().width;
             setCalculatedWidth(Math.min(640, parentW) + 'px');
         }
+
+        return () => {
+            if (lastPromise) lastPromise.cancel();
+        };
     }, []);
 
     const handleCloseDeleteDialog = () => setShowDeleteCameraDialog(false);
 
     const handleAcceptDeleteDialog = () => {
-        configurationService
+        lastPromise = configurationService
             .deleteCamera(context.params.id, commonData.camera)
             .ok(() => {
                 eventBus.dispatch('removed-camera', { id: commonData.camera });

@@ -3,8 +3,10 @@ import {
     AccordionSummary,
     Box,
     Button,
+    Dialog,
     FormControlLabel,
     Grid,
+    Skeleton,
     Stack,
     Typography,
 } from '@mui/material';
@@ -28,6 +30,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import ComputerIcon from '@mui/icons-material/Computer';
+import React from 'react';
+import { Preview } from '@mui/icons-material';
 
 //import { Refresh as RefreshIcon, Computer } from '@mui/icons-material';
 
@@ -55,12 +59,17 @@ export default function AIValidateEventCameraConfiguration() {
     const [aiServer, setAiServer] = useState<DTOAIServer | null>(null);
     const [searchingAiServer, setSearchingAiServer] = useState<boolean>(false);
 
+    const [showMaskedFrame, setShowMaskedFrame] = useState<boolean>(false);
+    const [maskedFrame, setMaskedFrame] = useState<string>('');
+
     const id = params?.camera_id;
+
+    let promise: any;
 
     useEffect(() => {
         setLoading(true);
 
-        const promise = cameraService
+        promise = cameraService
             .getDefaults(id)
             .ok(v => {
                 setCameraDefaults(v);
@@ -72,13 +81,17 @@ export default function AIValidateEventCameraConfiguration() {
 
         return () => {
             promise.cancel();
+
+            if (maskedFrame.length > 0) {
+                URL.revokeObjectURL(maskedFrame);
+            }
         };
     }, []);
 
     const handleFindServer = () => {
         setSearchingAiServer(true);
 
-        const promise = aiServerService
+        promise = aiServerService
             .findAnyService()
             .ok(server => {
                 setAiServer(server);
@@ -87,6 +100,22 @@ export default function AIValidateEventCameraConfiguration() {
             .cancelled(() => console.debug('cancelled findAnyService'))
             .finally(() => setSearchingAiServer(false));
     };
+
+    let refModalMasks = React.createRef<HTMLDivElement>();
+
+    const onShowMaskedFrame = () => {
+        promise = cameraService
+            .getMaskedFrame(id)
+            .ok(blob => {
+                let url = URL.createObjectURL(blob);
+                setMaskedFrame(url);
+                setShowMaskedFrame(true);
+            })
+            .fail(e => console.error('could not get masked frame', e))
+            .cancelled(() => console.debug('cancelled masked frame'));
+    };
+
+    const onImageLoaded = () => {};
 
     return (
         <Grid container spacing={4}>
@@ -323,18 +352,54 @@ export default function AIValidateEventCameraConfiguration() {
                                     the masks specified in the "Detection"
                                     configuration.
                                 </Typography>
-                                <SwitchConfigurationField
-                                    data={{
-                                        ...commonData,
-                                        path: 'objectDetectionValidatorConfig/applyMasks',
-                                        defaultValue: false,
-                                    }}
-                                />
+                                <Stack
+                                    direction="row"
+                                    justifyContent={'space-between'}>
+                                    <SwitchConfigurationField
+                                        data={{
+                                            ...commonData,
+                                            path: 'objectDetectionValidatorConfig/applyMasks',
+                                            defaultValue: false,
+                                        }}
+                                    />
+                                    {/* Button show mask applied to frame (cameraService.GetMaskedFrame) */}
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<Preview />}
+                                        onClick={() => {
+                                            onShowMaskedFrame();
+                                        }}>
+                                        Show masked frame
+                                    </Button>
+                                </Stack>
                             </div>
                         </Stack>
                     </AccordionDetails>
                 </Accordion>
             </Grid>
+
+            <Dialog
+                fullScreen
+                open={showMaskedFrame}
+                ref={refModalMasks}
+                sx={{
+                    overflow: 'hidden',
+                    touchAction: 'none',
+                }}>
+                <Button onClick={() => setShowMaskedFrame(false)}>Close</Button>
+                <img
+                    src={maskedFrame}
+                    onLoad={() => onImageLoaded()}
+                    style={{
+                        width: '100%',
+                        height: 'calc(100% - 50px)',
+                        objectFit: 'contain',
+                    }}></img>
+                {maskedFrame.length == 0 && (
+                    <Skeleton variant="rectangular" width={640} height={360} />
+                )}
+            </Dialog>
         </Grid>
     );
 }

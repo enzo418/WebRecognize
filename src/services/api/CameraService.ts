@@ -52,6 +52,22 @@ export default class CameraService extends Service implements ICameraService {
         });
     }
 
+    public getMaskedFrame(camera_id: string, format: string = 'image/jpeg') {
+        return new TypedPromise<Blob, IProblemJson>((ok, fail) => {
+            processPromiseAsArrayBuffer(
+                this.client.get(this.baseUrl + camera_id + '/frame/masked', {}),
+            )
+                .ok(response => {
+                    const blob = new Blob([response.buffer], {
+                        type: format,
+                    });
+
+                    ok(blob);
+                })
+                .fail(e => fail(e));
+        });
+    }
+
     public snooze(camera_name: string, duration_seconds: number) {
         return processPromise<DTOCameraStatus, IProblemJson>(
             this.client.post(this.baseUrl + camera_name + '/snooze', {

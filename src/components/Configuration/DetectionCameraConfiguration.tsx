@@ -1,6 +1,14 @@
 import { CloseFullscreen } from '@mui/icons-material';
-import { Box, Button, Dialog, Grid, Stack, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import {
+    Box,
+    Button,
+    Dialog,
+    Grid,
+    Skeleton,
+    Stack,
+    Typography,
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useConfiguration } from '../../context/configurationContext';
 import { HelpPopover } from '../IconPopover';
 import InfoCard from '../InfoCard';
@@ -9,6 +17,8 @@ import {
     SliderConfigurationField,
     TextConfigurationField,
 } from './configurationField';
+import { cameraService } from '../../services/api/Services';
+import { Size } from '../../Geometry';
 
 export default function DetectionCameraConfiguration() {
     const { params, updateCB, getFieldCB, getInitialValue } =
@@ -19,15 +29,6 @@ export default function DetectionCameraConfiguration() {
     // used to reload the masks displayed when we know it changed
     const [masksForceReload, setMasksForceReload] = useState<number>(0);
 
-    const refModalMasks = React.createRef<HTMLDivElement>();
-
-    const commonData = {
-        getFieldCB,
-        updateCB,
-        getInitialValue,
-        camera: params?.camera_id,
-    };
-
     const isBiggerThanMD = screen.width >= 900; // by default md is 900
 
     // Don't scale it bigger than 640x360 because it's inside a grid item.
@@ -36,6 +37,18 @@ export default function DetectionCameraConfiguration() {
     const fitInScreenWithRatio169 = {
         width: isBiggerThanMD ? 640 : screen.width * 0.5,
         height: isBiggerThanMD ? 360 : (screen.width * 0.5) / (16 / 9),
+    };
+
+    const [canvasSizeLoading, setCanvasSizeLoading] = useState<boolean>(true);
+    const [canvasSize, setCanvasSize] = useState<Size>(fitInScreenWithRatio169);
+
+    const refModalMasks = React.createRef<HTMLDivElement>();
+
+    const commonData = {
+        getFieldCB,
+        updateCB,
+        getInitialValue,
+        camera: params?.camera_id,
     };
 
     const biggestSize = {
@@ -60,6 +73,28 @@ export default function DetectionCameraConfiguration() {
     };
 
     const maxSensibility = 100;
+
+    let lastPendingPromise: any;
+
+    useEffect(() => {
+        lastPendingPromise = cameraService
+            .getDefaults(params?.camera_id)
+            .ok(({ size }) => {
+                if (size.height > 600) {
+                    const scale = 600 / size.height;
+                    setCanvasSize({
+                        width: size.width * scale,
+                        height: size.height * scale,
+                    });
+                } else {
+                    setCanvasSize(size);
+                }
+            })
+            .finally(() => setCanvasSizeLoading(false));
+        return () => {
+            if (lastPendingPromise) lastPendingPromise.cancel();
+        };
+    }, [params?.camera_id]);
 
     return (
         <Grid container spacing={{ xs: 2, md: 2 }}>
@@ -139,15 +174,24 @@ export default function DetectionCameraConfiguration() {
                         to exit edit mode
                     </Typography>
                 </Typography>
+                {canvasSizeLoading && (
+                    <Skeleton
+                        variant="rectangular"
+                        width="640px"
+                        height="360px"
+                    />
+                )}
 
-                <MasksCanvasInputField
-                    key={masksForceReload}
-                    {...getMaskCommonProps()}
-                    enableEditing={false}
-                    fullScreen={false}
-                    onMasksUpdated={() => {}}
-                    canvasSize={fitInScreenWithRatio169}
-                />
+                {!canvasSizeLoading && (
+                    <MasksCanvasInputField
+                        key={masksForceReload}
+                        {...getMaskCommonProps()}
+                        enableEditing={false}
+                        fullScreen={false}
+                        onMasksUpdated={() => {}}
+                        canvasSize={canvasSize}
+                    />
+                )}
             </Grid>
 
             {/* Full screen modal for mobile users */}
