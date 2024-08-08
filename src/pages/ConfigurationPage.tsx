@@ -54,7 +54,7 @@ import TypedPromise from '../TypedPromise';
 import IProblemJson from '../services/api/interfaces/IProblemJson';
 import CachedConfiguration from '../modules/CachedConfiguration';
 import eventBus from '../EventBus';
-
+import HttpIcon from '@mui/icons-material/Http';
 import { Key, removeLocal, saveLocal } from '../LocalStore';
 import { useTheme } from '@emotion/react';
 
@@ -99,6 +99,11 @@ const getBasicConfigurationMenu = () => {
                             to: 'local',
                             primary: 'Local',
                             icon: <EditNotificationsIcon />,
+                        },
+                        {
+                            to: 'remote-web',
+                            primary: 'Remote Web',
+                            icon: <HttpIcon />,
                         },
                     ],
                 },

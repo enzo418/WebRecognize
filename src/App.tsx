@@ -59,6 +59,7 @@ import { notificationService, observerService } from './services/api/Services';
 import AIValidateEventCameraConfiguration from './components/Configuration/BlobsConfiguration/AIValidateEventCameraConfiguration';
 import DTOObserverStatus from './services/api/interfaces/DTOObserverStatus';
 import { ObserverStatusContext } from './context/observerStatusContext';
+import NotificationsRemoteWebConfiguration from './components/Configuration/NotificationsRemoteWebConfiguration';
 
 function App() {
     const notificationAudioPlayer = React.createRef<HTMLAudioElement>();
@@ -172,6 +173,12 @@ function App() {
                                                     path="local"
                                                     element={
                                                         <NotificationsLocalConfiguration />
+                                                    }></Route>
+
+                                                <Route
+                                                    path="remote-web"
+                                                    element={
+                                                        <NotificationsRemoteWebConfiguration />
                                                     }></Route>
                                             </Route>
                                             <Route

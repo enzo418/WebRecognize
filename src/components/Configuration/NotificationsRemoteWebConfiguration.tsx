@@ -19,7 +19,35 @@ import {
     TextConfigurationField,
 } from './configurationField';
 
-export default function NotificationsLocalConfiguration(props: any) {
+// An element that can be marked as required (red *) at the front, else it leaves a space before it so all are aligned
+// also, all their background color is like a markdown code block (grey)
+const QueryParameter = ({
+    children,
+    required,
+}: {
+    children: React.ReactNode;
+    required?: boolean;
+}) => (
+    <Typography
+        variant="overline"
+        display="block"
+        gutterBottom
+        sx={{
+            width: 'fit-content',
+            backgroundColor: 'grey.900',
+            paddingLeft: !required ? '14px' : '4px',
+            borderRadius: '4px',
+            paddingRight: '8px',
+            marginLeft: '10px',
+            textTransform: 'lowercase',
+            fontSize: '1rem',
+        }}>
+        {required && <span style={{ maxWidth: '8px', color: 'red' }}>* </span>}
+        {children}
+    </Typography>
+);
+
+export default function NotificationsRemoteWebConfiguration(props: any) {
     const { params, updateCB, getFieldCB, getInitialValue } =
         useConfiguration();
     const commonData = { getFieldCB, updateCB, getInitialValue };
@@ -32,7 +60,7 @@ export default function NotificationsLocalConfiguration(props: any) {
                         <SwitchConfigurationField
                             data={{
                                 ...commonData,
-                                path: 'localWebConfiguration/enabled',
+                                path: 'remoteWebNotificationConfiguration/enabled',
                                 defaultValue: false,
                             }}
                         />
@@ -46,13 +74,42 @@ export default function NotificationsLocalConfiguration(props: any) {
             </Grid>
 
             <Grid item xs={12} sm={12} md={12} sx={{ mb: '5px' }}>
+                <Typography>
+                    This is the endpoint that will receive the notification
+                    call. The data will be passed as query parameters:
+                </Typography>
+                <QueryParameter required={true}>
+                    id={'<notification id>'}
+                </QueryParameter>
+                <QueryParameter required={true}>
+                    content_type={'<image|video|text>'}
+                </QueryParameter>
+                <QueryParameter required={false}>
+                    camera_name={'<camera name>'}
+                </QueryParameter>
+                <QueryParameter required={false}>
+                    content_uri={'<string url pointing to the resource>'}
+                </QueryParameter>
+                <QueryParameter required={false}>
+                    person={'<number of people detected>'}
+                </QueryParameter>
+
+                <Typography
+                    variant="body2"
+                    color={'GrayText'}
+                    gutterBottom
+                    sx={{ mb: '10px', marginLeft: '10px' }}>
+                    <span style={{ maxWidth: '8px', color: 'red' }}>*</span>{' '}
+                    means the parameter will always be present
+                </Typography>
+
                 <TextConfigurationField
-                    label="Web server url"
+                    label="URL where to make the request"
                     variant="standard"
                     fullWidth
                     data={{
                         ...commonData,
-                        path: 'localWebConfiguration/webServerUrl',
+                        path: 'remoteWebNotificationConfiguration/endpointUrl',
                     }}
                 />
             </Grid>
@@ -60,12 +117,25 @@ export default function NotificationsLocalConfiguration(props: any) {
             <Grid item xs={12} sm={12} md={12} sx={{ mb: '5px' }}>
                 <Divider light />
                 <Typography sx={{ pt: '10px' }}>
-                    After sending a notification we set a timer and if a new
+                    After sending a notification, we set a timer. If a new
                     notification is marked as to send but the timer has not
                     finished, then we discard it. Choose a large value (~10s) to
-                    avoid an overload if many events occur in a row but not too
+                    avoid overload if many events occur in a row, but not too
                     long.
                 </Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={12} md={4}>
+                <TextConfigurationField
+                    label="Seconds to wait between TEXT notifications"
+                    variant="standard"
+                    type="number"
+                    fullWidth
+                    data={{
+                        ...commonData,
+                        path: 'remoteWebNotificationConfiguration/secondsBetweenTextNotification',
+                    }}
+                />
             </Grid>
 
             <Grid item xs={12} sm={12} md={4}>
@@ -76,7 +146,7 @@ export default function NotificationsLocalConfiguration(props: any) {
                     fullWidth
                     data={{
                         ...commonData,
-                        path: 'localWebConfiguration/secondsBetweenImageNotification',
+                        path: 'remoteWebNotificationConfiguration/secondsBetweenImageNotification',
                     }}
                 />
             </Grid>
@@ -89,7 +159,7 @@ export default function NotificationsLocalConfiguration(props: any) {
                     fullWidth
                     data={{
                         ...commonData,
-                        path: 'localWebConfiguration/secondsBetweenVideoNotification',
+                        path: 'remoteWebNotificationConfiguration/secondsBetweenVideoNotification',
                     }}
                 />
             </Grid>
@@ -106,7 +176,7 @@ export default function NotificationsLocalConfiguration(props: any) {
                         label="Type"
                         data={{
                             ...commonData,
-                            path: 'localWebConfiguration/notificationsToSend',
+                            path: 'remoteWebNotificationConfiguration/notificationsToSend',
                             defaultValue: [],
                         }}
                         multiple
@@ -130,7 +200,7 @@ export default function NotificationsLocalConfiguration(props: any) {
                             label="Type"
                             data={{
                                 ...commonData,
-                                path: 'localWebConfiguration/drawTraceOfChangeOn',
+                                path: 'remoteWebNotificationConfiguration/drawTraceOfChangeOn',
                                 defaultValue: [],
                             }}
                             multiple
@@ -140,7 +210,7 @@ export default function NotificationsLocalConfiguration(props: any) {
                             <MenuItem value={'Image'}>Image</MenuItem>
                         </SelectConfigurationField>
 
-                        <HelpPopover text="Before sending a notification we will draw lines describing the movement of whatever was detected" />
+                        <HelpPopover text="Before sending a notification, we will draw lines describing the movement of whatever was detected" />
                     </Stack>
                 </FormControl>
             </Grid>
